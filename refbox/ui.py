@@ -313,7 +313,7 @@ class PenaltyButton(object):
         self.button.after(refresh_ms, self.refresh)
 
     def refresh(self):
-        remaining = self.penalty.timeRemaining(self.mgr.gameClock())
+        remaining = self.penalty.timeRemaining(self.mgr)
         if self.penalty.dismissed():
             time_str = "Dismissed"
         elif remaining != 0:
@@ -773,8 +773,8 @@ class NormalView(object):
             elif self.mgr.timeoutStateBlack():
                 self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
             elif self.mgr.gameStateFirstHalf():
+                self.mgr.deleteServedPenalties()
                 self.mgr.pauseOutstandingPenalties()
-                self.mgr.deleteAllPenalties()
                 self.redraw_penalties()
                 self.mgr.setGameStateHalfTime()
                 self.mgr.setGameClock(half_time_duration)
@@ -789,7 +789,7 @@ class NormalView(object):
             elif self.mgr.gameStateSecondHalf():
                 self.gong_clicked()
                 self.mgr.pauseOutstandingPenalties()
-                self.mgr.deleteServedPenalties()
+                self.mgr.deleteAllPenalties()
                 self.redraw_penalties()
                 self.timeout_mgr.set_game_over(self.mgr)
 
