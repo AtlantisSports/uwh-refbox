@@ -547,7 +547,7 @@ class PenaltyEditor(object):
 
 
 class TimeoutEditor(object):
-    def __init__(self, master, tb_offset, mgr, cfg, on_ref, on_white, on_black):
+    def __init__(self, master, tb_offset, mgr, cfg, on_ref, on_white, on_black, on_shot):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
@@ -562,28 +562,45 @@ class TimeoutEditor(object):
         self.on_ref = on_ref
         self.on_white = on_white
         self.on_black = on_black
+        self.on_shot = on_shot
 
-        frame_height = 100
+        frame_height = 500
         frame_width = cfg.getint('hardware', 'screen_x')
 
-        # Actions
-        submit_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
-                                bg="dark grey")
-        submit_frame.grid(row=3, column=0, columnspan=2)
+        space = tk.Frame(self.root, height=100, width=frame_width, bg="black")
+        space.grid(row=0, column=0, columnspan=4)
 
-        cancel = SizedButton(submit_frame, self.cancel_clicked, "Cancel",
-                             "Yellow.TButton", frame_height, frame_width / 3)
-        cancel.grid(row=0, column=0)
+        space = tk.Frame(self.root, height=frame_height, width=0,
+                         bg="black")
+        space.grid(row=1, column=0)
+
+        submit_frame = tk.Frame(self.root, height=frame_height, width=frame_width / 2,
+                                bg="dark grey")
+        submit_frame.grid(row=1, column=1, columnspan=2)
+
+
+        # Actions
+        ref = SizedButton(submit_frame, self.ref_clicked, "Ref Timeout",
+                             "Yellow.TButton", frame_height / 5, frame_width / 2)
+        ref.grid(row=0, column=0)
 
         white = SizedButton(submit_frame, self.white_clicked,
                             "White Timeout", "White.TButton",
-                            frame_height, frame_width / 3)
-        white.grid(row=0, column=1)
+                            frame_height / 5, frame_width / 2)
+        white.grid(row=1, column=0)
 
         black = SizedButton(submit_frame, self.black_clicked,
                             "Black Timeout", "Blue.TButton",
-                            frame_height, frame_width / 3)
-        black.grid(row=0, column=2)
+                            frame_height / 5, frame_width / 2)
+        black.grid(row=2, column=0)
+
+        shot = SizedButton(submit_frame, self.shot_clicked, "Penalty Shot",
+                             "Cyan.TButton", frame_height / 5, frame_width / 2)
+        shot.grid(row=3, column=0)
+
+        cancel = SizedButton(submit_frame, self.cancel_clicked, "Cancel",
+                             "Red.TButton", frame_height / 5, frame_width / 2)
+        cancel.grid(row=4, column=0)
 
     def ref_clicked(self):
         self.root.destroy()
@@ -596,6 +613,10 @@ class TimeoutEditor(object):
     def black_clicked(self):
         self.root.destroy()
         self.on_black()
+
+    def shot_clicked(self):
+        self.root.destroy()
+        self.on_shot()
 
     def cancel_clicked(self):
         self.root.destroy()
@@ -716,6 +737,9 @@ class NormalView(object):
         def ref_clicked():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
             self.redraw_penalties()
+        def shot_clicked():
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
+            self.redraw_penalties()
         def white_clicked():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.white)
             self.redraw_penalties()
@@ -727,7 +751,7 @@ class NormalView(object):
             self.redraw_penalties()
         else:
             TimeoutEditor(self.root, self.tb_offset, self.mgr, self.cfg,
-                          ref_clicked, white_clicked, black_clicked)
+                          ref_clicked, white_clicked, black_clicked, shot_clicked)
 
     def center_column(self, refresh_ms):
         clock_height = 120
