@@ -738,7 +738,7 @@ class NormalView(object):
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
             self.redraw_penalties()
         def shot_clicked():
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.penalty_shot)
             self.redraw_penalties()
         def white_clicked():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.white)
@@ -823,6 +823,8 @@ class NormalView(object):
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("REF TIMEOUT")
+        elif self.mgr.timeoutStatePenaltyShot():
+            self.status_var.set("PENALTY SHOT")
         elif self.mgr.timeoutStateWhite():
             self.status_var.set("WHITE T/O")
         elif self.mgr.timeoutStateBlack():

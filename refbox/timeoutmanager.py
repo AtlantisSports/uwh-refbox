@@ -36,6 +36,8 @@ class TimeoutManager(object):
             mgr.setGameClockRunning(False)
             if state == TimeoutState.ref:
                 mgr.setTimeoutStateRef()
+            elif state == TimeoutState.penalty_shot:
+                mgr.setTimeoutStatePenaltyShot()
             elif state == TimeoutState.white:
                 mgr.setTimeoutStateWhite()
                 mgr.setGameClock(self._team_timeout_duration)
