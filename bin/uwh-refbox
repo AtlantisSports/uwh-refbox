@@ -13,6 +13,8 @@ cfg = RefboxConfigParser()
 cfg.read('timeshark.cfg')
 
 mgr = GameManager()
+mgr.setTid(16)
+mgr.setGid(1)
 
 if cfg.getboolean('hardware', 'white_on_right'):
     mgr.setLayout(PoolLayout.white_on_right)
