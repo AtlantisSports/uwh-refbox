@@ -25,7 +25,9 @@ def RefboxConfigParser():
         # game
         'half_play_duration': '600',
         'half_time_duration': '180',
-        'team_timeout_duration': '60'
+        'team_timeout_duration': '60',
+        'pool' : '1',
+        'tid' : '16',
     }
     parser = ConfigParser(defaults=defaults)
     parser.add_section('hardware')
