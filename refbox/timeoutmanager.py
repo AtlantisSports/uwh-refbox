@@ -48,9 +48,9 @@ class TimeoutManager(object):
             return
 
         mgr.setGameClockRunning(True)
-        mgr.restartOutstandingPenalties()
         if self._clock_at_timeout is not None:
             mgr.setGameClock(self._clock_at_timeout)
             self._clock_at_timeout = None
+        mgr.restartOutstandingPenalties()
         mgr.setTimeoutStateNone()
         self._text.set('TIMEOUT')

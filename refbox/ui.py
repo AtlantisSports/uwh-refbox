@@ -715,12 +715,16 @@ class NormalView(object):
         half_play_duration = self.cfg.getint('game', 'half_play_duration')
         def ref_clicked():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
+            self.redraw_penalties()
         def white_clicked():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.white)
+            self.redraw_penalties()
         def black_clicked():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.black)
+            self.redraw_penalties()
         if self.timeout_mgr.ready_to_start() or self.timeout_mgr.ready_to_resume():
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.redraw_penalties()
         else:
             TimeoutEditor(self.root, self.tb_offset, self.mgr, self.cfg,
                           ref_clicked, white_clicked, black_clicked)
