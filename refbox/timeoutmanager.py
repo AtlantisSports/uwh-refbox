@@ -8,7 +8,7 @@ class TimeoutManager(object):
         self._clock_at_timeout = None
 
     def ready_to_start(self):
-        return self._text.get() == "START"
+        return self._text.get() == "START" or self._text.get() == "RESET"
 
     def ready_to_resume(self):
         return self._text.get() == "RESUME"
