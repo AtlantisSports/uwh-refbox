@@ -32,6 +32,7 @@ class TimeoutManager(object):
 
         if mgr.timeoutStateNone() and state != TimeoutState.none:
             self._clock_at_timeout = mgr.gameClock()
+            mgr.pauseOutstandingPenalties()
             mgr.setGameClockRunning(False)
             if state == TimeoutState.ref:
                 mgr.setTimeoutStateRef()
@@ -47,6 +48,7 @@ class TimeoutManager(object):
             return
 
         mgr.setGameClockRunning(True)
+        mgr.restartOutstandingPenalties()
         if self._clock_at_timeout is not None:
             mgr.setGameClock(self._clock_at_timeout)
             self._clock_at_timeout = None
