@@ -24,4 +24,14 @@ if cfg.getboolean('hardware', 'has_xbee'):
     xbee.broadcast_thread(xbee_clients(cfg))
 
 nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=is_rpi(), cfg=cfg)
-nv.root.mainloop()
+
+def quit(event):
+    print("Quitting...")
+    nv.root.quit()
+
+try:
+    nv.root.bind('<Control-c>', quit)
+    nv.root.bind('<Escape>', quit)
+    nv.root.mainloop()
+except KeyboardInterrupt:
+    quit(None)
