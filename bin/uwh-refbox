@@ -4,5 +4,6 @@ from refbox.ui import NormalView
 from refbox.gamemanager import GameManager
 from refbox.noiomanager import IOManager
 
-NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+nv = NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+nv.root.mainloop()
 

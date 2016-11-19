@@ -468,8 +468,6 @@ class NormalView(object):
     self.root.after(refresh_ms, lambda : poll_clicker(self))
 
 
-    self.root.mainloop()
-
   def gong_clicked(self):
     print("gong clicked")
     if not self.first_game_started:
