@@ -31,6 +31,9 @@ class GameManager(object):
     def setBlackScore(self, n):
         self._black_score = n
 
+    def gameClockRunning(self):
+        return self._is_clock_running
+
     def setGameClockRunning(self, b):
         self._is_clock_running = b
 
