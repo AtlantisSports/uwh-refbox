@@ -1,0 +1,5 @@
+To test:
+
+```bash
+$ tox
+```
