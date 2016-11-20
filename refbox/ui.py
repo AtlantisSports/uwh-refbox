@@ -182,11 +182,9 @@ class ManualEditTime(object):
     self.root.overrideredirect(1)
     self.root.transient(master)
 
-    self.clock_at_pause = clock_at_pause
+    self.clock_at_pause_var = tk.IntVar(value=clock_at_pause)
     self.orig_clock_at_pause = clock_at_pause
     self.clock_running_var = tk.StringVar()
-    self.game_clock_var = tk.StringVar()
-    self.redraw()
 
     button_font = ("Consolas", 36)
     label_font  = ("Consolas", 96)
@@ -223,30 +221,28 @@ class ManualEditTime(object):
                               80, 200)
     s_dn_button.grid(row=1, column=3)
 
+    game_clock_var = tk.StringVar()
+    def on_clock_changed(*args):
+      x = self.clock_at_pause_var.get()
+      game_clock_var.set('%d:%02d' % (x // 60, x % 60))
 
-    game_clock_new = SizedLabel(self.root, self.game_clock_var, "black", "blue", game_clock_font,
+    self.clock_at_pause_var.trace('w', on_clock_changed)
+
+    game_clock_new = SizedLabel(self.root, game_clock_var, "black", "blue", game_clock_font,
                            160, 400)
     game_clock_new.grid(row=0, rowspan=2, column=1, columnspan=2)
 
-  def redraw(self):
-    self.game_clock_var.set('%d:%02d' % (self.clock_at_pause // 60,
-                                         self.clock_at_pause % 60))
-
   def game_clock_s_up(self):
-    self.clock_at_pause = self.clock_at_pause + 1
-    self.redraw()
+    self.clock_at_pause_var.set(self.clock_at_pause_var.get() + 1)
 
   def game_clock_s_dn(self):
-    self.clock_at_pause = self.clock_at_pause - 1
-    self.redraw()
+    self.clock_at_pause_var.set(self.clock_at_pause_var.get() - 1)
 
   def game_clock_m_up(self):
-    self.clock_at_pause = self.clock_at_pause + 60
-    self.redraw()
+    self.clock_at_pause_var.set(self.clock_at_pause_var.get() + 60)
 
   def game_clock_m_dn(self):
-    self.clock_at_pause = self.clock_at_pause - 60
-    self.redraw()
+    self.clock_at_pause_var.set(self.clock_at_pause_var.get() - 60)
 
   def cancel_clicked(self):
     self.root.destroy()
@@ -254,7 +250,7 @@ class ManualEditTime(object):
 
   def submit_clicked(self):
     self.root.destroy()
-    self.submit_continuation(self.clock_at_pause)
+    self.submit_continuation(self.clock_at_pause_var.get())
 
 
 class NormalView(object):
