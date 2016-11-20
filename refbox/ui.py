@@ -69,11 +69,8 @@ class ManualEditScore(object):
     self.root.overrideredirect(1)
     self.root.transient(master)
 
-    self.white_score = white_score
-    self.black_score = black_score
-    self.white_new_var = tk.IntVar()
-    self.black_new_var = tk.IntVar()
-    self.redraw()
+    self.white_new_var = tk.IntVar(value=white_score)
+    self.black_new_var = tk.IntVar(value=black_score)
 
     button_font = ("Consolas", 36)
     label_font  = ("Consolas", 96)
@@ -116,25 +113,17 @@ class ManualEditScore(object):
                                   80, 100)
     black_dn_button.grid(row=1, column=3)
 
-  def redraw(self):
-    self.white_new_var.set(self.white_score)
-    self.black_new_var.set(self.black_score)
-
   def white_up(self):
-    self.white_score = self.white_score + 1
-    self.redraw()
+    self.white_new_var.set(self.white_new_var.get() + 1)
 
   def white_dn(self):
-    self.white_score = self.white_score - 1
-    self.redraw()
+    self.white_new_var.set(self.white_new_var.get() - 1)
 
   def black_up(self):
-    self.black_score = self.black_score + 1
-    self.redraw()
+    self.black_new_var.set(self.black_new_var.get() + 1)
 
   def black_dn(self):
-    self.black_score = self.black_score - 1
-    self.redraw()
+    self.black_new_var.set(self.black_new_var.get() - 1)
 
   def cancel_clicked(self):
     self.root.destroy()
@@ -142,7 +131,7 @@ class ManualEditScore(object):
 
   def submit_clicked(self):
     self.root.destroy()
-    self.submit_continuation(self.white_score, self.black_score)
+    self.submit_continuation(self.white_new_var.get(), self.black_new_var.get())
 
 class ConfirmRefTimeOut(object):
   def __init__(self, master, tb_offset, game_clock, edit_continuation,
