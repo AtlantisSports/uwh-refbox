@@ -24,233 +24,214 @@ def SizedButton(root, callback, text, bg, fg, font, height, width):
   b.pack(fill=tk.BOTH, expand=1)
   return sf
 
-class ConfirmManualEditScore(object):
-  def __init__(self, master, tb_offset, cancel_continuation, manual_continuation):
-    self.root = tk.Toplevel(master)
-    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
-    self.root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
+def ConfirmManualEditScore(master, tb_offset, cancel_continuation, manual_continuation):
+  root = tk.Toplevel(master)
+  root.resizable(width=tk.FALSE, height=tk.FALSE)
+  root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
-    self.root.overrideredirect(1)
-    self.root.transient(master)
+  def manual_edit_clicked():
+    root.destroy()
+    manual_continuation()
 
-    manual_edit_button = SizedButton(self.root, lambda : self.manual_edit_clicked(),
-                                     "MANUALLY EDIT SCORE", "orange", "black", ("Consolas", 50),
-                                     180, 800)
-    manual_edit_button.grid(row=0, column=0)
+  def cancel_clicked():
+    root.destroy()
+    cancel_continuation()
 
-    cancel_button = SizedButton(self.root, lambda : self.cancel_clicked(),
-                                "CANCEL", "red", "black", ("Consolas", 36),
-                                130, 800)
-    cancel_button.grid(row=1, column=0)
+  root.overrideredirect(1)
+  root.transient(master)
 
-    self.manual_continuation = manual_continuation
-    self.cancel_continuation = cancel_continuation
+  manual_edit_button = SizedButton(root, manual_edit_clicked,
+                                   "MANUALLY EDIT SCORE", "orange", "black", ("Consolas", 50),
+                                   180, 800)
+  manual_edit_button.grid(row=0, column=0)
 
-    self.root.mainloop()
+  cancel_button = SizedButton(root, cancel_clicked,
+                              "CANCEL", "red", "black", ("Consolas", 36),
+                              130, 800)
+  cancel_button.grid(row=1, column=0)
 
-  def manual_edit_clicked(self):
-    self.root.destroy()
-    self.manual_continuation()
+  root.mainloop()
 
-  def cancel_clicked(self):
-    self.root.destroy()
-    self.cancel_continuation()
+def ManualEditScore(master, tb_offset, white_score, black_score,
+             cancel_continuation, submit_continuation):
+  root = tk.Toplevel(master)
+  root.resizable(width=tk.FALSE, height=tk.FALSE)
+  root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
-class ManualEditScore(object):
-  def __init__(self, master, tb_offset, white_score, black_score,
-               cancel_continuation, submit_continuation):
-    self.cancel_continuation = cancel_continuation
-    self.submit_continuation = submit_continuation
+  root.overrideredirect(1)
+  root.transient(master)
 
-    self.root = tk.Toplevel(master)
-    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
-    self.root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
+  white_new_var = tk.IntVar(value=white_score)
+  black_new_var = tk.IntVar(value=black_score)
 
-    self.root.overrideredirect(1)
-    self.root.transient(master)
+  button_font = ("Consolas", 36)
+  label_font  = ("Consolas", 96)
 
-    self.white_new_var = tk.IntVar(value=white_score)
-    self.black_new_var = tk.IntVar(value=black_score)
+  def white_up():
+    white_new_var.set(white_new_var.get() + 1)
 
-    button_font = ("Consolas", 36)
-    label_font  = ("Consolas", 96)
+  def white_dn():
+    white_new_var.set(white_new_var.get() - 1)
 
-    cancel_button = SizedButton(self.root, lambda : self.cancel_clicked(),
-                                "CANCEL", "red", "black", button_font,
-                                130, 400)
-    cancel_button.grid(row=2, column=0, columnspan=2)
+  def black_up():
+    black_new_var.set(black_new_var.get() + 1)
 
-    submit_button = SizedButton(self.root, lambda : self.submit_clicked(),
-                                "SUBMIT", "green", "black", button_font,
-                                130, 400)
-    submit_button.grid(row=2, column=2, columnspan=2)
+  def black_dn():
+    black_new_var.set(black_new_var.get() - 1)
 
-    white_new = SizedLabel(self.root, self.white_new_var, "black", "white", label_font,
-                           160, 300)
-    white_new.grid(row=0, rowspan=2, column=1)
+  def cancel_clicked():
+    root.destroy()
+    cancel_continuation()
 
-    black_new = SizedLabel(self.root, self.black_new_var, "black", "blue", label_font,
-                           160, 300)
-    black_new.grid(row=0, rowspan=2, column=2)
+  def submit_clicked():
+    root.destroy()
+    submit_continuation(white_new_var.get(), black_new_var.get())
 
-    white_up_button = SizedButton(self.root, lambda : self.white_up(),
-                                  "+", "light blue", "black", button_font,
-                                  80, 100)
-    white_up_button.grid(row=0, column=0)
+  cancel_button = SizedButton(root, cancel_clicked,
+                              "CANCEL", "red", "black", button_font,
+                              130, 400)
+  cancel_button.grid(row=2, column=0, columnspan=2)
 
-    white_dn_button = SizedButton(self.root, lambda : self.white_dn(),
-                                  "-", "grey", "black", button_font,
-                                  80, 100)
-    white_dn_button.grid(row=1, column=0)
+  submit_button = SizedButton(root, submit_clicked,
+                              "SUBMIT", "green", "black", button_font,
+                              130, 400)
+  submit_button.grid(row=2, column=2, columnspan=2)
 
-    black_up_button = SizedButton(self.root, lambda : self.black_up(),
-                                  "+", "light blue", "black", button_font,
-                                  80, 100)
-    black_up_button.grid(row=0, column=3)
+  white_new = SizedLabel(root, white_new_var, "black", "white", label_font,
+                         160, 300)
+  white_new.grid(row=0, rowspan=2, column=1)
 
-    black_dn_button = SizedButton(self.root, lambda : self.black_dn(),
-                                  "-", "grey", "black", button_font,
-                                  80, 100)
-    black_dn_button.grid(row=1, column=3)
+  black_new = SizedLabel(root, black_new_var, "black", "blue", label_font,
+                         160, 300)
+  black_new.grid(row=0, rowspan=2, column=2)
 
-  def white_up(self):
-    self.white_new_var.set(self.white_new_var.get() + 1)
+  white_up_button = SizedButton(root, white_up,
+                                "+", "light blue", "black", button_font,
+                                80, 100)
+  white_up_button.grid(row=0, column=0)
 
-  def white_dn(self):
-    self.white_new_var.set(self.white_new_var.get() - 1)
+  white_dn_button = SizedButton(root, white_dn,
+                                "-", "grey", "black", button_font,
+                                80, 100)
+  white_dn_button.grid(row=1, column=0)
 
-  def black_up(self):
-    self.black_new_var.set(self.black_new_var.get() + 1)
+  black_up_button = SizedButton(root, black_up,
+                                "+", "light blue", "black", button_font,
+                                80, 100)
+  black_up_button.grid(row=0, column=3)
 
-  def black_dn(self):
-    self.black_new_var.set(self.black_new_var.get() - 1)
+  black_dn_button = SizedButton(root, black_dn,
+                                "-", "grey", "black", button_font,
+                                80, 100)
+  black_dn_button.grid(row=1, column=3)
 
-  def cancel_clicked(self):
-    self.root.destroy()
-    self.cancel_continuation()
+def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
+             resume_continuation):
+  root = tk.Toplevel(master)
+  root.resizable(width=tk.FALSE, height=tk.FALSE)
+  root.geometry('{}x{}+{}+{}'.format(800, 190, 0, 115 + 170 + tb_offset))
 
-  def submit_clicked(self):
-    self.root.destroy()
-    self.submit_continuation(self.white_new_var.get(), self.black_new_var.get())
+  root.overrideredirect(1)
+  root.transient(master)
 
-class ConfirmRefTimeOut(object):
-  def __init__(self, master, tb_offset, game_clock, edit_continuation,
-               resume_continuation):
-    self.root = tk.Toplevel(master)
-    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
-    self.root.geometry('{}x{}+{}+{}'.format(800, 190, 0, 115 + 170 + tb_offset))
+  def resume_clicked():
+    root.destroy()
+    resume_continuation(game_clock)
 
-    self.root.overrideredirect(1)
-    self.root.transient(master)
+  def edit_clicked():
+    root.destroy()
+    edit_continuation()
 
-    self.game_clock = game_clock
-
-    resume_button = SizedButton(self.root, lambda : self.resume_clicked(),
-                                "RESUME\nPLAY", "green", "black", ("Consolas", 50),
-                                190, 400)
-    resume_button.grid(row=0, column=0)
-
-    edit_button = SizedButton(self.root, lambda : self.edit_clicked(),
-                              "EDIT TIME", "orange", "black", ("Consolas", 50),
+  resume_button = SizedButton(root, resume_clicked,
+                              "RESUME\nPLAY", "green", "black", ("Consolas", 50),
                               190, 400)
-    edit_button.grid(row=0, column=1)
+  resume_button.grid(row=0, column=0)
 
-    self.edit_continuation = edit_continuation
-    self.resume_continuation = resume_continuation
+  edit_button = SizedButton(root, edit_clicked,
+                            "EDIT TIME", "orange", "black", ("Consolas", 50),
+                            190, 400)
+  edit_button.grid(row=0, column=1)
 
-    self.root.mainloop()
+  root.mainloop()
 
-  def resume_clicked(self):
-    self.root.destroy()
-    self.resume_continuation(self.game_clock)
+def ManualEditTime(master, tb_offset, clock_at_pause,
+             cancel_continuation, submit_continuation):
+  root = tk.Toplevel(master)
+  root.resizable(width=tk.FALSE, height=tk.FALSE)
+  root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
-  def edit_clicked(self):
-    self.root.destroy()
-    self.edit_continuation()
+  root.overrideredirect(1)
+  root.transient(master)
 
+  clock_at_pause_var = tk.IntVar(value=clock_at_pause)
 
-class ManualEditTime(object):
-  def __init__(self, master, tb_offset, clock_at_pause,
-               cancel_continuation, submit_continuation):
-    self.cancel_continuation = cancel_continuation
-    self.submit_continuation = submit_continuation
+  button_font = ("Consolas", 36)
+  label_font  = ("Consolas", 96)
+  playpause_button_font = ("Consolas", 36)
+  game_clock_font = ("Consolas", 72)
 
-    self.root = tk.Toplevel(master)
-    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
-    self.root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
+  def game_clock_s_up():
+    clock_at_pause_var.set(clock_at_pause_var.get() + 1)
 
-    self.root.overrideredirect(1)
-    self.root.transient(master)
+  def game_clock_s_dn():
+    clock_at_pause_var.set(clock_at_pause_var.get() - 1)
 
-    self.clock_at_pause_var = tk.IntVar(value=clock_at_pause)
-    self.orig_clock_at_pause = clock_at_pause
-    self.clock_running_var = tk.StringVar()
+  def game_clock_m_up():
+    clock_at_pause_var.set(clock_at_pause_var.get() + 60)
 
-    button_font = ("Consolas", 36)
-    label_font  = ("Consolas", 96)
-    playpause_button_font = ("Consolas", 36)
-    game_clock_font = ("Consolas", 72)
+  def game_clock_m_dn():
+    clock_at_pause_var.set(clock_at_pause_var.get() - 60)
 
-    cancel_button = SizedButton(self.root, lambda : self.cancel_clicked(),
-                                "CANCEL", "red", "black", button_font,
-                                150, 400)
-    cancel_button.grid(row=2, column=0, columnspan=2)
+  def cancel_clicked():
+    root.destroy()
+    cancel_continuation(clock_at_pause)
 
-    submit_button = SizedButton(self.root, lambda : self.submit_clicked(),
-                                "SUBMIT", "green", "black", button_font,
-                                150, 400)
-    submit_button.grid(row=2, column=2, columnspan=2)
+  def submit_clicked():
+    root.destroy()
+    submit_continuation(clock_at_pause_var.get())
 
-    m_up_button = SizedButton(self.root, lambda : self.game_clock_m_up(),
-                              u"Min \u2191", "light blue", "black", button_font,
-                              80, 200)
-    m_up_button.grid(row=0, column=0)
+  cancel_button = SizedButton(root, cancel_clicked,
+                              "CANCEL", "red", "black", button_font,
+                              150, 400)
+  cancel_button.grid(row=2, column=0, columnspan=2)
 
-    m_dn_button = SizedButton(self.root, lambda : self.game_clock_m_dn(),
-                              u"Min \u2193", "grey", "black", button_font,
-                              80, 200)
-    m_dn_button.grid(row=1, column=0)
+  submit_button = SizedButton(root, submit_clicked,
+                              "SUBMIT", "green", "black", button_font,
+                              150, 400)
+  submit_button.grid(row=2, column=2, columnspan=2)
 
-    s_up_button = SizedButton(self.root, lambda : self.game_clock_s_up(),
-                              u"Sec \u2191", "light blue", "black", button_font,
-                              80, 200)
-    s_up_button.grid(row=0, column=3)
+  m_up_button = SizedButton(root, game_clock_m_up,
+                            u"Min \u2191", "light blue", "black", button_font,
+                            80, 200)
+  m_up_button.grid(row=0, column=0)
 
-    s_dn_button = SizedButton(self.root, lambda : self.game_clock_s_dn(),
-                              u"Sec \u2193", "grey", "black", button_font,
-                              80, 200)
-    s_dn_button.grid(row=1, column=3)
+  m_dn_button = SizedButton(root, game_clock_m_dn,
+                            u"Min \u2193", "grey", "black", button_font,
+                            80, 200)
+  m_dn_button.grid(row=1, column=0)
 
-    game_clock_var = tk.StringVar()
-    def on_clock_changed(*args):
-      x = self.clock_at_pause_var.get()
-      game_clock_var.set('%d:%02d' % (x // 60, x % 60))
+  s_up_button = SizedButton(root, game_clock_s_up,
+                            u"Sec \u2191", "light blue", "black", button_font,
+                            80, 200)
+  s_up_button.grid(row=0, column=3)
 
-    self.clock_at_pause_var.trace('w', on_clock_changed)
+  s_dn_button = SizedButton(root, game_clock_s_dn,
+                            u"Sec \u2193", "grey", "black", button_font,
+                            80, 200)
+  s_dn_button.grid(row=1, column=3)
 
-    game_clock_new = SizedLabel(self.root, game_clock_var, "black", "blue", game_clock_font,
-                           160, 400)
-    game_clock_new.grid(row=0, rowspan=2, column=1, columnspan=2)
+  game_clock_var = tk.StringVar()
+  def on_clock_changed(*args):
+    x = clock_at_pause_var.get()
+    game_clock_var.set('%d:%02d' % (x // 60, x % 60))
+  on_clock_changed()
 
-  def game_clock_s_up(self):
-    self.clock_at_pause_var.set(self.clock_at_pause_var.get() + 1)
+  clock_at_pause_var.trace('w', on_clock_changed)
 
-  def game_clock_s_dn(self):
-    self.clock_at_pause_var.set(self.clock_at_pause_var.get() - 1)
+  game_clock_new = SizedLabel(root, game_clock_var, "black", "blue", game_clock_font,
+                         160, 400)
+  game_clock_new.grid(row=0, rowspan=2, column=1, columnspan=2)
 
-  def game_clock_m_up(self):
-    self.clock_at_pause_var.set(self.clock_at_pause_var.get() + 60)
-
-  def game_clock_m_dn(self):
-    self.clock_at_pause_var.set(self.clock_at_pause_var.get() - 60)
-
-  def cancel_clicked(self):
-    self.root.destroy()
-    self.cancel_continuation(self.orig_clock_at_pause)
-
-  def submit_clicked(self):
-    self.root.destroy()
-    self.submit_continuation(self.clock_at_pause_var.get())
 
 
 class NormalView(object):
