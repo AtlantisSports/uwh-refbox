@@ -71,8 +71,8 @@ class ManualEditScore(object):
 
     self.white_score = white_score
     self.black_score = black_score
-    self.white_new_var = tk.StringVar()
-    self.black_new_var = tk.StringVar()
+    self.white_new_var = tk.IntVar()
+    self.black_new_var = tk.IntVar()
     self.redraw()
 
     button_font = ("Consolas", 36)
@@ -117,8 +117,8 @@ class ManualEditScore(object):
     black_dn_button.grid(row=1, column=3)
 
   def redraw(self):
-    self.white_new_var.set('%d' % (self.white_score,))
-    self.black_new_var.set('%d' % (self.black_score,))
+    self.white_new_var.set(self.white_score)
+    self.black_new_var.set(self.black_score)
 
   def white_up(self):
     self.white_score = self.white_score + 1
@@ -318,12 +318,10 @@ class NormalView(object):
     self.game_clock_mins = game_clock // 60
     self.game_clock_secs = game_clock % 60
 
-    self.white_score_var = tk.StringVar()
-    self.white_score_var.set("##")
+    self.white_score_var = tk.IntVar()
     self.game_clock_var = tk.StringVar()
     self.game_clock_var.set("##:##")
-    self.black_score_var = tk.StringVar()
-    self.black_score_var.set("##")
+    self.black_score_var = tk.IntVar()
 
     self.status_var = tk.StringVar()
     self.status_var.set("FIRST HALF")
@@ -335,7 +333,7 @@ class NormalView(object):
                                    score_width)
     white_score_label.grid(row=0, column=0)
     def refresh_white(self):
-      self.white_score_var.set("%d" % (self.mgr.whiteScore(),))
+      self.white_score_var.set(self.mgr.whiteScore())
       white_score_label.after(refresh_ms, lambda : refresh_white(self))
     white_score_label.after(refresh_ms, lambda : refresh_white(self))
 
@@ -439,7 +437,7 @@ class NormalView(object):
                                    score_width)
     black_score_label.grid(row=0, column=2)
     def refresh_black(self):
-      self.black_score_var.set("%d" % (self.mgr.blackScore(),))
+      self.black_score_var.set(self.mgr.blackScore())
       black_score_label.after(refresh_ms, lambda : refresh_black(self))
     black_score_label.after(refresh_ms, lambda : refresh_black(self))
 
