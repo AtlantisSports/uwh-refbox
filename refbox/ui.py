@@ -1,33 +1,33 @@
 try:
-    from Tkinter import *
+    import Tkinter as tk
 except ImportError:
-    from tkinter import *
+    import tkinter as tk
 
 import time
 
 def sized_frame(master, height, width):
-   F = Frame(master, height=height, width=width)
+   F = tk.Frame(master, height=height, width=width)
    F.pack_propagate(0)
    return F
 
 def SizedLabel(root, var, bg, fg, font, height, width):
   sf = sized_frame(root, height, width)
-  l = Label(sf, textvariable=var, bg=bg, fg=fg, font=font)
-  l.pack(fill=BOTH, expand=1)
+  l = tk.Label(sf, textvariable=var, bg=bg, fg=fg, font=font)
+  l.pack(fill=tk.BOTH, expand=1)
   return sf
 
 def SizedButton(root, callback, text, bg, fg, font, height, width):
   sf = sized_frame(root, height, width)
-  b = Button(sf, text=text, command=callback, bg=bg, fg=fg, font=font,
+  b = tk.Button(sf, text=text, command=callback, bg=bg, fg=fg, font=font,
              highlightbackground="dark grey", highlightthickness=4, relief='flat',
              activebackground=bg)
-  b.pack(fill=BOTH, expand=1)
+  b.pack(fill=tk.BOTH, expand=1)
   return sf
 
 class ConfirmManualEditScore(object):
   def __init__(self, master, tb_offset, cancel_continuation, manual_continuation):
-    self.root = Toplevel(master)
-    self.root.resizable(width=FALSE, height=FALSE)
+    self.root = tk.Toplevel(master)
+    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
     self.root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
     self.root.overrideredirect(1)
@@ -62,8 +62,8 @@ class ManualEditScore(object):
     self.cancel_continuation = cancel_continuation
     self.submit_continuation = submit_continuation
 
-    self.root = Toplevel(master)
-    self.root.resizable(width=FALSE, height=FALSE)
+    self.root = tk.Toplevel(master)
+    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
     self.root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
     self.root.overrideredirect(1)
@@ -71,8 +71,8 @@ class ManualEditScore(object):
 
     self.white_score = white_score
     self.black_score = black_score
-    self.white_new_var = StringVar()
-    self.black_new_var = StringVar()
+    self.white_new_var = tk.StringVar()
+    self.black_new_var = tk.StringVar()
     self.redraw()
 
     button_font = ("Consolas", 36)
@@ -147,8 +147,8 @@ class ManualEditScore(object):
 class ConfirmRefTimeOut(object):
   def __init__(self, master, tb_offset, game_clock, edit_continuation,
                resume_continuation):
-    self.root = Toplevel(master)
-    self.root.resizable(width=FALSE, height=FALSE)
+    self.root = tk.Toplevel(master)
+    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
     self.root.geometry('{}x{}+{}+{}'.format(800, 190, 0, 115 + 170 + tb_offset))
 
     self.root.overrideredirect(1)
@@ -186,8 +186,8 @@ class ManualEditTime(object):
     self.cancel_continuation = cancel_continuation
     self.submit_continuation = submit_continuation
 
-    self.root = Toplevel(master)
-    self.root.resizable(width=FALSE, height=FALSE)
+    self.root = tk.Toplevel(master)
+    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
     self.root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
     self.root.overrideredirect(1)
@@ -195,8 +195,8 @@ class ManualEditTime(object):
 
     self.clock_at_pause = clock_at_pause
     self.orig_clock_at_pause = clock_at_pause
-    self.clock_running_var = StringVar()
-    self.game_clock_var = StringVar()
+    self.clock_running_var = tk.StringVar()
+    self.game_clock_var = tk.StringVar()
     self.redraw()
 
     button_font = ("Consolas", 36)
@@ -274,8 +274,8 @@ class NormalView(object):
     self.iomgr = iomgr
     self.first_game_started = False
 
-    self.root = Tk()
-    self.root.resizable(width=FALSE, height=FALSE)
+    self.root = tk.Tk()
+    self.root.resizable(width=tk.FALSE, height=tk.FALSE)
     self.root.geometry('{}x{}+{}+{}'.format(800, 480, 0, 0))
     if NO_TITLE_BAR:
       self.root.overrideredirect(1)
@@ -318,14 +318,14 @@ class NormalView(object):
     self.game_clock_mins = game_clock // 60
     self.game_clock_secs = game_clock % 60
 
-    self.white_score_var = StringVar()
+    self.white_score_var = tk.StringVar()
     self.white_score_var.set("##")
-    self.game_clock_var = StringVar()
+    self.game_clock_var = tk.StringVar()
     self.game_clock_var.set("##:##")
-    self.black_score_var = StringVar()
+    self.black_score_var = tk.StringVar()
     self.black_score_var.set("##")
 
-    self.status_var = StringVar()
+    self.status_var = tk.StringVar()
     self.status_var.set("FIRST HALF")
 
     # Left Column
@@ -339,7 +339,7 @@ class NormalView(object):
       white_score_label.after(refresh_ms, lambda : refresh_white(self))
     white_score_label.after(refresh_ms, lambda : refresh_white(self))
 
-    white_label_var = StringVar()
+    white_label_var = tk.StringVar()
     white_label_var.set("WHITE")
     white_label = SizedLabel(self.root, white_label_var, "white", "black",
                              label_font, label_height, label_width)
@@ -350,7 +350,7 @@ class NormalView(object):
                                button_font, button_height, button_width)
     white_button.grid(row=2, column=0)
 
-    white_penalty = Frame(self.root, height=penalty_height, width=penalty_width,
+    white_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
                           bg="black")
     white_penalty.grid(row=3, column=0)
 
@@ -428,7 +428,7 @@ class NormalView(object):
                               time_change_height, time_change_width)
     time_button.grid(row=3, column=1)
 
-    #ref_signal_cover = Frame(self.root, height=ref_signal_height,
+    #ref_signal_cover = tk.Frame(self.root, height=ref_signal_height,
     #                         width=ref_signal_width, bg="black")
     #ref_signal_cover.grid(row=3, column=1)
 
@@ -443,7 +443,7 @@ class NormalView(object):
       black_score_label.after(refresh_ms, lambda : refresh_black(self))
     black_score_label.after(refresh_ms, lambda : refresh_black(self))
 
-    self.black_label_var = StringVar()
+    self.black_label_var = tk.StringVar()
     self.black_label_var.set("BLACK")
     black_label = SizedLabel(self.root, self.black_label_var, "black", "blue",
                              label_font, label_height, label_width)
@@ -454,7 +454,7 @@ class NormalView(object):
                                button_font, button_height, button_width)
     black_button.grid(row=2, column=2)
 
-    black_penalty = Frame(self.root, height=penalty_height, width=penalty_width,
+    black_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
                           bg="black")
     black_penalty.grid(row=3, column=2)
 
