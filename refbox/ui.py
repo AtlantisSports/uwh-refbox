@@ -1,14 +1,17 @@
 try:
     import Tkinter as tk
+    import ttk
 except ImportError:
     import tkinter as tk
+    from tkinter import ttk
 
 import time
 
 
 def sized_frame(master, height, width):
     F = tk.Frame(master, height=height, width=width)
-    F.pack_propagate(0)
+    F.pack_propagate(0) # Don't shrink
+    F.pack()
     return F
 
 
@@ -20,10 +23,12 @@ def SizedLabel(root, var, bg, fg, font, height, width):
 
 
 def SizedButton(root, callback, text, bg, fg, font, height, width):
+    style = ttk.Style()
+    style.configure("Sized.TButton", foreground=fg, background=bg, highlightthickness=4,
+            highlightbackground="dark grey", activebackground=bg, font=font, relief='flat')
+
     sf = sized_frame(root, height, width)
-    b = tk.Button(sf, text=text, command=callback, bg=bg, fg=fg, font=font,
-                  highlightbackground="dark grey", highlightthickness=4, relief='flat',
-                  activebackground=bg)
+    b = ttk.Button(sf, text=text, command=callback, style="Sized.TButton")
     b.pack(fill=tk.BOTH, expand=1)
     return sf
 
