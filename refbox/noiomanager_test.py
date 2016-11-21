@@ -1,5 +1,6 @@
 from .noiomanager import IOManager
 
+
 def test_iomanager():
     io_mgr = IOManager()
     io_mgr.turnOnWetDisplays()
