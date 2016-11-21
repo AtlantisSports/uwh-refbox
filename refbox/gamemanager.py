@@ -5,7 +5,9 @@ class GameState(object):
     second_half = 3
     time_out = 4
 
+
 class GameManager(object):
+
     def __init__(self):
         self._white_score = 0
         self._black_score = 0
@@ -66,4 +68,3 @@ class GameManager(object):
 
     def setGameStateRefTimeOut(self):
         self._game_state = GameState.time_out
-

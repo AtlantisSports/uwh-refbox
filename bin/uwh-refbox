@@ -6,4 +6,3 @@ from refbox.noiomanager import IOManager
 
 nv = NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
 nv.root.mainloop()
-
