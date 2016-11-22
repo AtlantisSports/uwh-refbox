@@ -263,50 +263,12 @@ class NormalView(object):
             self.tb_offset = 0
         else:
             self.tb_offset = 70
-        # self.root.mainloop()
-
-        score_font = ("Consolas", 96)
-        label_font = ("Consolas", 36)
-        status_font = label_font
-        button_font = label_font
-        gong_font = button_font
-
-        score_width = 200
-        score_height = 120
-        label_width = score_width
-        label_height = 50
-        clock_height = score_height
-        clock_width = 400
-        status_height = label_height
-        status_width = clock_width
-        button_width = score_width
-        button_height = 120
-        gong_width = clock_width
-        gong_height = button_height
-        penalty_height = 190
-        penalty_width = score_width
-        ref_signal_height = penalty_height
-        ref_signal_width = clock_width
-        time_change_font = gong_font
-        time_change_height = penalty_height
-        time_change_width = clock_width
 
         refresh_ms = 50
 
-        self.score_column(0, 'white', refresh_ms, 'white', score_font, score_height, score_width,
-                         label_font, label_height, label_width,
-                         button_font, button_height, button_width,
-                         penalty_height, penalty_width)
-
-        self.center_column(refresh_ms, score_font, score_height, score_width,
-                           clock_height, clock_width, status_height, status_width,
-                           status_font, gong_font, gong_height, gong_width,
-                           time_change_font, time_change_width, time_change_height)
-
-        self.score_column(2, 'black', refresh_ms, 'blue', score_font, score_height, score_width,
-                         label_font, label_height, label_width,
-                         button_font, button_height, button_width,
-                         penalty_height, penalty_width)
+        self.score_column(0, 'white', 'white', refresh_ms)
+        self.center_column(refresh_ms)
+        self.score_column(2, 'black', 'blue', refresh_ms)
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -317,10 +279,22 @@ class NormalView(object):
             self.root.after(refresh_ms, lambda: poll_clicker(self))
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
-    def score_column(self, column, name, refresh_ms, score_color, score_font, score_height, score_width,
-            label_font, label_height, label_width,
-            button_font, button_height, button_width,
-            penalty_height, penalty_width):
+    def score_column(self, column, name, score_color, refresh_ms):
+        score_font = ("Consolas", 96)
+        score_width = 200
+        score_height = 120
+
+        label_font = ("Consolas", 36)
+        label_width = score_width
+        label_height = 50
+
+        button_font = label_font
+        button_width = score_width
+        button_height = 120
+
+        penalty_height = 190
+        penalty_width = score_width
+
         score_var = tk.IntVar()
         score_label = SizedLabel(self.root, score_var, "black",
                                        score_color, score_font, score_height,
@@ -346,17 +320,33 @@ class NormalView(object):
                                  bg="black")
         penalty.grid(row=3, column=column)
         
-    def center_column(self, refresh_ms, score_font, score_height, score_width,
-                      clock_height, clock_width, status_height, status_width,
-                      status_font, gong_font, gong_height, gong_width,
-                      time_change_font, time_change_width, time_change_height):
+    def center_column(self, refresh_ms):
+        clock_font = ("Consolas", 96)
+        clock_height = 120
+        clock_width = 400
+
+        status_font = ("Consolas", 36)
+        status_height = 50
+        status_width = clock_width
+
+        gong_font = status_font
+        gong_width = clock_width
+        gong_height = 120
+
+        ref_signal_height = 190
+        ref_signal_width = clock_width
+
+        time_change_font = gong_font
+        time_change_height = ref_signal_height
+        time_change_width = clock_width
+
         self.status_var = tk.StringVar()
         self.status_var.set("FIRST HALF")
 
         self.game_clock_var = tk.StringVar()
         self.game_clock_var.set("##:##")
         self.game_clock_label = SizedLabel(self.root, self.game_clock_var, "black", "#000fff000",
-                                           score_font, clock_height, clock_width)
+                                           clock_font, clock_height, clock_width)
         self.game_clock_label.grid(row=0, column=1)
 
         status_label = SizedLabel(self.root, self.status_var, "black", "#000fff000", status_font,
