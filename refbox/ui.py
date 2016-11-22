@@ -7,6 +7,7 @@ except ImportError:
 
 import time
 
+_font_name = 'Consolas'
 
 def sized_frame(master, height, width):
     F = tk.Frame(master, height=height, width=width)
@@ -51,12 +52,12 @@ def ConfirmManualEditScore(master, tb_offset, cancel_continuation, manual_contin
 
     manual_edit_button = SizedButton(root, manual_edit_clicked,
                                      "MANUALLY EDIT SCORE", "orange", "black", (
-                                         "Consolas", 50),
+                                         _font_name, 50),
                                      180, 800)
     manual_edit_button.grid(row=0, column=0)
 
     cancel_button = SizedButton(root, cancel_clicked,
-                                "CANCEL", "red", "black", ("Consolas", 36),
+                                "CANCEL", "red", "black", (_font_name, 36),
                                 130, 800)
     cancel_button.grid(row=1, column=0)
 
@@ -75,8 +76,8 @@ def ManualEditScore(master, tb_offset, white_score, black_score,
     white_new_var = tk.IntVar(value=white_score)
     black_new_var = tk.IntVar(value=black_score)
 
-    button_font = ("Consolas", 36)
-    label_font = ("Consolas", 96)
+    button_font = (_font_name, 36)
+    label_font = (_font_name, 96)
 
     def white_up():
         white_new_var.set(white_new_var.get() + 1)
@@ -155,13 +156,12 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
         edit_continuation()
 
     resume_button = SizedButton(root, resume_clicked,
-                                "RESUME\nPLAY", "green", "black", (
-                                    "Consolas", 50),
+                                "RESUME\nPLAY", "green", "black", (_font_name, 50),
                                 190, 400)
     resume_button.grid(row=0, column=0)
 
     edit_button = SizedButton(root, edit_clicked,
-                              "EDIT TIME", "orange", "black", ("Consolas", 50),
+                              "EDIT TIME", "orange", "black", (_font_name, 50),
                               190, 400)
     edit_button.grid(row=0, column=1)
 
@@ -179,10 +179,10 @@ def ManualEditTime(master, tb_offset, clock_at_pause,
 
     clock_at_pause_var = tk.IntVar(value=clock_at_pause)
 
-    button_font = ("Consolas", 36)
-    label_font = ("Consolas", 96)
-    playpause_button_font = ("Consolas", 36)
-    game_clock_font = ("Consolas", 72)
+    button_font = (_font_name, 36)
+    label_font = (_font_name, 96)
+    playpause_button_font = (_font_name, 36)
+    game_clock_font = (_font_name, 72)
 
     def game_clock_s_up():
         clock_at_pause_var.set(clock_at_pause_var.get() + 1)
@@ -279,18 +279,18 @@ class NormalView(object):
             self.root.after(refresh_ms, lambda: poll_clicker(self))
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
-    def score_column(self, column, name, score_color, refresh_ms):
-        score_font = ("Consolas", 96)
-        score_width = 200
+    def score_column(self, column, team_color, score_color, refresh_ms):
+        score_font = (_font_name, 96)
         score_height = 120
+        score_width = 200
 
-        label_font = ("Consolas", 36)
-        label_width = score_width
+        label_font = (_font_name, 36)
         label_height = 50
+        label_width = score_width
 
         button_font = label_font
-        button_width = score_width
         button_height = 120
+        button_width = score_width
 
         penalty_height = 190
         penalty_width = score_width
@@ -306,13 +306,13 @@ class NormalView(object):
             score_label.after(refresh_ms, lambda: refresh_score(self))
         score_label.after(refresh_ms, lambda: refresh_score(self))
 
-        label_var = tk.StringVar(value=name.upper())
+        label_var = tk.StringVar(value=team_color.upper())
         label = SizedLabel(self.root, label_var, score_color, "black",
                                  label_font, label_height, label_width)
         label.grid(row=1, column=column)
 
         button = SizedButton(self.root, lambda: self.score_change_clicked(),
-                                   name.upper() + "\nSCORE", "dark cyan", "black",
+                                   team_color.upper() + "\nSCORE", "dark cyan", "black",
                                    button_font, button_height, button_width)
         button.grid(row=2, column=column)
 
@@ -321,17 +321,17 @@ class NormalView(object):
         penalty.grid(row=3, column=column)
         
     def center_column(self, refresh_ms):
-        clock_font = ("Consolas", 96)
+        clock_font = (_font_name, 96)
         clock_height = 120
         clock_width = 400
 
-        status_font = ("Consolas", 36)
+        status_font = (_font_name, 36)
         status_height = 50
         status_width = clock_width
 
         gong_font = status_font
-        gong_width = clock_width
         gong_height = 120
+        gong_width = clock_width
 
         ref_signal_height = 190
         ref_signal_width = clock_width
