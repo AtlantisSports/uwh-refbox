@@ -321,61 +321,61 @@ class NormalView(object):
             label_font, label_height, label_width,
             button_font, button_height, button_width,
             penalty_height, penalty_width):
-        self.white_score_var = tk.IntVar()
-        white_score_label = SizedLabel(self.root, self.white_score_var, "black",
+        score_var = tk.IntVar()
+        score_label = SizedLabel(self.root, score_var, "black",
                                        "white", score_font, score_height,
                                        score_width)
-        white_score_label.grid(row=0, column=0)
+        score_label.grid(row=0, column=0)
 
-        def refresh_white(self):
-            self.white_score_var.set(self.mgr.whiteScore())
-            white_score_label.after(refresh_ms, lambda: refresh_white(self))
-        white_score_label.after(refresh_ms, lambda: refresh_white(self))
+        def refresh_score(self):
+            score_var.set(self.mgr.whiteScore())
+            score_label.after(refresh_ms, lambda: refresh_score(self))
+        score_label.after(refresh_ms, lambda: refresh_score(self))
 
-        white_label_var = tk.StringVar()
-        white_label_var.set("WHITE")
-        white_label = SizedLabel(self.root, white_label_var, "white", "black",
+        label_var = tk.StringVar()
+        label_var.set("WHITE")
+        label = SizedLabel(self.root, label_var, "white", "black",
                                  label_font, label_height, label_width)
-        white_label.grid(row=1, column=0)
+        label.grid(row=1, column=0)
 
-        white_button = SizedButton(self.root, lambda: self.score_change_clicked(),
+        button = SizedButton(self.root, lambda: self.score_change_clicked(),
                                    "WHITE\nSCORE", "dark cyan", "black",
                                    button_font, button_height, button_width)
-        white_button.grid(row=2, column=0)
+        button.grid(row=2, column=0)
 
-        white_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
+        penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
                                  bg="black")
-        white_penalty.grid(row=3, column=0)
+        penalty.grid(row=3, column=0)
         
     def right_column(self, refresh_ms, score_font, score_height, score_width,
             label_font, label_height, label_width,
             button_font, button_height, button_width,
             penalty_height, penalty_width):
-        self.black_score_var = tk.IntVar()
-        black_score_label = SizedLabel(self.root, self.black_score_var, "black",
+        score_var = tk.IntVar()
+        score_label = SizedLabel(self.root, score_var, "black",
                                        "blue", score_font, score_height,
                                        score_width)
-        black_score_label.grid(row=0, column=2)
+        score_label.grid(row=0, column=2)
 
-        def refresh_black(self):
-            self.black_score_var.set(self.mgr.blackScore())
-            black_score_label.after(refresh_ms, lambda: refresh_black(self))
-        black_score_label.after(refresh_ms, lambda: refresh_black(self))
+        def refresh_score(self):
+            score_var.set(self.mgr.blackScore())
+            score_label.after(refresh_ms, lambda: refresh_score(self))
+        score_label.after(refresh_ms, lambda: refresh_score(self))
 
-        self.black_label_var = tk.StringVar()
-        self.black_label_var.set("BLACK")
-        black_label = SizedLabel(self.root, self.black_label_var, "black", "blue",
+        label_var = tk.StringVar()
+        label_var.set("BLACK")
+        label = SizedLabel(self.root, label_var, "black", "blue",
                                  label_font, label_height, label_width)
-        black_label.grid(row=1, column=2)
+        label.grid(row=1, column=2)
 
-        black_button = SizedButton(self.root, lambda: self.score_change_clicked(),
+        button = SizedButton(self.root, lambda: self.score_change_clicked(),
                                    "BLACK\nSCORE", "dark cyan", "black",
                                    button_font, button_height, button_width)
-        black_button.grid(row=2, column=2)
+        button.grid(row=2, column=2)
 
-        black_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
+        penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
                                  bg="black")
-        black_penalty.grid(row=3, column=2)
+        penalty.grid(row=3, column=2)
 
     def center_column(self, refresh_ms, score_font, score_height, score_width,
                       clock_height, clock_width, status_height, status_width,
@@ -384,15 +384,15 @@ class NormalView(object):
         self.status_var = tk.StringVar()
         self.status_var.set("FIRST HALF")
 
-        self.game_clock_var = tk.StringVar()
-        self.game_clock_var.set("##:##")
-        self.game_clock_label = SizedLabel(self.root, self.game_clock_var, "black", "#000fff000",
+        game_clock_var = tk.StringVar()
+        game_clock_var.set("##:##")
+        self.game_clock_label = SizedLabel(self.root, game_clock_var, "black", "#000fff000",
                                            score_font, clock_height, clock_width)
         self.game_clock_label.grid(row=0, column=1)
 
-        self.status_label = SizedLabel(self.root, self.status_var, "black", "#000fff000", status_font,
+        status_label = SizedLabel(self.root, self.status_var, "black", "#000fff000", status_font,
                                        status_height, status_width)
-        self.status_label.grid(row=1, column=1)
+        status_label.grid(row=1, column=1)
 
         def refresh_time(self):
             game_clock = self.mgr.gameClock()
