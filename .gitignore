@@ -1,5 +1,6 @@
 .tox/
 .coverage
+coverage.xml
 *.pyc
 __pycache__/
 uwh_refbox.egg-info/
