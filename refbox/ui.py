@@ -266,9 +266,9 @@ class NormalView(object):
 
         refresh_ms = 50
 
-        self.score_column(0, 'white', 'white', refresh_ms)
+        self.score_column(0, 'white', 'white', refresh_ms, lambda: self.mgr.whiteScore())
         self.center_column(refresh_ms)
-        self.score_column(2, 'black', 'blue', refresh_ms)
+        self.score_column(2, 'black', 'blue', refresh_ms, lambda: self.mgr.blackScore())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -279,7 +279,7 @@ class NormalView(object):
             self.root.after(refresh_ms, lambda: poll_clicker(self))
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
-    def score_column(self, column, team_color, score_color, refresh_ms):
+    def score_column(self, column, team_color, score_color, refresh_ms, get_score):
         score_font = (_font_name, 96)
         score_height = 120
         score_width = 200
@@ -301,10 +301,10 @@ class NormalView(object):
                                        score_width)
         score_label.grid(row=0, column=column)
 
-        def refresh_score(self):
-            score_var.set(self.mgr.whiteScore())
-            score_label.after(refresh_ms, lambda: refresh_score(self))
-        score_label.after(refresh_ms, lambda: refresh_score(self))
+        def refresh_score():
+            score_var.set(get_score())
+            score_label.after(refresh_ms, lambda: refresh_score())
+        score_label.after(refresh_ms, lambda: refresh_score())
 
         label_var = tk.StringVar(value=team_color.upper())
         label = SizedLabel(self.root, label_var, score_color, "black",
