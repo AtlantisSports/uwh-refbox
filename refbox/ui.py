@@ -384,9 +384,9 @@ class NormalView(object):
         self.status_var = tk.StringVar()
         self.status_var.set("FIRST HALF")
 
-        game_clock_var = tk.StringVar()
-        game_clock_var.set("##:##")
-        self.game_clock_label = SizedLabel(self.root, game_clock_var, "black", "#000fff000",
+        self.game_clock_var = tk.StringVar()
+        self.game_clock_var.set("##:##")
+        self.game_clock_label = SizedLabel(self.root, self.game_clock_var, "black", "#000fff000",
                                            score_font, clock_height, clock_width)
         self.game_clock_label.grid(row=0, column=1)
 
@@ -394,59 +394,7 @@ class NormalView(object):
                                        status_height, status_width)
         status_label.grid(row=1, column=1)
 
-        def refresh_time(self):
-            game_clock = self.mgr.gameClock()
-            game_mins = game_clock // 60
-            game_secs = game_clock % 60
-            self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
-
-            if game_clock <= 0:
-                self.mgr.setGameClockRunning(False)
-                if self.mgr.gameStateFirstHalf():
-                    self.mgr.setGameStateHalfTime()
-                    # FIXME:
-                    # self.mgr.setGameClock(HALF_TIME_DURATION)
-                    self.gong_clicked()
-                    self.mgr.setGameClockRunning(True)
-                    self.root.update()
-                elif self.mgr.gameStateHalfTime():
-                    self.mgr.setGameStateSecondHalf()
-                    # FIXME:
-                    # self.mgr.setGameClock(HALF_PLAY_DURATION)
-                    self.gong_clicked()
-                    self.mgr.setGameClockRunning(True)
-                    self.root.update()
-                elif self.mgr.gameStateSecondHalf():
-                    self.mgr.setGameStateGameOver()
-                    # FIXME:
-                    # self.mgr.setGameClock(GAME_OVER_DURATION)
-                    self.gong_clicked()
-                    self.mgr.setGameClockRunning(True)
-                    self.root.update()
-                elif self.mgr.gameStateGameOver():
-                    self.mgr.setBlackScore(0)
-                    self.mgr.setWhiteScore(0)
-                    self.mgr.setGameStateFirstHalf()
-                    # FIXME:
-                    # self.mgr.setGameClock(HALF_PLAY_DURATION)
-                    self.gong_clicked()
-                    self.mgr.setGameClockRunning(True)
-
-            if self.mgr.gameStateFirstHalf():
-                self.status_var.set("FIRST HALF")
-            elif self.mgr.gameStateHalfTime():
-                self.status_var.set("HALF TIME")
-            elif self.mgr.gameStateSecondHalf():
-                self.status_var.set("SECOND HALF")
-            elif self.mgr.gameStateGameOver():
-                self.status_var.set("GAME OVER")
-            elif self.mgr.gameStateRefTimeOut():
-                self.status_var.set("REF TIMEOUT")
-            self.root.update()
-
-            self.game_clock_label.after(refresh_ms, lambda: refresh_time(self))
-        self.game_clock_label.after(refresh_ms, lambda: refresh_time(self))
-        self.refresh_time = refresh_time
+        self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
         gong_button = SizedButton(self.root, lambda: self.gong_clicked(), "GONG",
                                   "red", "black", gong_font, gong_height,
@@ -461,6 +409,59 @@ class NormalView(object):
         # ref_signal_cover = tk.Frame(self.root, height=ref_signal_height,
         #                         width=ref_signal_width, bg="black")
         #ref_signal_cover.grid(row=3, column=1)
+
+    def refresh_time(self):
+        game_clock = self.mgr.gameClock()
+        game_mins = game_clock // 60
+        game_secs = game_clock % 60
+        self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
+
+        if game_clock <= 0:
+            self.mgr.setGameClockRunning(False)
+            if self.mgr.gameStateFirstHalf():
+                self.mgr.setGameStateHalfTime()
+                # FIXME:
+                # self.mgr.setGameClock(HALF_TIME_DURATION)
+                self.gong_clicked()
+                self.mgr.setGameClockRunning(True)
+                self.root.update()
+            elif self.mgr.gameStateHalfTime():
+                self.mgr.setGameStateSecondHalf()
+                # FIXME:
+                # self.mgr.setGameClock(HALF_PLAY_DURATION)
+                self.gong_clicked()
+                self.mgr.setGameClockRunning(True)
+                self.root.update()
+            elif self.mgr.gameStateSecondHalf():
+                self.mgr.setGameStateGameOver()
+                # FIXME:
+                # self.mgr.setGameClock(GAME_OVER_DURATION)
+                self.gong_clicked()
+                self.mgr.setGameClockRunning(True)
+                self.root.update()
+            elif self.mgr.gameStateGameOver():
+                self.mgr.setBlackScore(0)
+                self.mgr.setWhiteScore(0)
+                self.mgr.setGameStateFirstHalf()
+                # FIXME:
+                # self.mgr.setGameClock(HALF_PLAY_DURATION)
+                self.gong_clicked()
+                self.mgr.setGameClockRunning(True)
+
+        if self.mgr.gameStateFirstHalf():
+            self.status_var.set("FIRST HALF")
+        elif self.mgr.gameStateHalfTime():
+            self.status_var.set("HALF TIME")
+        elif self.mgr.gameStateSecondHalf():
+            self.status_var.set("SECOND HALF")
+        elif self.mgr.gameStateGameOver():
+            self.status_var.set("GAME OVER")
+        elif self.mgr.gameStateRefTimeOut():
+            self.status_var.set("REF TIMEOUT")
+        self.root.update()
+
+        refresh_ms = 50
+        self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
     def gong_clicked(self):
         print("gong clicked")
@@ -513,7 +514,7 @@ class NormalView(object):
 
             self.mgr.setGameStateRefTimeOut()
 
-        self.refresh_time(self)
+        self.refresh_time()
 
         def edit_continuation(self):
             def submit_clicked(game_clock):
