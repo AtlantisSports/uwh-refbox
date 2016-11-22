@@ -9,9 +9,10 @@ import time
 
 _font_name = 'Consolas'
 
+
 def sized_frame(master, height, width):
     F = tk.Frame(master, height=height, width=width)
-    F.pack_propagate(0) # Don't shrink
+    F.pack_propagate(0)  # Don't shrink
     F.pack()
     return F
 
@@ -26,7 +27,7 @@ def SizedLabel(root, var, bg, fg, font, height, width):
 def SizedButton(root, callback, text, bg, fg, font, height, width):
     style = ttk.Style()
     style.configure("Sized.TButton", foreground=fg, background=bg, highlightthickness=4,
-            highlightbackground="dark grey", activebackground=bg, font=font, relief='flat')
+                    highlightbackground="dark grey", activebackground=bg, font=font, relief='flat')
 
     sf = sized_frame(root, height, width)
     b = ttk.Button(sf, text=text, command=callback, style="Sized.TButton")
@@ -156,7 +157,8 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
         edit_continuation()
 
     resume_button = SizedButton(root, resume_clicked,
-                                "RESUME\nPLAY", "green", "black", (_font_name, 50),
+                                "RESUME\nPLAY", "green", "black", (
+                                    _font_name, 50),
                                 190, 400)
     resume_button.grid(row=0, column=0)
 
@@ -266,8 +268,8 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score):
 
     score_var = tk.IntVar()
     score_label = SizedLabel(root, score_var, "black",
-                                   score_color, score_font, score_height,
-                                   score_width)
+                             score_color, score_font, score_height,
+                             score_width)
     score_label.grid(row=0, column=column)
 
     def refresh_score():
@@ -277,16 +279,16 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score):
 
     label_var = tk.StringVar(value=team_color.upper())
     label = SizedLabel(root, label_var, score_color, "black",
-                             label_font, label_height, label_width)
+                       label_font, label_height, label_width)
     label.grid(row=1, column=column)
 
     button = SizedButton(root, lambda: self.score_change_clicked(),
-                               team_color.upper() + "\nSCORE", "dark cyan", "black",
-                               button_font, button_height, button_width)
+                         team_color.upper() + "\nSCORE", "dark cyan", "black",
+                         button_font, button_height, button_width)
     button.grid(row=2, column=column)
 
     penalty = tk.Frame(root, height=penalty_height, width=penalty_width,
-                             bg="black")
+                       bg="black")
     penalty.grid(row=3, column=column)
 
     return root
@@ -310,9 +312,11 @@ class NormalView(object):
 
         refresh_ms = 50
 
-        ScoreColumn(self.root, 0, 'white', 'white', refresh_ms, lambda: self.mgr.whiteScore())
+        ScoreColumn(self.root, 0, 'white', 'white',
+                    refresh_ms, lambda: self.mgr.whiteScore())
         self.center_column(refresh_ms)
-        ScoreColumn(self.root, 2, 'black', 'blue', refresh_ms, lambda: self.mgr.blackScore())
+        ScoreColumn(self.root, 2, 'black', 'blue',
+                    refresh_ms, lambda: self.mgr.blackScore())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -323,7 +327,6 @@ class NormalView(object):
             self.root.after(refresh_ms, lambda: poll_clicker(self))
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
-        
     def center_column(self, refresh_ms):
         clock_font = (_font_name, 96)
         clock_height = 120
@@ -354,7 +357,7 @@ class NormalView(object):
         self.game_clock_label.grid(row=0, column=1)
 
         status_label = SizedLabel(self.root, self.status_var, "black", "#000fff000", status_font,
-                                       status_height, status_width)
+                                  status_height, status_width)
         status_label.grid(row=1, column=1)
 
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
