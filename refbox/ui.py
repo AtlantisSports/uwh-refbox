@@ -270,7 +270,6 @@ class NormalView(object):
         status_font = label_font
         button_font = label_font
         gong_font = button_font
-        time_change_font = gong_font
 
         score_width = 200
         score_height = 120
@@ -288,27 +287,41 @@ class NormalView(object):
         penalty_width = score_width
         ref_signal_height = penalty_height
         ref_signal_width = clock_width
+        time_change_font = gong_font
         time_change_height = penalty_height
         time_change_width = clock_width
 
         refresh_ms = 50
 
-        # Vars
-        #######################################################################
-        game_clock = self.mgr.gameClock()
-        self.game_clock_mins = game_clock // 60
-        self.game_clock_secs = game_clock % 60
+        self.left_column(refresh_ms, score_font, score_height, score_width,
+                         label_font, label_height, label_width,
+                         button_font, button_height, button_width,
+                         penalty_height, penalty_width)
 
+        self.center_column(refresh_ms, score_font, score_height, score_width,
+                           clock_height, clock_width, status_height, status_width,
+                           status_font, gong_font, gong_height, gong_width,
+                           time_change_font, time_change_width, time_change_height)
+
+        self.right_column(refresh_ms, score_font, score_height, score_width,
+                          label_font, label_height, label_width,
+                          button_font, button_height, button_width,
+                          penalty_height, penalty_width)
+
+        def poll_clicker(self):
+            if self.iomgr.readClicker():
+                print("remote clicked")
+                self.gong_clicked()
+            else:
+                self.iomgr.setSound(0)
+            self.root.after(refresh_ms, lambda: poll_clicker(self))
+        self.root.after(refresh_ms, lambda: poll_clicker(self))
+
+    def left_column(self, refresh_ms, score_font, score_height, score_width,
+            label_font, label_height, label_width,
+            button_font, button_height, button_width,
+            penalty_height, penalty_width):
         self.white_score_var = tk.IntVar()
-        self.game_clock_var = tk.StringVar()
-        self.game_clock_var.set("##:##")
-        self.black_score_var = tk.IntVar()
-
-        self.status_var = tk.StringVar()
-        self.status_var.set("FIRST HALF")
-
-        # Left Column
-        #######################################################################
         white_score_label = SizedLabel(self.root, self.white_score_var, "black",
                                        "white", score_font, score_height,
                                        score_width)
@@ -333,9 +346,46 @@ class NormalView(object):
         white_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
                                  bg="black")
         white_penalty.grid(row=3, column=0)
+        
+    def right_column(self, refresh_ms, score_font, score_height, score_width,
+            label_font, label_height, label_width,
+            button_font, button_height, button_width,
+            penalty_height, penalty_width):
+        self.black_score_var = tk.IntVar()
+        black_score_label = SizedLabel(self.root, self.black_score_var, "black",
+                                       "blue", score_font, score_height,
+                                       score_width)
+        black_score_label.grid(row=0, column=2)
 
-        # Center Column
-        #######################################################################
+        def refresh_black(self):
+            self.black_score_var.set(self.mgr.blackScore())
+            black_score_label.after(refresh_ms, lambda: refresh_black(self))
+        black_score_label.after(refresh_ms, lambda: refresh_black(self))
+
+        self.black_label_var = tk.StringVar()
+        self.black_label_var.set("BLACK")
+        black_label = SizedLabel(self.root, self.black_label_var, "black", "blue",
+                                 label_font, label_height, label_width)
+        black_label.grid(row=1, column=2)
+
+        black_button = SizedButton(self.root, lambda: self.score_change_clicked(),
+                                   "BLACK\nSCORE", "dark cyan", "black",
+                                   button_font, button_height, button_width)
+        black_button.grid(row=2, column=2)
+
+        black_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
+                                 bg="black")
+        black_penalty.grid(row=3, column=2)
+
+    def center_column(self, refresh_ms, score_font, score_height, score_width,
+                      clock_height, clock_width, status_height, status_width,
+                      status_font, gong_font, gong_height, gong_width,
+                      time_change_font, time_change_width, time_change_height):
+        self.status_var = tk.StringVar()
+        self.status_var.set("FIRST HALF")
+
+        self.game_clock_var = tk.StringVar()
+        self.game_clock_var.set("##:##")
         self.game_clock_label = SizedLabel(self.root, self.game_clock_var, "black", "#000fff000",
                                            score_font, clock_height, clock_width)
         self.game_clock_label.grid(row=0, column=1)
@@ -411,42 +461,6 @@ class NormalView(object):
         # ref_signal_cover = tk.Frame(self.root, height=ref_signal_height,
         #                         width=ref_signal_width, bg="black")
         #ref_signal_cover.grid(row=3, column=1)
-
-        # Right Column
-        #######################################################################
-        black_score_label = SizedLabel(self.root, self.black_score_var, "black",
-                                       "blue", score_font, score_height,
-                                       score_width)
-        black_score_label.grid(row=0, column=2)
-
-        def refresh_black(self):
-            self.black_score_var.set(self.mgr.blackScore())
-            black_score_label.after(refresh_ms, lambda: refresh_black(self))
-        black_score_label.after(refresh_ms, lambda: refresh_black(self))
-
-        self.black_label_var = tk.StringVar()
-        self.black_label_var.set("BLACK")
-        black_label = SizedLabel(self.root, self.black_label_var, "black", "blue",
-                                 label_font, label_height, label_width)
-        black_label.grid(row=1, column=2)
-
-        black_button = SizedButton(self.root, lambda: self.score_change_clicked(),
-                                   "BLACK\nSCORE", "dark cyan", "black",
-                                   button_font, button_height, button_width)
-        black_button.grid(row=2, column=2)
-
-        black_penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
-                                 bg="black")
-        black_penalty.grid(row=3, column=2)
-
-        def poll_clicker(self):
-            if self.iomgr.readClicker():
-                print("remote clicked")
-                self.gong_clicked()
-            else:
-                self.iomgr.setSound(0)
-            self.root.after(refresh_ms, lambda: poll_clicker(self))
-        self.root.after(refresh_ms, lambda: poll_clicker(self))
 
     def gong_clicked(self):
         print("gong clicked")
