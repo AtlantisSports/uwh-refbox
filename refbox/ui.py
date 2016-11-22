@@ -248,6 +248,50 @@ def ManualEditTime(master, tb_offset, clock_at_pause,
     game_clock_new.grid(row=0, rowspan=2, column=1, columnspan=2)
 
 
+def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score):
+    score_font = (_font_name, 96)
+    score_height = 120
+    score_width = 200
+
+    label_font = (_font_name, 36)
+    label_height = 50
+    label_width = score_width
+
+    button_font = label_font
+    button_height = 120
+    button_width = score_width
+
+    penalty_height = 190
+    penalty_width = score_width
+
+    score_var = tk.IntVar()
+    score_label = SizedLabel(root, score_var, "black",
+                                   score_color, score_font, score_height,
+                                   score_width)
+    score_label.grid(row=0, column=column)
+
+    def refresh_score():
+        score_var.set(get_score())
+        score_label.after(refresh_ms, lambda: refresh_score())
+    score_label.after(refresh_ms, lambda: refresh_score())
+
+    label_var = tk.StringVar(value=team_color.upper())
+    label = SizedLabel(root, label_var, score_color, "black",
+                             label_font, label_height, label_width)
+    label.grid(row=1, column=column)
+
+    button = SizedButton(root, lambda: self.score_change_clicked(),
+                               team_color.upper() + "\nSCORE", "dark cyan", "black",
+                               button_font, button_height, button_width)
+    button.grid(row=2, column=column)
+
+    penalty = tk.Frame(root, height=penalty_height, width=penalty_width,
+                             bg="black")
+    penalty.grid(row=3, column=column)
+
+    return root
+
+
 class NormalView(object):
 
     def __init__(self, mgr, iomgr, NO_TITLE_BAR):
@@ -266,9 +310,9 @@ class NormalView(object):
 
         refresh_ms = 50
 
-        self.score_column(0, 'white', 'white', refresh_ms, lambda: self.mgr.whiteScore())
+        ScoreColumn(self.root, 0, 'white', 'white', refresh_ms, lambda: self.mgr.whiteScore())
         self.center_column(refresh_ms)
-        self.score_column(2, 'black', 'blue', refresh_ms, lambda: self.mgr.blackScore())
+        ScoreColumn(self.root, 2, 'black', 'blue', refresh_ms, lambda: self.mgr.blackScore())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -279,46 +323,6 @@ class NormalView(object):
             self.root.after(refresh_ms, lambda: poll_clicker(self))
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
-    def score_column(self, column, team_color, score_color, refresh_ms, get_score):
-        score_font = (_font_name, 96)
-        score_height = 120
-        score_width = 200
-
-        label_font = (_font_name, 36)
-        label_height = 50
-        label_width = score_width
-
-        button_font = label_font
-        button_height = 120
-        button_width = score_width
-
-        penalty_height = 190
-        penalty_width = score_width
-
-        score_var = tk.IntVar()
-        score_label = SizedLabel(self.root, score_var, "black",
-                                       score_color, score_font, score_height,
-                                       score_width)
-        score_label.grid(row=0, column=column)
-
-        def refresh_score():
-            score_var.set(get_score())
-            score_label.after(refresh_ms, lambda: refresh_score())
-        score_label.after(refresh_ms, lambda: refresh_score())
-
-        label_var = tk.StringVar(value=team_color.upper())
-        label = SizedLabel(self.root, label_var, score_color, "black",
-                                 label_font, label_height, label_width)
-        label.grid(row=1, column=column)
-
-        button = SizedButton(self.root, lambda: self.score_change_clicked(),
-                                   team_color.upper() + "\nSCORE", "dark cyan", "black",
-                                   button_font, button_height, button_width)
-        button.grid(row=2, column=column)
-
-        penalty = tk.Frame(self.root, height=penalty_height, width=penalty_width,
-                                 bg="black")
-        penalty.grid(row=3, column=column)
         
     def center_column(self, refresh_ms):
         clock_font = (_font_name, 96)
