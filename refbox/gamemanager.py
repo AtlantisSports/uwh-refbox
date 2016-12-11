@@ -3,7 +3,13 @@ class GameState(object):
     first_half = 1
     half_time = 2
     second_half = 3
-    time_out = 4
+
+
+class TimeoutState(object):
+    none = 0
+    ref = 1
+    white = 2
+    black = 3
 
 
 class GameManager(object):
@@ -14,6 +20,7 @@ class GameManager(object):
         self._game_clock = 0
         self._is_clock_running = False
         self._game_state = GameState.game_over
+        self._timeout_state = TimeoutState.none
 
     def gameClock(self):
         return self._game_clock
@@ -63,8 +70,26 @@ class GameManager(object):
     def setGameStateGameOver(self):
         self._game_state = GameState.game_over
 
-    def gameStateRefTimeOut(self):
-        return self._game_state == GameState.time_out
+    def timeoutStateNone(self):
+        return self._timeout_state = TimeoutState.none
 
-    def setGameStateRefTimeOut(self):
-        self._game_state = GameState.time_out
+    def setTimeoutStateNone(self):
+        self._timeout_state = TimeoutState.none
+
+    def timeoutStateRef(self):
+        return self._timeout_state = TimeoutState.ref
+
+    def setTimeoutStateRef(self):
+        self._timeout_state = GameState.ref
+
+    def timeoutStateBlack(self):
+        return self._timeout_state = TimeoutState.black
+
+    def setTimeoutStateBlack(self):
+        self._timeout_state = TimeoutState.black
+
+    def timeoutStateWhite(self):
+        return self._timeout_state = TimeoutState.white
+
+    def setTimeoutStateWhite(self):
+        self._timeout_state = TimeoutState.white
