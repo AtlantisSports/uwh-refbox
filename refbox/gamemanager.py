@@ -46,6 +46,18 @@ class GameManager(object):
     def setGameClockRunning(self, b):
         self._is_clock_running = b
 
+    def gameState(self):
+        return self._game_state
+
+    def setGameState(self, state):
+        self._game_state = state
+
+    def timeoutState(self):
+        return self._timeout_state
+
+    def setTimeoutState(self, state):
+        self._timeout_state = state
+
     def gameStateFirstHalf(self):
         return self._game_state == GameState.first_half
 
@@ -71,25 +83,25 @@ class GameManager(object):
         self._game_state = GameState.game_over
 
     def timeoutStateNone(self):
-        return self._timeout_state = TimeoutState.none
+        return self._timeout_state == TimeoutState.none
 
     def setTimeoutStateNone(self):
         self._timeout_state = TimeoutState.none
 
     def timeoutStateRef(self):
-        return self._timeout_state = TimeoutState.ref
+        return self._timeout_state == TimeoutState.ref
 
     def setTimeoutStateRef(self):
-        self._timeout_state = GameState.ref
+        self._timeout_state = TimeoutState.ref
 
     def timeoutStateBlack(self):
-        return self._timeout_state = TimeoutState.black
+        return self._timeout_state == TimeoutState.black
 
     def setTimeoutStateBlack(self):
         self._timeout_state = TimeoutState.black
 
     def timeoutStateWhite(self):
-        return self._timeout_state = TimeoutState.white
+        return self._timeout_state == TimeoutState.white
 
     def setTimeoutStateWhite(self):
         self._timeout_state = TimeoutState.white
