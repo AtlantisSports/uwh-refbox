@@ -66,9 +66,37 @@ def test_gameStateGameOver():
     assert mgr.gameStateGameOver() is True
 
 
-def test_gameStateRefTimeOut():
+def test_timeoutStateNone():
     mgr = GameManager()
-    assert mgr.gameStateRefTimeOut() is False
+    mgr.setTimeoutStateNone()
+    assert mgr.timeoutStateNone() is True
 
-    mgr.setGameStateRefTimeOut()
-    assert mgr.gameStateRefTimeOut() is True
+    mgr.setTimeoutStateWhite()
+    assert mgr.timeoutStateNone() is False
+
+
+def test_timeoutStateRef():
+    mgr = GameManager()
+    mgr.setTimeoutStateRef()
+    assert mgr.timeoutStateRef() is True
+
+    mgr.setTimeoutStateNone()
+    assert mgr.timeoutStateRef() is False
+
+
+def test_timeoutStateWhite():
+    mgr = GameManager()
+    mgr.setTimeoutStateWhite()
+    assert mgr.timeoutStateWhite() is True
+
+    mgr.setTimeoutStateNone()
+    assert mgr.timeoutStateWhite() is False
+
+
+def test_timeoutStateBlack():
+    mgr = GameManager()
+    mgr.setTimeoutStateBlack()
+    assert mgr.timeoutStateBlack() is True
+
+    mgr.setTimeoutStateNone()
+    assert mgr.timeoutStateBlack() is False
