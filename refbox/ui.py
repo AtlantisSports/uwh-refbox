@@ -250,7 +250,8 @@ def ManualEditTime(master, tb_offset, clock_at_pause,
     game_clock_new.grid(row=0, rowspan=2, column=1, columnspan=2)
 
 
-def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score):
+def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
+        score_changed):
     score_font = (_font_name, 96)
     score_height = 120
     score_width = 200
@@ -282,7 +283,7 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score):
                        label_font, label_height, label_width)
     label.grid(row=1, column=column)
 
-    button = SizedButton(root, lambda: self.score_change_clicked(),
+    button = SizedButton(root, score_changed,
                          team_color.upper() + "\nSCORE", "dark cyan", "black",
                          button_font, button_height, button_width)
     button.grid(row=2, column=column)
@@ -313,10 +314,12 @@ class NormalView(object):
         refresh_ms = 50
 
         ScoreColumn(self.root, 0, 'white', 'white',
-                    refresh_ms, lambda: self.mgr.whiteScore())
+                    refresh_ms, lambda: self.mgr.whiteScore(),
+                    lambda: self.score_change_clicked())
         self.center_column(refresh_ms)
         ScoreColumn(self.root, 2, 'black', 'blue',
-                    refresh_ms, lambda: self.mgr.blackScore())
+                    refresh_ms, lambda: self.mgr.blackScore(),
+                    lambda: self.score_change_clicked())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
