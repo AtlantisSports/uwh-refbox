@@ -445,20 +445,32 @@ class NormalView(object):
         time.sleep(1)
         self.iomgr.setSound(0)
 
+    def edit_score(self):
+        def submit_clicked(white_score, black_score):
+            self.mgr.setWhiteScore(white_score)
+            self.mgr.setBlackScore(black_score)
+
+        ManualEditScore(self.root, self.tb_offset,
+                        self.mgr.whiteScore(), self.mgr.blackScore(),
+                        lambda: None, submit_clicked)
+
     def score_change_clicked(self):
-        def manual_continuation():
-            def submit_clicked(white_score, black_score):
-                self.mgr.setWhiteScore(white_score)
-                self.mgr.setBlackScore(black_score)
-
-            ManualEditScore(self.root, self.tb_offset,
-                            self.mgr.whiteScore(), self.mgr.blackScore(),
-                            lambda: None, submit_clicked)
-
         ConfirmManualEditScore(self.root,
                                self.tb_offset,
                                lambda: None,
-                               manual_continuation)
+                               lambda: self.edit_score())
+
+    def edit_time(self, clock_at_pause):
+        def submit_clicked(game_clock):
+            self.mgr.setGameClock(max(game_clock, 0))
+            self.ref_timeout_clicked(save_state=False)
+
+        def cancel_clicked(game_clock):
+            self.mgr.setGameClock(max(clock_at_pause, 0))
+            self.ref_timeout_clicked(save_state=False)
+
+        ManualEditTime(self.root, self.tb_offset, clock_at_pause,
+                       cancel_clicked, submit_clicked)
 
     def ref_timeout_clicked(self, save_state=True):
         # The awkward sequence here is to work around a bug in the c++ code,
@@ -479,18 +491,6 @@ class NormalView(object):
 
         self.refresh_time()
 
-        def edit_continuation(self):
-            def submit_clicked(game_clock):
-                self.mgr.setGameClock(max(game_clock, 0))
-                self.ref_timeout_clicked(save_state=False)
-
-            def cancel_clicked(game_clock):
-                self.mgr.setGameClock(max(clock_at_pause, 0))
-                self.ref_timeout_clicked(save_state=False)
-
-            ManualEditTime(self.root, self.tb_offset, clock_at_pause,
-                           cancel_clicked, submit_clicked)
-
         def resume_continuation(self, pause_time):
             self.mgr.setGameState(self.state_before_pause)
             self.mgr.setTimeoutStateNone()
@@ -500,5 +500,5 @@ class NormalView(object):
         ConfirmRefTimeOut(self.root,
                           self.tb_offset,
                           clock_at_pause,
-                          lambda: edit_continuation(self),
+                          lambda: self.edit_time(clock_at_pause),
                           lambda pause_time: resume_continuation(self, pause_time))
