@@ -9,7 +9,7 @@ def test_sized_frame():
 
 def test_score_column():
     root = ui.sized_frame(None, 1, 2)
-    assert ui.ScoreColumn(root, 2, 'black', 'blue', 5, lambda: 42)
+    assert ui.ScoreColumn(root, 2, 'black', 'blue', 5, lambda: 42, lambda: 43)
 
 
 def test_normal_view():
