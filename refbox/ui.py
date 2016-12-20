@@ -62,8 +62,6 @@ def ConfirmManualEditScore(master, tb_offset, cancel_continuation, manual_contin
                                 130, 800)
     cancel_button.grid(row=1, column=0)
 
-    root.mainloop()
-
 
 def ManualEditScore(master, tb_offset, white_score, black_score,
                     cancel_continuation, submit_continuation):
@@ -153,7 +151,6 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
         resume_continuation(game_clock)
 
     def edit_clicked():
-        root.destroy()
         edit_continuation()
 
     resume_button = SizedButton(root, resume_clicked,
@@ -166,8 +163,6 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
                               "EDIT TIME", "orange", "black", (_font_name, 50),
                               190, 400)
     edit_button.grid(row=0, column=1)
-
-    root.mainloop()
 
 
 def ManualEditTime(master, tb_offset, clock_at_pause,
@@ -463,16 +458,16 @@ class NormalView(object):
     def edit_time(self, clock_at_pause):
         def submit_clicked(game_clock):
             self.mgr.setGameClock(max(game_clock, 0))
-            self.ref_timeout_clicked(save_state=False)
+            self.set_paused_time()
 
         def cancel_clicked(game_clock):
             self.mgr.setGameClock(max(clock_at_pause, 0))
-            self.ref_timeout_clicked(save_state=False)
+            self.set_paused_time()
 
         ManualEditTime(self.root, self.tb_offset, clock_at_pause,
                        cancel_clicked, submit_clicked)
 
-    def ref_timeout_clicked(self, save_state=True):
+    def set_paused_time(self):
         # The awkward sequence here is to work around a bug in the c++ code,
         # which can't easily be fixed at the moment: it is baked into the displays.
         #
@@ -484,12 +479,13 @@ class NormalView(object):
         clock_at_pause = self.mgr.gameClock()
         self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(max(clock_at_pause, 0))
-
-        if save_state:
-            self.state_before_pause = self.mgr.gameState()
-            self.mgr.setTimeoutStateRef()
-
         self.refresh_time()
+
+    def ref_timeout_clicked(self):
+        clock_at_pause = self.mgr.gameClock()
+        self.state_before_pause = self.mgr.gameState()
+        self.mgr.setTimeoutStateRef()
+        self.set_paused_time()
 
         def resume_continuation(self, pause_time):
             self.mgr.setGameState(self.state_before_pause)
