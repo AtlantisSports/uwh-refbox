@@ -35,18 +35,18 @@ def SizedButton(root, callback, text, bg, fg, font, height, width):
     return sf
 
 
-def ConfirmManualEditScore(master, tb_offset, cancel_continuation, manual_continuation):
+def ConfirmManualEditScore(master, tb_offset, on_cancel, on_edit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
 
     def manual_edit_clicked():
         root.destroy()
-        manual_continuation()
+        on_edit()
 
     def cancel_clicked():
         root.destroy()
-        cancel_continuation()
+        on_cancel()
 
     root.overrideredirect(1)
     root.transient(master)
@@ -63,8 +63,7 @@ def ConfirmManualEditScore(master, tb_offset, cancel_continuation, manual_contin
     cancel_button.grid(row=1, column=0)
 
 
-def ManualEditScore(master, tb_offset, white_score, black_score,
-                    cancel_continuation, submit_continuation):
+def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_submit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
@@ -92,11 +91,11 @@ def ManualEditScore(master, tb_offset, white_score, black_score,
 
     def cancel_clicked():
         root.destroy()
-        cancel_continuation()
+        on_cancel()
 
     def submit_clicked():
         root.destroy()
-        submit_continuation(white_new_var.get(), black_new_var.get())
+        on_submit(white_new_var.get(), black_new_var.get())
 
     cancel_button = SizedButton(root, cancel_clicked,
                                 "CANCEL", "red", "black", button_font,
@@ -137,8 +136,7 @@ def ManualEditScore(master, tb_offset, white_score, black_score,
     black_dn_button.grid(row=1, column=3)
 
 
-def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
-                      resume_continuation):
+def ConfirmRefTimeOut(master, tb_offset, game_clock, on_edit, on_resume):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 190, 0, 115 + 170 + tb_offset))
@@ -148,10 +146,7 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
 
     def resume_clicked():
         root.destroy()
-        resume_continuation(game_clock)
-
-    def edit_clicked():
-        edit_continuation()
+        on_resume(game_clock)
 
     resume_button = SizedButton(root, resume_clicked,
                                 "RESUME\nPLAY", "green", "black", (
@@ -159,14 +154,13 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, edit_continuation,
                                 190, 400)
     resume_button.grid(row=0, column=0)
 
-    edit_button = SizedButton(root, edit_clicked,
+    edit_button = SizedButton(root, on_edit,
                               "EDIT TIME", "orange", "black", (_font_name, 50),
                               190, 400)
     edit_button.grid(row=0, column=1)
 
 
-def ManualEditTime(master, tb_offset, clock_at_pause,
-                   cancel_continuation, submit_continuation):
+def ManualEditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
@@ -195,11 +189,11 @@ def ManualEditTime(master, tb_offset, clock_at_pause,
 
     def cancel_clicked():
         root.destroy()
-        cancel_continuation(clock_at_pause)
+        on_cancel(clock_at_pause)
 
     def submit_clicked():
         root.destroy()
-        submit_continuation(clock_at_pause_var.get())
+        on_submit(clock_at_pause_var.get())
 
     cancel_button = SizedButton(root, cancel_clicked,
                                 "CANCEL", "red", "black", button_font,
@@ -487,7 +481,7 @@ class NormalView(object):
         self.mgr.setTimeoutStateRef()
         self.set_paused_time()
 
-        def resume_continuation(self, pause_time):
+        def resume(self, pause_time):
             self.mgr.setGameState(self.state_before_pause)
             self.mgr.setTimeoutStateNone()
             self.mgr.setGameClockRunning(True)
@@ -497,4 +491,4 @@ class NormalView(object):
                           self.tb_offset,
                           clock_at_pause,
                           lambda: self.edit_time(clock_at_pause),
-                          lambda pause_time: resume_continuation(self, pause_time))
+                          lambda pause_time: resume(self, pause_time))
