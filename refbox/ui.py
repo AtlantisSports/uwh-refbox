@@ -13,7 +13,6 @@ _font_name = 'Consolas'
 def sized_frame(master, height, width):
     F = tk.Frame(master, height=height, width=width)
     F.pack_propagate(0)  # Don't shrink
-    F.pack()
     return F
 
 
