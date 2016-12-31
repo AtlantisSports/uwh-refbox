@@ -125,7 +125,7 @@ def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_s
     black_dn_button.grid(row=1, column=3)
 
 
-def ConfirmRefTimeOut(master, tb_offset, game_clock, on_edit, on_resume):
+def ConfirmRefTimeOut(master, tb_offset, on_edit, on_resume):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 190, 0, 115 + 170 + tb_offset))
@@ -135,7 +135,7 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, on_edit, on_resume):
 
     def resume_clicked():
         root.destroy()
-        on_resume(game_clock)
+        on_resume()
 
     resume_button = SizedButton(root, resume_clicked, "RESUME\nPLAY", "Big.Green.TButton", 190, 400)
     resume_button.grid(row=0, column=0)
@@ -429,12 +429,8 @@ class NormalView(object):
             self.mgr.setGameClock(max(game_clock, 0))
             self.set_paused_time()
 
-        def cancel_clicked(game_clock):
-            self.mgr.setGameClock(max(clock_at_pause, 0))
-            self.set_paused_time()
-
         ManualEditTime(self.root, self.tb_offset, clock_at_pause,
-                       cancel_clicked, submit_clicked)
+                lambda: None, submit_clicked)
 
     def set_paused_time(self):
         # The awkward sequence here is to work around a bug in the c++ code,
@@ -451,20 +447,17 @@ class NormalView(object):
         self.refresh_time()
 
     def ref_timeout_clicked(self):
-        clock_at_pause = self.mgr.gameClock()
         running_at_pause = self.mgr.gameClockRunning()
         self.state_before_pause = self.mgr.gameState()
         self.mgr.setTimeoutStateRef()
         self.set_paused_time()
 
-        def resume(self, pause_time):
+        def resume():
             self.mgr.setGameState(self.state_before_pause)
             self.mgr.setTimeoutStateNone()
             self.mgr.setGameClockRunning(running_at_pause)
-            self.mgr.setGameClock(max(pause_time, 0))
 
         ConfirmRefTimeOut(self.root,
                           self.tb_offset,
-                          clock_at_pause,
-                          lambda: self.edit_time(clock_at_pause),
-                          lambda pause_time: resume(self, pause_time))
+                          lambda: self.edit_time(self.mgr.gameClock()),
+                          resume)
