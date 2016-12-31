@@ -50,15 +50,10 @@ def test_edit_time():
     assert nv.mgr.gameClock() == 2
 
 
-# FIXME: ref_timeout_clicked calls refresh_time, which puts the UI into
-#        an unstable state.
-#def test_ref_timeout_clicked():
-#    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
-#    nv.mgr.setGameClock(2)
-#    nv.ref_timeout_clicked()
-#
-#    # Assert the clock is restarted on resume()
-#    assert nv.mgr.gameClockRunning() is True
-#
-#    # Cleanup
-#    nv.mgr.setGameClockRunning(False)
+def test_ref_timeout_clicked():
+    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+    assert nv.mgr.gameClockRunning() is False
+
+    # Assert the resuming does not start the clock
+    nv.ref_timeout_clicked()
+    assert nv.mgr.gameClockRunning() is False

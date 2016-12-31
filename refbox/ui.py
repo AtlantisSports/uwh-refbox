@@ -452,6 +452,7 @@ class NormalView(object):
 
     def ref_timeout_clicked(self):
         clock_at_pause = self.mgr.gameClock()
+        running_at_pause = self.mgr.gameClockRunning()
         self.state_before_pause = self.mgr.gameState()
         self.mgr.setTimeoutStateRef()
         self.set_paused_time()
@@ -459,7 +460,7 @@ class NormalView(object):
         def resume(self, pause_time):
             self.mgr.setGameState(self.state_before_pause)
             self.mgr.setTimeoutStateNone()
-            self.mgr.setGameClockRunning(True)
+            self.mgr.setGameClockRunning(running_at_pause)
             self.mgr.setGameClock(max(pause_time, 0))
 
         ConfirmRefTimeOut(self.root,
