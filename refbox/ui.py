@@ -1,14 +1,27 @@
 try:
     import Tkinter as tk
     import ttk
+    from ConfigParser import ConfigParser
 except ImportError:
     import tkinter as tk
     from tkinter import ttk
+    from configparser import ConfigParser
 
+from collections import namedtuple
 import time
+
 
 _font_name = 'Consolas'
 
+def GameConfigParser():
+    game_defaults = {
+        'half_play_duration': '600',
+        'half_time_duration': '300',
+        'game_over_duration': '300'
+    }
+    parser = ConfigParser(defaults=game_defaults)
+    parser.add_section('game')
+    return parser
 
 def sized_frame(master, height, width):
     F = tk.Frame(master, height=height, width=width)
@@ -285,10 +298,11 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
 
 class NormalView(object):
 
-    def __init__(self, mgr, iomgr, NO_TITLE_BAR):
+    def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None):
         self.mgr = mgr
         self.iomgr = iomgr
         self.first_game_started = False
+        self.cfg = cfg or GameConfigParser()
 
         self.root = tk.Tk()
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
@@ -377,22 +391,19 @@ class NormalView(object):
             self.mgr.setGameClockRunning(False)
             if self.mgr.gameStateFirstHalf():
                 self.mgr.setGameStateHalfTime()
-                # FIXME:
-                # self.mgr.setGameClock(HALF_TIME_DURATION)
+                self.mgr.setGameClock(self.cfg.getint('game', 'half_time_duration'))
                 self.gong_clicked()
                 self.mgr.setGameClockRunning(True)
                 self.root.update()
             elif self.mgr.gameStateHalfTime():
                 self.mgr.setGameStateSecondHalf()
-                # FIXME:
-                # self.mgr.setGameClock(HALF_PLAY_DURATION)
+                self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
                 self.gong_clicked()
                 self.mgr.setGameClockRunning(True)
                 self.root.update()
             elif self.mgr.gameStateSecondHalf():
                 self.mgr.setGameStateGameOver()
-                # FIXME:
-                # self.mgr.setGameClock(GAME_OVER_DURATION)
+                self.mgr.setGameClock(self.cfg.getint('game', 'game_over_duration'))
                 self.gong_clicked()
                 self.mgr.setGameClockRunning(True)
                 self.root.update()
@@ -400,8 +411,7 @@ class NormalView(object):
                 self.mgr.setBlackScore(0)
                 self.mgr.setWhiteScore(0)
                 self.mgr.setGameStateFirstHalf()
-                # FIXME:
-                # self.mgr.setGameClock(HALF_PLAY_DURATION)
+                self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
                 self.gong_clicked()
                 self.mgr.setGameClockRunning(True)
 

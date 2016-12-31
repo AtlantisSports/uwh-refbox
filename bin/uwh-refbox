@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
-from refbox.ui import NormalView
+from refbox.ui import NormalView, GameConfigParser
 from refbox.gamemanager import GameManager
 from refbox.noiomanager import IOManager
 
-nv = NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+cfg = GameConfigParser()
+cfg.read('game.cfg')
+
+nv = NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True, cfg=cfg)
 nv.root.mainloop()

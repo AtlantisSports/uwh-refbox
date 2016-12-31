@@ -1,3 +1,5 @@
+from threading import Timer
+
 class GameState(object):
     game_over = 0
     first_half = 1
@@ -21,6 +23,14 @@ class GameManager(object):
         self._is_clock_running = False
         self._game_state = GameState.game_over
         self._timeout_state = TimeoutState.none
+        self._timer = None
+
+    def tick(self):
+        print('tick')
+        if self.gameClockRunning():
+            self.setGameClock(self.gameClock() - 1)
+            self._timer = Timer(1, lambda: self.tick())
+            self._timer.start()
 
     def gameClock(self):
         return self._game_clock
@@ -44,6 +54,18 @@ class GameManager(object):
         return self._is_clock_running
 
     def setGameClockRunning(self, b):
+        if b == self._is_clock_running:
+            return
+
+        if b:
+            print('game clock resumed')
+            self._timer = Timer(1, lambda: self.tick())
+            self._timer.start()
+        else:
+            print('game clock paused')
+            self._timer.cancel()
+            self._timer = None
+
         self._is_clock_running = b
 
     def gameState(self):
