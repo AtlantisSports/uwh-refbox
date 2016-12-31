@@ -36,16 +36,11 @@ def SizedLabel(root, var, bg, fg, font, height, width):
     return sf
 
 
-def SizedButton(root, callback, text, bg, fg, font, height, width):
-    style = ttk.Style()
-    style.configure("Sized.TButton", foreground=fg, background=bg, highlightthickness=4,
-                    highlightbackground="dark grey", activebackground=bg, font=font, relief='flat')
-
+def SizedButton(root, callback, text, style, height, width):
     sf = sized_frame(root, height, width)
-    b = ttk.Button(sf, text=text, command=callback, style="Sized.TButton")
+    b = ttk.Button(sf, text=text, command=callback, style=style)
     b.pack(fill=tk.BOTH, expand=1)
     return sf
-
 
 def ConfirmManualEditScore(master, tb_offset, on_cancel, on_edit):
     root = tk.Toplevel(master)
@@ -63,15 +58,10 @@ def ConfirmManualEditScore(master, tb_offset, on_cancel, on_edit):
     root.overrideredirect(1)
     root.transient(master)
 
-    manual_edit_button = SizedButton(root, manual_edit_clicked,
-                                     "MANUALLY EDIT SCORE", "orange", "black", (
-                                         _font_name, 50),
-                                     180, 800)
+    manual_edit_button = SizedButton(root, manual_edit_clicked, "MANUALLY EDIT SCORE", "Big.Orange.TButton", 180, 800)
     manual_edit_button.grid(row=0, column=0)
 
-    cancel_button = SizedButton(root, cancel_clicked,
-                                "CANCEL", "red", "black", (_font_name, 36),
-                                130, 800)
+    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 800)
     cancel_button.grid(row=1, column=0)
 
 
@@ -86,7 +76,6 @@ def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_s
     white_new_var = tk.IntVar(value=white_score)
     black_new_var = tk.IntVar(value=black_score)
 
-    button_font = (_font_name, 36)
     label_font = (_font_name, 96)
 
     def white_up():
@@ -109,14 +98,10 @@ def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_s
         root.destroy()
         on_submit(white_new_var.get(), black_new_var.get())
 
-    cancel_button = SizedButton(root, cancel_clicked,
-                                "CANCEL", "red", "black", button_font,
-                                130, 400)
+    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 400)
     cancel_button.grid(row=2, column=0, columnspan=2)
 
-    submit_button = SizedButton(root, submit_clicked,
-                                "SUBMIT", "green", "black", button_font,
-                                130, 400)
+    submit_button = SizedButton(root, submit_clicked, "SUBMIT", "Green.TButton", 130, 400)
     submit_button.grid(row=2, column=2, columnspan=2)
 
     white_new = SizedLabel(root, white_new_var, "black", "white", label_font,
@@ -127,24 +112,16 @@ def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_s
                            160, 300)
     black_new.grid(row=0, rowspan=2, column=2)
 
-    white_up_button = SizedButton(root, white_up,
-                                  "+", "light blue", "black", button_font,
-                                  80, 100)
+    white_up_button = SizedButton(root, white_up, "+", "Blue.TButton", 80, 100)
     white_up_button.grid(row=0, column=0)
 
-    white_dn_button = SizedButton(root, white_dn,
-                                  "-", "grey", "black", button_font,
-                                  80, 100)
+    white_dn_button = SizedButton(root, white_dn, "-", "Grey.TButton", 80, 100)
     white_dn_button.grid(row=1, column=0)
 
-    black_up_button = SizedButton(root, black_up,
-                                  "+", "light blue", "black", button_font,
-                                  80, 100)
+    black_up_button = SizedButton(root, black_up, "+", "Blue.TButton", 80, 100)
     black_up_button.grid(row=0, column=3)
 
-    black_dn_button = SizedButton(root, black_dn,
-                                  "-", "grey", "black", button_font,
-                                  80, 100)
+    black_dn_button = SizedButton(root, black_dn, "-", "Grey.TButton", 80, 100)
     black_dn_button.grid(row=1, column=3)
 
 
@@ -160,15 +137,10 @@ def ConfirmRefTimeOut(master, tb_offset, game_clock, on_edit, on_resume):
         root.destroy()
         on_resume(game_clock)
 
-    resume_button = SizedButton(root, resume_clicked,
-                                "RESUME\nPLAY", "green", "black", (
-                                    _font_name, 50),
-                                190, 400)
+    resume_button = SizedButton(root, resume_clicked, "RESUME\nPLAY", "Big.Green.TButton", 190, 400)
     resume_button.grid(row=0, column=0)
 
-    edit_button = SizedButton(root, on_edit,
-                              "EDIT TIME", "orange", "black", (_font_name, 50),
-                              190, 400)
+    edit_button = SizedButton(root, on_edit, "EDIT TIME", "Big.Orange.TButton", 190, 400)
     edit_button.grid(row=0, column=1)
 
 
@@ -182,7 +154,6 @@ def ManualEditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
 
     clock_at_pause_var = tk.IntVar(value=clock_at_pause)
 
-    button_font = (_font_name, 36)
     label_font = (_font_name, 96)
     playpause_button_font = (_font_name, 36)
     game_clock_font = (_font_name, 72)
@@ -207,34 +178,22 @@ def ManualEditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
         root.destroy()
         on_submit(clock_at_pause_var.get())
 
-    cancel_button = SizedButton(root, cancel_clicked,
-                                "CANCEL", "red", "black", button_font,
-                                150, 400)
+    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 150, 400)
     cancel_button.grid(row=2, column=0, columnspan=2)
 
-    submit_button = SizedButton(root, submit_clicked,
-                                "SUBMIT", "green", "black", button_font,
-                                150, 400)
+    submit_button = SizedButton(root, submit_clicked, "SUBMIT", "Green.TButton", 150, 400)
     submit_button.grid(row=2, column=2, columnspan=2)
 
-    m_up_button = SizedButton(root, game_clock_m_up,
-                              u"Min \u2191", "light blue", "black", button_font,
-                              80, 200)
+    m_up_button = SizedButton(root, game_clock_m_up, u"Min \u2191", "Blue.TButton", 80, 200)
     m_up_button.grid(row=0, column=0)
 
-    m_dn_button = SizedButton(root, game_clock_m_dn,
-                              u"Min \u2193", "grey", "black", button_font,
-                              80, 200)
+    m_dn_button = SizedButton(root, game_clock_m_dn, u"Min \u2193", "Grey.TButton", 80, 200)
     m_dn_button.grid(row=1, column=0)
 
-    s_up_button = SizedButton(root, game_clock_s_up,
-                              u"Sec \u2191", "light blue", "black", button_font,
-                              80, 200)
+    s_up_button = SizedButton(root, game_clock_s_up, u"Sec \u2191", "Blue.TButton", 80, 200)
     s_up_button.grid(row=0, column=3)
 
-    s_dn_button = SizedButton(root, game_clock_s_dn,
-                              u"Sec \u2193", "grey", "black", button_font,
-                              80, 200)
+    s_dn_button = SizedButton(root, game_clock_s_dn, u"Sec \u2193", "Grey.TButton", 80, 200)
     s_dn_button.grid(row=1, column=3)
 
     game_clock_var = tk.StringVar()
@@ -261,7 +220,6 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
     label_height = 50
     label_width = score_width
 
-    button_font = label_font
     button_height = 120
     button_width = score_width
 
@@ -285,8 +243,8 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
     label.grid(row=1, column=column)
 
     button = SizedButton(root, score_changed,
-                         team_color.upper() + "\nSCORE", "dark cyan", "black",
-                         button_font, button_height, button_width)
+                         team_color.upper() + "\nSCORE", "Cyan.TButton",
+                         button_height, button_width)
     button.grid(row=2, column=column)
 
     penalty = tk.Frame(root, height=penalty_height, width=penalty_width,
@@ -294,6 +252,26 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
     penalty.grid(row=3, column=column)
 
     return root
+
+def create_button_style(name, background, sz):
+    style = ttk.Style()
+    style.configure(name, foreground='black', background=background,
+        relief='flat', font=(_font_name, sz))
+    style.map(name, background=[('active', background)])
+
+
+def create_styles():
+    big_font_size = 36
+    create_button_style('Big.Green.TButton', 'green', big_font_size)
+    create_button_style('Big.Orange.TButton', 'orange', big_font_size)
+
+    font_size = 36
+    create_button_style('Cyan.TButton', 'dark cyan', font_size)
+    create_button_style('Green.TButton', 'green', font_size)
+    create_button_style('Grey.TButton', 'grey', font_size)
+    create_button_style('Blue.TButton', 'light blue', font_size)
+    create_button_style('Red.TButton', 'red', font_size)
+    create_button_style('Yellow.TButton', 'yellow', font_size)
 
 
 class NormalView(object):
@@ -314,6 +292,7 @@ class NormalView(object):
 
         refresh_ms = 50
 
+        create_styles()
         ScoreColumn(self.root, 0, 'white', 'white',
                     refresh_ms, lambda: self.mgr.whiteScore(),
                     lambda: self.score_change_clicked())
@@ -340,14 +319,12 @@ class NormalView(object):
         status_height = 50
         status_width = clock_width
 
-        gong_font = status_font
         gong_height = 120
         gong_width = clock_width
 
         ref_signal_height = 190
         ref_signal_width = clock_width
 
-        time_change_font = gong_font
         time_change_height = ref_signal_height
         time_change_width = clock_width
 
@@ -367,12 +344,12 @@ class NormalView(object):
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
         gong_button = SizedButton(self.root, lambda: self.gong_clicked(), "GONG",
-                                  "red", "black", gong_font, gong_height,
+                                  "Red.TButton", gong_height,
                                   gong_width)
         gong_button.grid(row=2, column=1)
 
         time_button = SizedButton(self.root, lambda: self.ref_timeout_clicked(),
-                                  "REF TIMEOUT", "yellow", "black", time_change_font,
+                                  "REF TIMEOUT", "Yellow.TButton",
                                   time_change_height, time_change_width)
         time_button.grid(row=3, column=1)
 
