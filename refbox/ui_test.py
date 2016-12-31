@@ -19,7 +19,18 @@ def test_score_column():
 
 def test_normal_view():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
-    assert nv.first_game_started is False
+    assert nv.mgr.gameClockRunning() is False
+    assert nv.mgr.gameClock() == 0
+
+    nv.refresh_time()
+    assert nv.mgr.gameClockRunning() is False
+    assert nv.mgr.gameClock() > 0
+
+    nv.gong_clicked()
+    assert nv.mgr.gameClockRunning() is True
+
+    # Cleanup
+    nv.mgr.setGameClockRunning(False)
 
 
 def test_edit_score():
