@@ -301,7 +301,6 @@ class NormalView(object):
     def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None):
         self.mgr = mgr
         self.iomgr = iomgr
-        self.first_game_started = False
         self.cfg = cfg or GameConfigParser()
 
         self.root = tk.Tk()
@@ -388,32 +387,25 @@ class NormalView(object):
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
         if game_clock <= 0:
-            self.mgr.setGameClockRunning(False)
             if self.mgr.gameStateFirstHalf():
                 self.mgr.setGameStateHalfTime()
                 self.mgr.setGameClock(self.cfg.getint('game', 'half_time_duration'))
                 self.gong_clicked()
-                self.mgr.setGameClockRunning(True)
-                self.root.update()
             elif self.mgr.gameStateHalfTime():
                 self.mgr.setGameStateSecondHalf()
                 self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
                 self.gong_clicked()
-                self.mgr.setGameClockRunning(True)
-                self.root.update()
             elif self.mgr.gameStateSecondHalf():
                 self.mgr.setGameStateGameOver()
                 self.mgr.setGameClock(self.cfg.getint('game', 'game_over_duration'))
                 self.gong_clicked()
-                self.mgr.setGameClockRunning(True)
-                self.root.update()
             elif self.mgr.gameStateGameOver():
                 self.mgr.setBlackScore(0)
                 self.mgr.setWhiteScore(0)
                 self.mgr.setGameStateFirstHalf()
                 self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
-                self.gong_clicked()
-                self.mgr.setGameClockRunning(True)
+                if self.mgr.gameClockRunning():
+                    self.gong_clicked()
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("REF TIMEOUT")
@@ -429,16 +421,13 @@ class NormalView(object):
             self.status_var.set("SECOND HALF")
         elif self.mgr.gameStateGameOver():
             self.status_var.set("GAME OVER")
-        self.root.update()
 
         refresh_ms = 50
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
     def gong_clicked(self):
         print("gong clicked")
-        if not self.first_game_started:
-            self.first_game_started = True
-            self.mgr.setGameClockRunning(True)
+        self.mgr.setGameClockRunning(True)
         self.iomgr.setSound(1)
         time.sleep(1)
         self.iomgr.setSound(0)
