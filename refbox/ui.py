@@ -172,7 +172,7 @@ def ManualEditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
 
     def cancel_clicked():
         root.destroy()
-        on_cancel(clock_at_pause)
+        on_cancel()
 
     def submit_clicked():
         root.destroy()
