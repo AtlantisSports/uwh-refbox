@@ -200,8 +200,7 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
                        label_font, label_height, label_width)
     label.grid(row=1, column=column)
 
-    button = SizedButton(root, score_changed,
-                         team_color.upper() + "\nSCORE", "Cyan.TButton",
+    button = SizedButton(root, score_changed, "SCORE", "Cyan.TButton",
                          button_height, button_width)
     button.grid(row=2, column=column)
 
@@ -308,7 +307,7 @@ class NormalView(object):
         gong_button.grid(row=2, column=1)
 
         time_button = SizedButton(self.root, lambda: self.ref_timeout_clicked(),
-                                  "REF TIMEOUT", "Yellow.TButton",
+                                  "TIMEOUT", "Yellow.TButton",
                                   time_change_height, time_change_width)
         time_button.grid(row=3, column=1)
 
@@ -344,7 +343,7 @@ class NormalView(object):
                     self.gong_clicked()
 
         if self.mgr.timeoutStateRef():
-            self.status_var.set("REF TIMEOUT")
+            self.status_var.set("TIMEOUT")
         elif self.mgr.timeoutStateWhite():
             self.status_var.set("WHT TIMEOUT")
         elif self.mgr.timeoutStateBlack():
