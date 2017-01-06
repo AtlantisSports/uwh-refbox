@@ -42,64 +42,45 @@ def SizedButton(root, callback, text, style, height, width):
     b.pack(fill=tk.BOTH, expand=1)
     return sf
 
-def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_submit):
+def ManualEditScore(master, tb_offset, score, on_submit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
+    root.geometry('{}x{}+{}+{}'.format(400, 420, 200, 50 + tb_offset))
 
     root.overrideredirect(1)
     root.transient(master)
 
-    white_new_var = tk.IntVar(value=white_score)
-    black_new_var = tk.IntVar(value=black_score)
+    score_var = tk.IntVar(value=score)
 
     label_font = (_font_name, 96)
 
-    def white_up():
-        white_new_var.set(white_new_var.get() + 1)
+    def up():
+        score_var.set(score_var.get() + 1)
 
-    def white_dn():
-        white_new_var.set(white_new_var.get() - 1)
-
-    def black_up():
-        black_new_var.set(black_new_var.get() + 1)
-
-    def black_dn():
-        black_new_var.set(black_new_var.get() - 1)
+    def dn():
+        score_var.set(score_var.get() - 1)
 
     def cancel_clicked():
         root.destroy()
-        on_cancel()
 
     def submit_clicked():
         root.destroy()
-        on_submit(white_new_var.get(), black_new_var.get())
+        on_submit(score_var.get())
 
     cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 400)
-    cancel_button.grid(row=2, column=0, columnspan=2)
+    cancel_button.grid(row=3, column=0, columnspan=2)
 
     submit_button = SizedButton(root, submit_clicked, "SUBMIT", "Green.TButton", 130, 400)
-    submit_button.grid(row=2, column=2, columnspan=2)
+    submit_button.grid(row=2, column=0, columnspan=2)
 
-    white_new = SizedLabel(root, white_new_var, "black", "white", label_font,
-                           160, 300)
-    white_new.grid(row=0, rowspan=2, column=1)
+    label = SizedLabel(root, score_var, "black", "white", label_font, 160, 300)
+    label.grid(row=0, rowspan=2, column=0)
 
-    black_new = SizedLabel(root, black_new_var, "black", "blue", label_font,
-                           160, 300)
-    black_new.grid(row=0, rowspan=2, column=2)
+    up_button = SizedButton(root, up, "+", "Blue.TButton", 80, 100)
+    up_button.grid(row=0, column=1)
 
-    white_up_button = SizedButton(root, white_up, "+", "Blue.TButton", 80, 100)
-    white_up_button.grid(row=0, column=0)
-
-    white_dn_button = SizedButton(root, white_dn, "-", "Grey.TButton", 80, 100)
-    white_dn_button.grid(row=1, column=0)
-
-    black_up_button = SizedButton(root, black_up, "+", "Blue.TButton", 80, 100)
-    black_up_button.grid(row=0, column=3)
-
-    black_dn_button = SizedButton(root, black_dn, "-", "Grey.TButton", 80, 100)
-    black_dn_button.grid(row=1, column=3)
+    dn_button = SizedButton(root, dn, "-", "Grey.TButton", 80, 100)
+    dn_button.grid(row=1, column=1)
 
 
 def ConfirmRefTimeOut(master, tb_offset, on_edit, on_resume):
@@ -272,11 +253,12 @@ class NormalView(object):
         create_styles()
         ScoreColumn(self.root, 0, 'white', 'white',
                     refresh_ms, lambda: self.mgr.whiteScore(),
-                    lambda: self.edit_score())
+                    lambda: self.edit_white_score())
+
         self.center_column(refresh_ms)
         ScoreColumn(self.root, 2, 'black', 'blue',
                     refresh_ms, lambda: self.mgr.blackScore(),
-                    lambda: self.edit_score())
+                    lambda: self.edit_black_score())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -386,14 +368,13 @@ class NormalView(object):
         time.sleep(1)
         self.iomgr.setSound(0)
 
-    def edit_score(self):
-        def submit_clicked(white_score, black_score):
-            self.mgr.setWhiteScore(white_score)
-            self.mgr.setBlackScore(black_score)
+    def edit_white_score(self):
+        ManualEditScore(self.root, self.tb_offset, self.mgr.whiteScore(),
+                        lambda x: self.mgr.setWhiteScore(x))
 
-        ManualEditScore(self.root, self.tb_offset,
-                        self.mgr.whiteScore(), self.mgr.blackScore(),
-                        lambda: None, submit_clicked)
+    def edit_black_score(self):
+        ManualEditScore(self.root, self.tb_offset, self.mgr.blackScore(),
+                        lambda x: self.mgr.setBlackScore(x))
 
     def edit_time(self, clock_at_pause):
         def submit_clicked(game_clock):
