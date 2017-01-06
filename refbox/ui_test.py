@@ -38,11 +38,6 @@ def test_edit_score():
     nv.edit_score()
 
 
-def test_change_clicked():
-    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
-    nv.score_change_clicked()
-
-
 def test_edit_time():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     nv.mgr.setGameClock(2)

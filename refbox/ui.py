@@ -42,29 +42,6 @@ def SizedButton(root, callback, text, style, height, width):
     b.pack(fill=tk.BOTH, expand=1)
     return sf
 
-def ConfirmManualEditScore(master, tb_offset, on_cancel, on_edit):
-    root = tk.Toplevel(master)
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
-
-    def manual_edit_clicked():
-        root.destroy()
-        on_edit()
-
-    def cancel_clicked():
-        root.destroy()
-        on_cancel()
-
-    root.overrideredirect(1)
-    root.transient(master)
-
-    manual_edit_button = SizedButton(root, manual_edit_clicked, "MANUALLY EDIT SCORE", "Big.Orange.TButton", 180, 800)
-    manual_edit_button.grid(row=0, column=0)
-
-    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 800)
-    cancel_button.grid(row=1, column=0)
-
-
 def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_submit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
@@ -295,11 +272,11 @@ class NormalView(object):
         create_styles()
         ScoreColumn(self.root, 0, 'white', 'white',
                     refresh_ms, lambda: self.mgr.whiteScore(),
-                    lambda: self.score_change_clicked())
+                    lambda: self.edit_score())
         self.center_column(refresh_ms)
         ScoreColumn(self.root, 2, 'black', 'blue',
                     refresh_ms, lambda: self.mgr.blackScore(),
-                    lambda: self.score_change_clicked())
+                    lambda: self.edit_score())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -417,12 +394,6 @@ class NormalView(object):
         ManualEditScore(self.root, self.tb_offset,
                         self.mgr.whiteScore(), self.mgr.blackScore(),
                         lambda: None, submit_clicked)
-
-    def score_change_clicked(self):
-        ConfirmManualEditScore(self.root,
-                               self.tb_offset,
-                               lambda: None,
-                               lambda: self.edit_score())
 
     def edit_time(self, clock_at_pause):
         def submit_clicked(game_clock):
