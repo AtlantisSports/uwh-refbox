@@ -35,7 +35,8 @@ def test_normal_view():
 
 def test_edit_score():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
-    nv.edit_score()
+    nv.edit_white_score()
+    nv.edit_black_score()
 
 
 def test_edit_time():
