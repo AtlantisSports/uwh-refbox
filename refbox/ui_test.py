@@ -50,6 +50,9 @@ def test_ref_timeout_clicked():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     assert nv.mgr.gameClockRunning() is False
 
-    # Assert the resuming does not start the clock
+    # Assert resuming starts the clock
     nv.ref_timeout_clicked()
-    assert nv.mgr.gameClockRunning() is False
+    assert nv.mgr.gameClockRunning() is True
+
+    # Cleanup
+    nv.mgr.setGameClockRunning(False)
