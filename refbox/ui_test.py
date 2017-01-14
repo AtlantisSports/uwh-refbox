@@ -14,7 +14,7 @@ def test_sized_frame():
 
 def test_score_column():
     root = ui.sized_frame(None, 1, 2)
-    assert ui.ScoreColumn(root, 2, 'black', 'blue', 5, lambda: 42, lambda: 43)
+    assert ui.ScoreColumn(root, 2, 'black', 'blue', 5, lambda: 42, lambda: 43, lambda: 44)
 
 
 def test_normal_view():
@@ -39,6 +39,12 @@ def test_edit_score():
     nv.edit_black_score()
 
 
+def test_inc_score():
+    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+    nv.increment_white_score()
+    nv.increment_black_score()
+
+
 def test_edit_time():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     nv.mgr.setGameClock(2)
@@ -50,6 +56,9 @@ def test_ref_timeout_clicked():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     assert nv.mgr.gameClockRunning() is False
 
-    # Assert the resuming does not start the clock
+    # Assert resuming starts the clock
     nv.ref_timeout_clicked()
-    assert nv.mgr.gameClockRunning() is False
+    assert nv.mgr.gameClockRunning() is True
+
+    # Cleanup
+    nv.mgr.setGameClockRunning(False)
