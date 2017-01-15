@@ -29,125 +29,82 @@ def sized_frame(master, height, width):
     return F
 
 
-def SizedLabel(root, var, bg, fg, font, height, width):
+def SizedLabel(root, text, bg, fg, font, height, width):
     sf = sized_frame(root, height, width)
-    l = tk.Label(sf, textvariable=var, bg=bg, fg=fg, font=font)
+
+    if isinstance(text, str):
+        l = tk.Label(sf, text=text, bg=bg, fg=fg, font=font)
+    else:
+        l = tk.Label(sf, textvariable=text, bg=bg, fg=fg, font=font)
+
     l.pack(fill=tk.BOTH, expand=1)
     return sf
 
 
 def SizedButton(root, callback, text, style, height, width):
     sf = sized_frame(root, height, width)
-    b = ttk.Button(sf, text=text, command=callback, style=style)
+
+    if isinstance(text, str):
+        b = ttk.Button(sf, text=text, command=callback, style=style)
+    else:
+        b = ttk.Button(sf, textvariable=text, command=callback, style=style)
+
     b.pack(fill=tk.BOTH, expand=1)
     return sf
 
-def ConfirmManualEditScore(master, tb_offset, on_cancel, on_edit):
+def ManualEditScore(master, tb_offset, score, is_black, on_submit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
-
-    def manual_edit_clicked():
-        root.destroy()
-        on_edit()
-
-    def cancel_clicked():
-        root.destroy()
-        on_cancel()
+    root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
 
     root.overrideredirect(1)
     root.transient(master)
 
-    manual_edit_button = SizedButton(root, manual_edit_clicked, "MANUALLY EDIT SCORE", "Big.Orange.TButton", 180, 800)
-    manual_edit_button.grid(row=0, column=0)
 
-    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 800)
-    cancel_button.grid(row=1, column=0)
+    header_font = (_font_name, 36)
+    header_text = "BLACK" if is_black else "WHITE"
+    header = SizedLabel(root, header_text, "black", "white", header_font, 50, 200)
+    header.grid(row=0, columnspan=2, column=3)
 
+    score_var = tk.IntVar(value=score)
+    score_height = 120
 
-def ManualEditScore(master, tb_offset, white_score, black_score, on_cancel, on_submit):
-    root = tk.Toplevel(master)
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
+    def dn():
+        x = score_var.get()
+        if x > 0:
+            score_var.set(x - 1)
 
-    root.overrideredirect(1)
-    root.transient(master)
-
-    white_new_var = tk.IntVar(value=white_score)
-    black_new_var = tk.IntVar(value=black_score)
+    dn_button = SizedButton(root, dn, "-", "Blue.TButton", score_height, 100)
+    dn_button.grid(row=1, column=2)
 
     label_font = (_font_name, 96)
+    label = SizedLabel(root, score_var, "black", "white", label_font, score_height, 200)
+    label.grid(row=1, column=3, columnspan=2)
 
-    def white_up():
-        white_new_var.set(white_new_var.get() + 1)
+    def up():
+        score_var.set(score_var.get() + 1)
 
-    def white_dn():
-        white_new_var.set(white_new_var.get() - 1)
-
-    def black_up():
-        black_new_var.set(black_new_var.get() + 1)
-
-    def black_dn():
-        black_new_var.set(black_new_var.get() - 1)
+    up_button = SizedButton(root, up, "+", "Blue.TButton", score_height, 100)
+    up_button.grid(row=1, column=5)
 
     def cancel_clicked():
         root.destroy()
-        on_cancel()
+
+    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 400)
+    cancel_button.grid(row=2, column=0, columnspan=4)
 
     def submit_clicked():
         root.destroy()
-        on_submit(white_new_var.get(), black_new_var.get())
-
-    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton", 130, 400)
-    cancel_button.grid(row=2, column=0, columnspan=2)
+        on_submit(score_var.get())
 
     submit_button = SizedButton(root, submit_clicked, "SUBMIT", "Green.TButton", 130, 400)
-    submit_button.grid(row=2, column=2, columnspan=2)
-
-    white_new = SizedLabel(root, white_new_var, "black", "white", label_font,
-                           160, 300)
-    white_new.grid(row=0, rowspan=2, column=1)
-
-    black_new = SizedLabel(root, black_new_var, "black", "blue", label_font,
-                           160, 300)
-    black_new.grid(row=0, rowspan=2, column=2)
-
-    white_up_button = SizedButton(root, white_up, "+", "Blue.TButton", 80, 100)
-    white_up_button.grid(row=0, column=0)
-
-    white_dn_button = SizedButton(root, white_dn, "-", "Grey.TButton", 80, 100)
-    white_dn_button.grid(row=1, column=0)
-
-    black_up_button = SizedButton(root, black_up, "+", "Blue.TButton", 80, 100)
-    black_up_button.grid(row=0, column=3)
-
-    black_dn_button = SizedButton(root, black_dn, "-", "Grey.TButton", 80, 100)
-    black_dn_button.grid(row=1, column=3)
-
-
-def ConfirmRefTimeOut(master, tb_offset, on_edit, on_resume):
-    root = tk.Toplevel(master)
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(800, 190, 0, 115 + 170 + tb_offset))
-
-    root.overrideredirect(1)
-    root.transient(master)
-
-    def resume_clicked():
-        root.destroy()
-        on_resume()
-
-    resume_button = SizedButton(root, resume_clicked, "RESUME\nPLAY", "Big.Green.TButton", 190, 400)
-    resume_button.grid(row=0, column=0)
-
-    edit_button = SizedButton(root, on_edit, "EDIT TIME", "Big.Orange.TButton", 190, 400)
-    edit_button.grid(row=0, column=1)
+    submit_button.grid(row=2, column=4, columnspan=4)
 
 
 def ManualEditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
     root = tk.Toplevel(master)
     root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(800, 310, 0, 170 + tb_offset))
+    root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
 
     root.overrideredirect(1)
     root.transient(master)
@@ -212,7 +169,6 @@ def ManualEditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
 
 def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
         score_changed):
-    score_font = (_font_name, 96)
     score_height = 120
     score_width = 200
 
@@ -226,25 +182,27 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
     penalty_height = 190
     penalty_width = score_width
 
+    label = SizedLabel(root, team_color.upper(), score_color, "black",
+                       label_font, label_height, label_width)
+    label.grid(row=0, column=column)
+
     score_var = tk.IntVar()
-    score_label = SizedLabel(root, score_var, "black",
-                             score_color, score_font, score_height,
-                             score_width)
-    score_label.grid(row=0, column=column)
+    score_label = SizedButton(root, score_changed, score_var, "Huge.White.TButton",
+                             score_height, score_width)
+    score_label.grid(row=1, column=column)
 
     def refresh_score():
         score_var.set(get_score())
         score_label.after(refresh_ms, lambda: refresh_score())
     score_label.after(refresh_ms, lambda: refresh_score())
 
-    label_var = tk.StringVar(value=team_color.upper())
-    label = SizedLabel(root, label_var, score_color, "black",
-                       label_font, label_height, label_width)
-    label.grid(row=1, column=column)
+    # TODO: These should be increment_score buttons
+    #button = SizedButton(root, score_changed, "SCORE", "Cyan.TButton",
+    #                     button_height, button_width)
+    #button.grid(row=2, column=column)
 
-    button = SizedButton(root, score_changed,
-                         team_color.upper() + "\nSCORE", "Cyan.TButton",
-                         button_height, button_width)
+    button = tk.Frame(root, height=button_height, width=button_width,
+                       bg="black")
     button.grid(row=2, column=column)
 
     penalty = tk.Frame(root, height=penalty_height, width=penalty_width,
@@ -253,17 +211,17 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
 
     return root
 
-def create_button_style(name, background, sz):
+def create_button_style(name, background, sz, foreground='black'):
     style = ttk.Style()
-    style.configure(name, foreground='black', background=background,
+    style.configure(name, foreground=foreground, background=background,
         relief='flat', font=(_font_name, sz))
     style.map(name, background=[('active', background)])
 
 
 def create_styles():
-    big_font_size = 36
-    create_button_style('Big.Green.TButton', 'green', big_font_size)
-    create_button_style('Big.Orange.TButton', 'orange', big_font_size)
+    huge_font_size = 80
+    create_button_style('Huge.White.TButton', 'black', huge_font_size, foreground='white')
+    create_button_style('Huge.Neon.TButton', 'black', huge_font_size, foreground='#000fff000')
 
     font_size = 36
     create_button_style('Cyan.TButton', 'dark cyan', font_size)
@@ -280,6 +238,7 @@ class NormalView(object):
         self.mgr = mgr
         self.iomgr = iomgr
         self.cfg = cfg or GameConfigParser()
+        self.state_before_pause = self.mgr.gameState()
 
         self.root = tk.Tk()
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
@@ -295,11 +254,12 @@ class NormalView(object):
         create_styles()
         ScoreColumn(self.root, 0, 'white', 'white',
                     refresh_ms, lambda: self.mgr.whiteScore(),
-                    lambda: self.score_change_clicked())
+                    lambda: self.edit_white_score())
+
         self.center_column(refresh_ms)
         ScoreColumn(self.root, 2, 'black', 'blue',
                     refresh_ms, lambda: self.mgr.blackScore(),
-                    lambda: self.score_change_clicked())
+                    lambda: self.edit_black_score())
 
         def poll_clicker(self):
             if self.iomgr.readClicker():
@@ -311,7 +271,6 @@ class NormalView(object):
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
     def center_column(self, refresh_ms):
-        clock_font = (_font_name, 96)
         clock_height = 120
         clock_width = 400
 
@@ -331,27 +290,31 @@ class NormalView(object):
         self.status_var = tk.StringVar()
         self.status_var.set("FIRST HALF")
 
-        self.game_clock_var = tk.StringVar()
-        self.game_clock_var.set("##:##")
-        self.game_clock_label = SizedLabel(self.root, self.game_clock_var, "black", "#000fff000",
-                                           clock_font, clock_height, clock_width)
-        self.game_clock_label.grid(row=0, column=1)
-
         status_label = SizedLabel(self.root, self.status_var, "black", "#000fff000", status_font,
                                   status_height, status_width)
-        status_label.grid(row=1, column=1)
+        status_label.grid(row=0, column=1)
+
+        self.game_clock_var = tk.StringVar()
+        self.game_clock_var.set("##:##")
+        self.game_clock_label = SizedButton(self.root, lambda: self.edit_time(self.mgr.gameClock()),
+                                            self.game_clock_var, "Huge.Neon.TButton",
+                                            clock_height, clock_width)
+        self.game_clock_label.grid(row=1, column=1)
 
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
-        gong_button = SizedButton(self.root, lambda: self.gong_clicked(), "GONG",
-                                  "Red.TButton", gong_height,
-                                  gong_width)
-        gong_button.grid(row=2, column=1)
+        # gong_button = SizedButton(self.root, lambda: self.gong_clicked(), "GONG",
+        #                          "Red.TButton", gong_height,
+        #                          gong_width)
+        # gong_button.grid(row=2, column=1)
 
-        time_button = SizedButton(self.root, lambda: self.ref_timeout_clicked(),
-                                  "REF TIMEOUT", "Yellow.TButton",
-                                  time_change_height, time_change_width)
-        time_button.grid(row=3, column=1)
+        time_button_text = "TIMEOUT" if self.mgr.gameClockRunning() else "RESUME"
+        self.time_button_var = tk.StringVar(value="START")
+        time_button = SizedButton(self.root,
+                                  lambda: self.ref_timeout_clicked(),
+                                  self.time_button_var, "Yellow.TButton",
+                                  time_change_height + gong_height, time_change_width)
+        time_button.grid(row=2, column=1, rowspan=2)
 
         # ref_signal_cover = tk.Frame(self.root, height=ref_signal_height,
         #                         width=ref_signal_width, bg="black")
@@ -385,7 +348,7 @@ class NormalView(object):
                     self.gong_clicked()
 
         if self.mgr.timeoutStateRef():
-            self.status_var.set("REF TIMEOUT")
+            self.status_var.set("TIMEOUT")
         elif self.mgr.timeoutStateWhite():
             self.status_var.set("WHT TIMEOUT")
         elif self.mgr.timeoutStateBlack():
@@ -409,20 +372,13 @@ class NormalView(object):
         time.sleep(1)
         self.iomgr.setSound(0)
 
-    def edit_score(self):
-        def submit_clicked(white_score, black_score):
-            self.mgr.setWhiteScore(white_score)
-            self.mgr.setBlackScore(black_score)
+    def edit_white_score(self):
+        ManualEditScore(self.root, self.tb_offset, self.mgr.whiteScore(),
+                        False, lambda x: self.mgr.setWhiteScore(x))
 
-        ManualEditScore(self.root, self.tb_offset,
-                        self.mgr.whiteScore(), self.mgr.blackScore(),
-                        lambda: None, submit_clicked)
-
-    def score_change_clicked(self):
-        ConfirmManualEditScore(self.root,
-                               self.tb_offset,
-                               lambda: None,
-                               lambda: self.edit_score())
+    def edit_black_score(self):
+        ManualEditScore(self.root, self.tb_offset, self.mgr.blackScore(),
+                        True, lambda x: self.mgr.setBlackScore(x))
 
     def edit_time(self, clock_at_pause):
         def submit_clicked(game_clock):
@@ -447,17 +403,14 @@ class NormalView(object):
         self.refresh_time()
 
     def ref_timeout_clicked(self):
-        running_at_pause = self.mgr.gameClockRunning()
-        self.state_before_pause = self.mgr.gameState()
-        self.mgr.setTimeoutStateRef()
-        self.set_paused_time()
-
-        def resume():
+        if self.mgr.gameClockRunning():
+            self.state_before_pause = self.mgr.gameState()
+            self.mgr.setTimeoutStateRef()
+            self.set_paused_time()
+            self.mgr.setGameClockRunning(False)
+            self.time_button_var.set('RESUME')
+        else:
             self.mgr.setGameState(self.state_before_pause)
             self.mgr.setTimeoutStateNone()
-            self.mgr.setGameClockRunning(running_at_pause)
-
-        ConfirmRefTimeOut(self.root,
-                          self.tb_offset,
-                          lambda: self.edit_time(self.mgr.gameClock()),
-                          resume)
+            self.mgr.setGameClockRunning(True)
+            self.time_button_var.set('TIMEOUT')
