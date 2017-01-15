@@ -404,7 +404,7 @@ class NormalView(object):
     def edit_time(self, clock_at_pause):
         def submit_clicked(game_clock):
             self.mgr.setGameClock(max(game_clock, 0))
-            if self.mgr.gameClockRunning():
+            if not self.mgr.gameClockRunning():
                 self.set_paused_time()
 
         EditTime(self.root, self.tb_offset, clock_at_pause,
