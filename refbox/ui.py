@@ -1,15 +1,7 @@
-try:
-    import Tkinter as tk
-    import ttk
-    from ConfigParser import ConfigParser
-except ImportError:
-    import tkinter as tk
-    from tkinter import ttk
-    from configparser import ConfigParser
-
-from collections import namedtuple
+import tkinter as tk
+from tkinter import ttk
+from configparser import ConfigParser
 import time
-
 
 _font_name = 'Consolas'
 
@@ -67,8 +59,6 @@ def EditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
 
     clock_at_pause_var = tk.IntVar(value=clock_at_pause)
 
-    label_font = (_font_name, 96)
-    playpause_button_font = (_font_name, 36)
     game_clock_font = (_font_name, 72)
 
     def game_clock_s_up():
@@ -325,7 +315,6 @@ class NormalView(object):
 
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
-        time_button_text = "TIMEOUT" if self.mgr.gameClockRunning() else "RESUME"
         self.time_button_var = tk.StringVar(value="START")
         time_button = SizedButton(self.root,
                                   lambda: self.ref_timeout_clicked(),
