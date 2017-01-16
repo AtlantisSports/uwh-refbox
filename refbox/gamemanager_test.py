@@ -1,4 +1,4 @@
-from .gamemanager import GameManager
+from .gamemanager import GameManager, GameState, TimeoutState
 
 
 def test_gameClock():
@@ -28,6 +28,9 @@ def test_blackScore():
 def test_gameClockRunning():
     mgr = GameManager()
     assert mgr.gameClockRunning() is False
+
+    mgr.setGameClockRunning(True)
+    assert mgr.gameClockRunning() is True
 
     mgr.setGameClockRunning(True)
     assert mgr.gameClockRunning() is True
@@ -103,3 +106,24 @@ def test_timeoutStateBlack():
 
     mgr.setTimeoutStateNone()
     assert mgr.timeoutStateBlack() is False
+
+def test_tick():
+    mgr = GameManager()
+    mgr.tick()
+    assert mgr._timer is None
+
+    mgr.setGameClockRunning(True)
+    mgr.tick()
+    assert mgr._timer is not None
+
+    mgr.setGameClockRunning(False)
+
+def test_gameState():
+    mgr = GameManager()
+    mgr.setGameState(GameState.first_half)
+    assert mgr.gameState() == GameState.first_half
+
+def test_timeoutState():
+    mgr = GameManager()
+    mgr.setTimeoutState(TimeoutState.ref)
+    assert mgr.timeoutState() == TimeoutState.ref
