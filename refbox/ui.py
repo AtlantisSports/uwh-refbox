@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from configparser import ConfigParser
 import time
+import os
 
 _font_name = 'Consolas'
 
@@ -260,6 +261,11 @@ class NormalView(object):
 
         self.root = tk.Tk()
         self.root.configure(background='black')
+
+        # Don't show a cursor on Pi.
+        if os.uname().machine == 'armv7l':
+            self.root.configure(cursor='none')
+
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(800, 480, 0, 0))
         if NO_TITLE_BAR:
