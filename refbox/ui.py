@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from configparser import ConfigParser
-import time
 import os
 
 _font_name = 'Consolas'
@@ -377,8 +376,7 @@ class NormalView(object):
         print("gong clicked")
         self.mgr.setGameClockRunning(True)
         self.iomgr.setSound(1)
-        time.sleep(1)
-        self.iomgr.setSound(0)
+        self.root.after(1000, lambda: self.iomgr.setSound(0))
 
     def edit_white_score(self):
         EditScore(self.root, self.tb_offset, self.mgr.whiteScore(),
