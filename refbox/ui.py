@@ -78,6 +78,8 @@ def EditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
         x = clock_at_pause_var.get()
         if x - 60 >= 0:
             clock_at_pause_var.set(x - 60)
+        else:
+            clock_at_pause_var.set(0)
 
     def cancel_clicked():
         root.destroy()
