@@ -8,8 +8,8 @@ _font_name = 'Consolas'
 def GameConfigParser():
     game_defaults = {
         'half_play_duration': '600',
-        'half_time_duration': '300',
-        'game_over_duration': '300'
+        'half_time_duration': '180',
+        'game_over_duration': '120'
     }
     parser = ConfigParser(defaults=game_defaults)
     parser.add_section('game')
@@ -351,8 +351,8 @@ class NormalView(object):
                 self.mgr.setWhiteScore(0)
                 self.mgr.setGameStateFirstHalf()
                 self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
-                if self.mgr.gameClockRunning():
-                    self.gong_clicked()
+                self.mgr.setGameClockRunning(False)
+                self.time_button_var.set("START")
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("TIMEOUT")
