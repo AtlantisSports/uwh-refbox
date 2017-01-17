@@ -32,6 +32,14 @@ def test_normal_view():
     # Cleanup
     nv.mgr.setGameClockRunning(False)
 
+def test_game_over():
+    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+    nv.mgr.setGameStateGameOver()
+    nv.mgr.setGameClock(0)
+    nv.mgr.setGameClockRunning(True)
+
+    nv.refresh_time()
+    assert nv.mgr.gameClockRunning() is False
 
 def test_edit_score():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
