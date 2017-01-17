@@ -148,7 +148,9 @@ def EditScore(master, tb_offset, score, is_black, on_submit):
     label.grid(row=1, column=3, columnspan=2)
 
     def up():
-        score_var.set(score_var.get() + 1)
+        x = score_var.get()
+        if x < 99:
+            score_var.set(x + 1)
 
     up_button = SizedButton(root, up, "+", "Blue.TButton", score_height, 100)
     up_button.grid(row=1, column=5)
@@ -191,7 +193,8 @@ def IncrementScore(master, tb_offset, score, is_black, on_submit):
 
     def yes_clocked():
         root.destroy()
-        on_submit(score + 1)
+        if score < 99:
+            on_submit(score + 1)
 
     yes_button = SizedButton(root, yes_clocked, "YES", "Green.TButton", 150, 400)
     yes_button.grid(row=2, column=1)
