@@ -45,11 +45,17 @@ def SizedButton(root, callback, text, style, height, width):
     return sf
 
 
+def maybe_hide_cursor(root):
+    # Don't show a cursor on Pi.
+    if os.uname().machine == 'armv7l':
+        root.configure(cursor='none')
 
 def EditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
     root = tk.Toplevel(master, background='black')
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
+
+    maybe_hide_cursor(root)
 
     root.overrideredirect(1)
     root.transient(master)
@@ -125,6 +131,8 @@ def EditScore(master, tb_offset, score, is_black, on_submit):
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
 
+    maybe_hide_cursor(root)
+
     root.overrideredirect(1)
     root.transient(master)
 
@@ -174,6 +182,8 @@ def IncrementScore(master, tb_offset, score, is_black, on_submit):
     root = tk.Toplevel(master, background='black')
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
+
+    maybe_hide_cursor(root)
 
     root.overrideredirect(1)
     root.transient(master)
@@ -266,9 +276,7 @@ class NormalView(object):
         self.root = tk.Tk()
         self.root.configure(background='black')
 
-        # Don't show a cursor on Pi.
-        if os.uname().machine == 'armv7l':
-            self.root.configure(cursor='none')
+        maybe_hide_cursor(self.root)
 
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(800, 480, 0, 0))
