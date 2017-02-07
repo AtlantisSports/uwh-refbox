@@ -107,17 +107,6 @@ def test_timeoutStateBlack():
     mgr.setTimeoutStateNone()
     assert mgr.timeoutStateBlack() is False
 
-def test_tick():
-    mgr = GameManager()
-    mgr.tick()
-    assert mgr._timer is None
-
-    mgr.setGameClockRunning(True)
-    mgr.tick()
-    assert mgr._timer is not None
-
-    mgr.setGameClockRunning(False)
-
 def test_gameState():
     mgr = GameManager()
     mgr.setGameState(GameState.first_half)

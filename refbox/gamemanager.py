@@ -1,4 +1,5 @@
-from threading import Timer
+import time
+import math
 
 class GameState(object):
     game_over = 0
@@ -13,30 +14,30 @@ class TimeoutState(object):
     white = 2
     black = 3
 
+def now():
+    return math.floor(time.time())
 
 class GameManager(object):
 
     def __init__(self):
         self._white_score = 0
         self._black_score = 0
-        self._game_clock = 0
-        self._is_clock_running = False
+        self._duration = 0
+        self._time_at_start = None
         self._game_state = GameState.game_over
         self._timeout_state = TimeoutState.none
-        self._timer = None
-
-    def tick(self):
-        print('tick')
-        if self.gameClockRunning():
-            self.setGameClock(self.gameClock() - 1)
-            self._timer = Timer(1, lambda: self.tick())
-            self._timer.start()
 
     def gameClock(self):
-        return self._game_clock
+        if not self.gameClockRunning():
+            return self._duration
+
+        return self._duration - (now() - self._time_at_start)
 
     def setGameClock(self, n):
-        self._game_clock = n
+        self._duration = n
+
+        if self.gameClockRunning():
+            self._time_at_start = now()
 
     def whiteScore(self):
         return self._white_score
@@ -51,22 +52,19 @@ class GameManager(object):
         self._black_score = n
 
     def gameClockRunning(self):
-        return self._is_clock_running
+        return bool(self._time_at_start)
 
     def setGameClockRunning(self, b):
-        if b == self._is_clock_running:
+        if b == self.gameClockRunning():
             return
 
         if b:
             print('game clock resumed')
-            self._timer = Timer(1, lambda: self.tick())
-            self._timer.start()
+            self._time_at_start = now()
         else:
             print('game clock paused')
-            self._timer.cancel()
-            self._timer = None
-
-        self._is_clock_running = b
+            self._duration -= now() - self._time_at_start
+            self._time_at_start = None
 
     def gameState(self):
         return self._game_state
