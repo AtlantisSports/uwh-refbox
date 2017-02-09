@@ -6,7 +6,6 @@ def test_game_config_parser():
     cfg = ui.GameConfigParser()
     assert type(cfg.getint('game', 'half_play_duration')) == int
     assert type(cfg.getint('game', 'half_time_duration')) == int
-    assert type(cfg.getint('game', 'game_over_duration')) == int
 
 def test_sized_frame():
     assert ui.sized_frame(None, 1, 2)
@@ -20,25 +19,19 @@ def test_score_column():
 def test_normal_view():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     assert nv.mgr.gameClockRunning() is False
-    assert nv.mgr.gameClock() == 0
-
-    nv.refresh_time()
-    assert nv.mgr.gameClockRunning() is False
     assert nv.mgr.gameClock() > 0
 
     nv.gong_clicked()
     assert nv.mgr.gameClockRunning() is True
 
-    # Cleanup
-    nv.mgr.setGameClockRunning(False)
-
 def test_game_over():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
-    nv.mgr.setGameStateGameOver()
+    nv.mgr.setGameStateSecondHalf()
     nv.mgr.setGameClock(0)
     nv.mgr.setGameClockRunning(True)
 
     nv.refresh_time()
+    assert nv.mgr.gameStateGameOver() is True
     assert nv.mgr.gameClockRunning() is False
 
 def test_edit_score():
