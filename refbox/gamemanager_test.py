@@ -35,10 +35,6 @@ def test_gameClockRunning():
     mgr.setGameClockRunning(True)
     assert mgr.gameClockRunning() is True
 
-    # Stop the clock before exiting
-    mgr.setGameClockRunning(False)
-
-
 def test_gameStateFirstHalf():
     mgr = GameManager()
     assert mgr.gameStateFirstHalf() is False

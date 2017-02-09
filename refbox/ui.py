@@ -9,7 +9,6 @@ def GameConfigParser():
     game_defaults = {
         'half_play_duration': '600',
         'half_time_duration': '180',
-        'game_over_duration': '120'
     }
     parser = ConfigParser(defaults=game_defaults)
     parser.add_section('game')
@@ -269,8 +268,9 @@ class NormalView(object):
         self.mgr = mgr
         self.iomgr = iomgr
         self.cfg = cfg or GameConfigParser()
-        self.mgr.setGameStateGameOver()
-        self.state_before_pause = self.mgr.gameStateGameOver()
+        self.mgr.setGameStateFirstHalf()
+        self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
+        self.state_before_pause = self.mgr.gameStateFirstHalf()
 
         self.root = tk.Tk()
         self.root.configure(background='black')
@@ -345,7 +345,7 @@ class NormalView(object):
         game_secs = game_clock % 60
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
-        if game_clock <= 0:
+        if game_clock <= 0 and self.mgr.gameClockRunning():
             if self.mgr.gameStateFirstHalf():
                 self.mgr.setGameStateHalfTime()
                 self.mgr.setGameClock(self.cfg.getint('game', 'half_time_duration'))
@@ -356,15 +356,10 @@ class NormalView(object):
                 self.gong_clicked()
             elif self.mgr.gameStateSecondHalf():
                 self.mgr.setGameStateGameOver()
-                self.mgr.setGameClock(self.cfg.getint('game', 'game_over_duration'))
                 self.gong_clicked()
-            elif self.mgr.gameStateGameOver():
-                self.mgr.setBlackScore(0)
-                self.mgr.setWhiteScore(0)
-                self.mgr.setGameStateFirstHalf()
-                self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
+                self.time_button_var.set("RESET")
                 self.mgr.setGameClockRunning(False)
-                self.time_button_var.set("START")
+                self.mgr.setGameClock(0)
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("TIMEOUT")
@@ -414,13 +409,21 @@ class NormalView(object):
         EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked)
 
     def ref_timeout_clicked(self):
-        if self.mgr.gameClockRunning():
-            self.state_before_pause = self.mgr.gameState()
-            self.mgr.setTimeoutStateRef()
-            self.mgr.setGameClockRunning(False)
-            self.time_button_var.set('RESUME')
+        if self.mgr.gameStateGameOver():
+            self.mgr.setGameClock(0)
+            self.mgr.setBlackScore(0)
+            self.mgr.setWhiteScore(0)
+            self.mgr.setGameStateFirstHalf()
+            self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
+            self.time_button_var.set("START")
         else:
-            self.mgr.setGameState(self.state_before_pause)
-            self.mgr.setTimeoutStateNone()
-            self.mgr.setGameClockRunning(True)
-            self.time_button_var.set('TIMEOUT')
+            if self.mgr.gameClockRunning():
+                self.state_before_pause = self.mgr.gameState()
+                self.mgr.setTimeoutStateRef()
+                self.mgr.setGameClockRunning(False)
+                self.time_button_var.set('RESUME')
+            else:
+                self.mgr.setGameState(self.state_before_pause)
+                self.mgr.setTimeoutStateNone()
+                self.mgr.setGameClockRunning(True)
+                self.time_button_var.set('TIMEOUT')
