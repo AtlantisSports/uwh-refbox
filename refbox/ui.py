@@ -50,7 +50,7 @@ def maybe_hide_cursor(root):
     if os.uname().machine == 'armv7l':
         root.configure(cursor='none')
 
-def EditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
+def EditTime(master, tb_offset, clock_at_pause, on_submit):
     root = tk.Toplevel(master, background='black')
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
@@ -89,7 +89,6 @@ def EditTime(master, tb_offset, clock_at_pause, on_cancel, on_submit):
 
     def cancel_clicked():
         root.destroy()
-        on_cancel()
 
     def submit_clicked():
         root.destroy()
@@ -326,7 +325,7 @@ class NormalView(object):
 
         self.game_clock_var = tk.StringVar()
         self.game_clock_var.set("##:##")
-        self.game_clock_label = SizedButton(self.root, lambda: self.edit_time(self.mgr.gameClock()),
+        self.game_clock_label = SizedButton(self.root, lambda: self.edit_time(),
                                             self.game_clock_var, "Huge.Neon.TButton",
                                             clock_height, clock_width)
         self.game_clock_label.grid(row=1, column=1)
@@ -407,14 +406,16 @@ class NormalView(object):
         IncrementScore(self.root, self.tb_offset, self.mgr.blackScore(),
                         True, lambda x: self.mgr.setBlackScore(x))
 
-    def edit_time(self, clock_at_pause):
-        def submit_clicked(game_clock):
-            self.mgr.setGameClock(max(game_clock, 0))
-            if not self.mgr.gameClockRunning():
-                self.set_paused_time()
+    def edit_time(self):
+        was_running = self.mgr.gameClockRunning()
+        self.mgr.setGameClockRunning(False)
+        clock_at_pause = self.mgr.gameClock();
 
-        EditTime(self.root, self.tb_offset, clock_at_pause,
-                lambda: None, submit_clicked)
+        def submit_clicked(game_clock):
+            self.mgr.setGameClock(game_clock)
+            self.mgr.setGameClockRunning(was_running)
+
+        EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked)
 
     def set_paused_time(self):
         # The awkward sequence here is to work around a bug in the c++ code,
