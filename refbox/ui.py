@@ -368,10 +368,6 @@ class NormalView(object):
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("TIMEOUT")
-        elif self.mgr.timeoutStateWhite():
-            self.status_var.set("WHT TIMEOUT")
-        elif self.mgr.timeoutStateBlack():
-            self.status_var.set("BLK TIMEOUT")
         elif self.mgr.gameStateFirstHalf():
             self.status_var.set("FIRST HALF")
         elif self.mgr.gameStateHalfTime():
