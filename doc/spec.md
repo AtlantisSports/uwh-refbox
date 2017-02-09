@@ -26,7 +26,7 @@ If "black score" or "white score" is pressed, a confirmation dialog should be
 displayed. The display should NOT show the new score until the YES button is
 pressed.
 
-After the game has completed, the score should be displayed for one minute before
-cleared. The display should show state "Game Over" and clock 0:00. After the
-score is cleared, the display should show "First half" and the duration of the
-first half. The clock should be stopped and awaiting a buzzer.
+After the game has completed, the clock should be stopped. The score of the previous
+game should be displayed until the RESET button is pressed. The display should show
+state "GAME OVER" and clock 00:00. After pressing RESET, the display should show
+"FIRST HALF" and the duration of the first half.
