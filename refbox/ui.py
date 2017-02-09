@@ -417,25 +417,10 @@ class NormalView(object):
 
         EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked)
 
-    def set_paused_time(self):
-        # The awkward sequence here is to work around a bug in the c++ code,
-        # which can't easily be fixed at the moment: it is baked into the displays.
-        #
-        # The bug itself is that self.mgr.gameClock() returns the wrong value
-        # when it is called while the clock is paused. It does produce the correct
-        # value when the clock is running, so we save it off, stop the clock, and
-        # write the saved value so that all of the clock displays get the correct
-        # paused time.
-        clock_at_pause = self.mgr.gameClock()
-        self.mgr.setGameClockRunning(False)
-        self.mgr.setGameClock(max(clock_at_pause, 0))
-        self.refresh_time()
-
     def ref_timeout_clicked(self):
         if self.mgr.gameClockRunning():
             self.state_before_pause = self.mgr.gameState()
             self.mgr.setTimeoutStateRef()
-            self.set_paused_time()
             self.mgr.setGameClockRunning(False)
             self.time_button_var.set('RESUME')
         else:
