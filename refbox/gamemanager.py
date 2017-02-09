@@ -11,8 +11,6 @@ class GameState(object):
 class TimeoutState(object):
     none = 0
     ref = 1
-    white = 2
-    black = 3
 
 def now():
     return math.floor(time.time())
@@ -113,15 +111,3 @@ class GameManager(object):
 
     def setTimeoutStateRef(self):
         self._timeout_state = TimeoutState.ref
-
-    def timeoutStateBlack(self):
-        return self._timeout_state == TimeoutState.black
-
-    def setTimeoutStateBlack(self):
-        self._timeout_state = TimeoutState.black
-
-    def timeoutStateWhite(self):
-        return self._timeout_state == TimeoutState.white
-
-    def setTimeoutStateWhite(self):
-        self._timeout_state = TimeoutState.white

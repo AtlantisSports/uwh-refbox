@@ -28,12 +28,13 @@ def test_blackScore():
 def test_gameClockRunning():
     mgr = GameManager()
     assert mgr.gameClockRunning() is False
+    assert mgr._time_at_start is None
 
     mgr.setGameClockRunning(True)
     assert mgr.gameClockRunning() is True
 
-    mgr.setGameClockRunning(True)
-    assert mgr.gameClockRunning() is True
+    mgr.setGameClock(1)
+    assert mgr._time_at_start
 
 def test_gameStateFirstHalf():
     mgr = GameManager()
@@ -73,7 +74,7 @@ def test_timeoutStateNone():
     mgr.setTimeoutStateNone()
     assert mgr.timeoutStateNone() is True
 
-    mgr.setTimeoutStateWhite()
+    mgr.setTimeoutStateRef()
     assert mgr.timeoutStateNone() is False
 
 
@@ -85,23 +86,6 @@ def test_timeoutStateRef():
     mgr.setTimeoutStateNone()
     assert mgr.timeoutStateRef() is False
 
-
-def test_timeoutStateWhite():
-    mgr = GameManager()
-    mgr.setTimeoutStateWhite()
-    assert mgr.timeoutStateWhite() is True
-
-    mgr.setTimeoutStateNone()
-    assert mgr.timeoutStateWhite() is False
-
-
-def test_timeoutStateBlack():
-    mgr = GameManager()
-    mgr.setTimeoutStateBlack()
-    assert mgr.timeoutStateBlack() is True
-
-    mgr.setTimeoutStateNone()
-    assert mgr.timeoutStateBlack() is False
 
 def test_gameState():
     mgr = GameManager()
