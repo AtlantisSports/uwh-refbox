@@ -56,7 +56,7 @@ def test_inc_score():
 def test_edit_time():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     nv.mgr.setGameClock(2)
-    nv.edit_time(1)
+    nv.edit_time()
     assert nv.mgr.gameClock() == 2
 
 
