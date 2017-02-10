@@ -38,10 +38,10 @@ def test_gameClockRunning():
 
 def test_gameStateFirstHalf():
     mgr = GameManager()
-    assert mgr.gameStateFirstHalf() is False
-
-    mgr.setGameStateFirstHalf()
     assert mgr.gameStateFirstHalf() is True
+
+    mgr.setGameStateSecondHalf()
+    assert mgr.gameStateFirstHalf() is False
 
 
 def test_gameStateHalfTime():

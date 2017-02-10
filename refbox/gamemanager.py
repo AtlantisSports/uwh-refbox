@@ -22,7 +22,7 @@ class GameManager(object):
         self._black_score = 0
         self._duration = 0
         self._time_at_start = None
-        self._game_state = GameState.game_over
+        self._game_state = GameState.first_half
         self._timeout_state = TimeoutState.none
 
     def gameClock(self):
