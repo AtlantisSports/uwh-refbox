@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from configparser import ConfigParser
 import os
+from .timeoutmanager import TimeoutManager
 
 _font_name = 'Consolas'
 
@@ -262,36 +263,6 @@ def create_styles():
     create_button_style('Yellow.TButton', 'yellow', font_size)
 
 
-class TimeoutManager(object):
-    def __init__(self):
-        self.text = tk.StringVar(value="START")
-
-    def set_game_over(self, mgr):
-        self.text.set("RESET")
-        mgr.setGameStateGameOver()
-        mgr.setGameClockRunning(False)
-        mgr.setGameClock(0)
-
-    def click(self, mgr, half_play_duration):
-        if mgr.gameStateGameOver():
-            mgr.setBlackScore(0)
-            mgr.setWhiteScore(0)
-            mgr.setGameStateFirstHalf()
-            mgr.setGameClock(half_play_duration)
-            self.text.set("START")
-            return
-
-        if mgr.gameClockRunning():
-            mgr.setTimeoutStateRef()
-            mgr.setGameClockRunning(False)
-            self.text.set('RESUME')
-            return
-
-        mgr.setTimeoutStateNone()
-        mgr.setGameClockRunning(True)
-        self.text.set('TIMEOUT')
-
-
 class NormalView(object):
 
     def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None):
@@ -362,11 +333,12 @@ class NormalView(object):
 
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
-        self.timeout_mgr = TimeoutManager()
+        time_button_var = tk.StringVar()
+        self.timeout_mgr = TimeoutManager(time_button_var)
         half_play_duration = self.cfg.getint('game', 'half_play_duration')
         time_button = SizedButton(self.root,
                                   lambda: self.timeout_mgr.click(self.mgr, half_play_duration),
-                                  self.timeout_mgr.text, "Yellow.TButton",
+                                  time_button_var, "Yellow.TButton",
                                   150, clock_width)
         time_button.grid(row=2, column=1)
 
