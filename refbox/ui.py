@@ -262,6 +262,36 @@ def create_styles():
     create_button_style('Yellow.TButton', 'yellow', font_size)
 
 
+class TimeoutManager(object):
+    def __init__(self):
+        self.text = tk.StringVar(value="START")
+
+    def set_game_over(self, mgr):
+        self.text.set("RESET")
+        mgr.setGameStateGameOver()
+        mgr.setGameClockRunning(False)
+        mgr.setGameClock(0)
+
+    def click(self, mgr, half_play_duration):
+        if mgr.gameStateGameOver():
+            mgr.setBlackScore(0)
+            mgr.setWhiteScore(0)
+            mgr.setGameStateFirstHalf()
+            mgr.setGameClock(half_play_duration)
+            self.text.set("START")
+            return
+
+        if mgr.gameClockRunning():
+            mgr.setTimeoutStateRef()
+            mgr.setGameClockRunning(False)
+            self.text.set('RESUME')
+            return
+
+        mgr.setTimeoutStateNone()
+        mgr.setGameClockRunning(True)
+        self.text.set('TIMEOUT')
+
+
 class NormalView(object):
 
     def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None):
@@ -270,7 +300,6 @@ class NormalView(object):
         self.cfg = cfg or GameConfigParser()
         self.mgr.setGameStateFirstHalf()
         self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
-        self.state_before_pause = self.mgr.gameStateFirstHalf()
 
         self.root = tk.Tk()
         self.root.configure(background='black')
@@ -316,6 +345,7 @@ class NormalView(object):
         status_height = 50
         status_width = clock_width
 
+
         self.status_var = tk.StringVar()
         self.status_var.set("FIRST HALF")
 
@@ -332,10 +362,11 @@ class NormalView(object):
 
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
-        self.time_button_var = tk.StringVar(value="START")
+        self.timeout_mgr = TimeoutManager()
+        half_play_duration = self.cfg.getint('game', 'half_play_duration')
         time_button = SizedButton(self.root,
-                                  lambda: self.ref_timeout_clicked(),
-                                  self.time_button_var, "Yellow.TButton",
+                                  lambda: self.timeout_mgr.click(self.mgr, half_play_duration),
+                                  self.timeout_mgr.text, "Yellow.TButton",
                                   150, clock_width)
         time_button.grid(row=2, column=1)
 
@@ -345,21 +376,21 @@ class NormalView(object):
         game_secs = game_clock % 60
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
+        half_play_duration = self.cfg.getint('game', 'half_play_duration')
+        half_time_duration = self.cfg.getint('game', 'half_time_duration')
+
         if game_clock <= 0 and self.mgr.gameClockRunning():
             if self.mgr.gameStateFirstHalf():
                 self.mgr.setGameStateHalfTime()
-                self.mgr.setGameClock(self.cfg.getint('game', 'half_time_duration'))
+                self.mgr.setGameClock(half_time_duration)
                 self.gong_clicked()
             elif self.mgr.gameStateHalfTime():
                 self.mgr.setGameStateSecondHalf()
-                self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
+                self.mgr.setGameClock(half_play_duration)
                 self.gong_clicked()
             elif self.mgr.gameStateSecondHalf():
-                self.mgr.setGameStateGameOver()
                 self.gong_clicked()
-                self.time_button_var.set("RESET")
-                self.mgr.setGameClockRunning(False)
-                self.mgr.setGameClock(0)
+                self.timeout_mgr.set_game_over(self.mgr)
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("TIMEOUT")
@@ -408,22 +439,3 @@ class NormalView(object):
 
         EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked)
 
-    def ref_timeout_clicked(self):
-        if self.mgr.gameStateGameOver():
-            self.mgr.setGameClock(0)
-            self.mgr.setBlackScore(0)
-            self.mgr.setWhiteScore(0)
-            self.mgr.setGameStateFirstHalf()
-            self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
-            self.time_button_var.set("START")
-        else:
-            if self.mgr.gameClockRunning():
-                self.state_before_pause = self.mgr.gameState()
-                self.mgr.setTimeoutStateRef()
-                self.mgr.setGameClockRunning(False)
-                self.time_button_var.set('RESUME')
-            else:
-                self.mgr.setGameState(self.state_before_pause)
-                self.mgr.setTimeoutStateNone()
-                self.mgr.setGameClockRunning(True)
-                self.time_button_var.set('TIMEOUT')
