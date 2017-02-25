@@ -50,7 +50,7 @@ def maybe_hide_cursor(root):
     if os.uname().machine == 'armv7l':
         root.configure(cursor='none')
 
-def EditTime(master, tb_offset, clock_at_pause, on_submit):
+def EditTime(master, tb_offset, clock_at_pause, on_submit, on_cancel):
     root = tk.Toplevel(master, background='black')
     root.resizable(width=tk.FALSE, height=tk.FALSE)
     root.geometry('{}x{}+{}+{}'.format(800, 480, 0, tb_offset))
@@ -89,6 +89,7 @@ def EditTime(master, tb_offset, clock_at_pause, on_submit):
 
     def cancel_clicked():
         root.destroy()
+        on_cancel()
 
     def submit_clicked():
         root.destroy()
@@ -409,5 +410,8 @@ class NormalView(object):
             self.mgr.setGameClock(game_clock)
             self.mgr.setGameClockRunning(was_running)
 
-        EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked)
+        def cancel_clicked():
+            self.mgr.setGameClockRunning(was_running)
+
+        EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked)
 
