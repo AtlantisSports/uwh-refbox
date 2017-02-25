@@ -1,8 +1,9 @@
 from .gamemanager import GameManager, GameState, TimeoutState
 
+_observers = [GameManager()]
 
 def test_gameClock():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.gameClock() == 0
 
     mgr.setGameClock(1)
@@ -10,7 +11,7 @@ def test_gameClock():
 
 
 def test_whiteScore():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.whiteScore() == 0
 
     mgr.setWhiteScore(1)
@@ -18,7 +19,7 @@ def test_whiteScore():
 
 
 def test_blackScore():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.blackScore() == 0
 
     mgr.setBlackScore(1)
@@ -26,7 +27,7 @@ def test_blackScore():
 
 
 def test_gameClockRunning():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.gameClockRunning() is False
     assert mgr._time_at_start is None
 
@@ -37,7 +38,7 @@ def test_gameClockRunning():
     assert mgr._time_at_start
 
 def test_gameStateFirstHalf():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.gameStateFirstHalf() is True
 
     mgr.setGameStateSecondHalf()
@@ -45,7 +46,7 @@ def test_gameStateFirstHalf():
 
 
 def test_gameStateHalfTime():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.gameStateHalfTime() is False
 
     mgr.setGameStateHalfTime()
@@ -53,7 +54,7 @@ def test_gameStateHalfTime():
 
 
 def test_gameStateSecondHalf():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     assert mgr.gameStateSecondHalf() is False
 
     mgr.setGameStateSecondHalf()
@@ -61,7 +62,7 @@ def test_gameStateSecondHalf():
 
 
 def test_gameStateGameOver():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     mgr.setGameStateSecondHalf()
     assert mgr.gameStateGameOver() is False
 
@@ -70,7 +71,7 @@ def test_gameStateGameOver():
 
 
 def test_timeoutStateNone():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     mgr.setTimeoutStateNone()
     assert mgr.timeoutStateNone() is True
 
@@ -79,7 +80,7 @@ def test_timeoutStateNone():
 
 
 def test_timeoutStateRef():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     mgr.setTimeoutStateRef()
     assert mgr.timeoutStateRef() is True
 
@@ -88,11 +89,11 @@ def test_timeoutStateRef():
 
 
 def test_gameState():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     mgr.setGameState(GameState.first_half)
     assert mgr.gameState() == GameState.first_half
 
 def test_timeoutState():
-    mgr = GameManager()
+    mgr = GameManager(_observers)
     mgr.setTimeoutState(TimeoutState.ref)
     assert mgr.timeoutState() == TimeoutState.ref
