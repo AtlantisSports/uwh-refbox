@@ -3,6 +3,7 @@ from tkinter import ttk
 from configparser import ConfigParser
 import os
 from .timeoutmanager import TimeoutManager
+from .gamemanager import GameManager
 
 _font_name = 'Consolas'
 
@@ -267,7 +268,7 @@ def create_styles():
 class NormalView(object):
 
     def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None):
-        self.mgr = mgr
+        self.mgr = GameManager([mgr])
         self.iomgr = iomgr
         self.cfg = cfg or GameConfigParser()
         self.mgr.setGameStateFirstHalf()
