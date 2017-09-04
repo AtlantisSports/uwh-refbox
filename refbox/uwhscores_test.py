@@ -34,7 +34,7 @@ def test_game():
       "black": "Rogue Ten",
       "black_id": 1,
       "day": "Sat",
-      "forfeit": None,
+      "forfeit": "", # FIXME: support null here.
       "gid": 1,
       "note_b": "",
       "note_w": "",
