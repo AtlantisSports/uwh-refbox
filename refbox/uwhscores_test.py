@@ -24,9 +24,9 @@ def test_Tournament():
     schema = Tournament()
     t = schema.deserialize(data['tournament'])
 
-    assert t.tid == 4
-    assert t.is_active == 0
-    assert t.name == "2015 CanAm Midwestern Championships"
+    assert t['tid'] == 4
+    assert t['is_active'] == 0
+    assert t['name'] == "2015 CanAm Midwestern Championships"
 
 
 def test_game():
@@ -50,9 +50,9 @@ def test_game():
     schema = Game()
     g = schema.deserialize(data)
 
-    assert g.gid == 1
-    assert g.black == "Rogue Ten"
-    assert g.white == "Colorado Aquatic Sloths"
+    assert g['gid'] == 1
+    assert g['black'] == "Rogue Ten"
+    assert g['white'] == "Colorado Aquatic Sloths"
 
 
 def test_teams():
@@ -79,8 +79,8 @@ def test_teams():
     schema = Teams()
     ts = schema.deserialize(data['teams'])
 
-    assert ts[0].name == "Colorado Acquatic Sloths"
-    assert ts[2].name == "Dallas"
+    assert ts[0]['name'] == "Colorado Acquatic Sloths"
+    assert ts[2]['name'] == "Dallas"
 
 
 def test_database():
