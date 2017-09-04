@@ -79,7 +79,7 @@ def test_teams():
     schema = Teams()
     ts = schema.deserialize(data['teams'])
 
-    assert ts[0]['name'] == "Colorado Acquatic Sloths"
+    assert ts[0]['name'] == "Colorado Aquatic Sloths"
     assert ts[2]['name'] == "Dallas"
 
 
