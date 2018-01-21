@@ -1,5 +1,5 @@
 from . import timeoutmanager
-from .gamemanager import GameManager, GameState, TimeoutState
+from .gamemanager import GameManager, GameState, TimeoutState, Penalty, TeamColor
 
 class Observable(object):
     def __init__(self):
@@ -26,6 +26,11 @@ def test_click():
     assert mgr.gameState() == GameState.first_half
     assert mgr.timeoutState() == TimeoutState.none
     assert timeout_mgr._text.get() == "TIMEOUT"
+
+    # Test adding a penalty
+    p = Penalty(24, TeamColor.white, 5 * 60, 10 * 60)
+    mgr.addPenalty(p)
+    assert len(mgr.penalties(TeamColor.white)) == 1
 
     # Test when button says TIMEOUT.
     timeout_mgr.click(mgr, 0)
@@ -58,3 +63,4 @@ def test_click():
     assert mgr.gameState() == GameState.first_half
     assert mgr.timeoutState() == TimeoutState.none
     assert timeout_mgr._text.get() == "START"
+    assert len(mgr.penalties(TeamColor.white)) == 0

@@ -2,10 +2,11 @@ from . import ui
 from .gamemanager import GameManager
 from .noiomanager import IOManager
 
-def test_game_config_parser():
-    cfg = ui.GameConfigParser()
+def test_refbox_config_parser():
+    cfg = ui.RefboxConfigParser()
     assert type(cfg.getint('game', 'half_play_duration')) == int
     assert type(cfg.getint('game', 'half_time_duration')) == int
+
 
 def test_sized_frame():
     assert ui.sized_frame(None, 1, 2)
@@ -13,7 +14,8 @@ def test_sized_frame():
 
 def test_score_column():
     root = ui.sized_frame(None, 1, 2)
-    assert ui.ScoreColumn(root, 2, 'black', 'blue', 5, lambda: 42, lambda: 43, lambda: 44)
+    assert ui.ScoreColumn(root, 2, 'black', 'blue', 5, lambda: 42, lambda: 43,
+                          lambda: 44, ui.RefboxConfigParser())
 
 
 def test_normal_view():
@@ -24,6 +26,7 @@ def test_normal_view():
     nv.gong_clicked()
     assert nv.mgr.gameClockRunning() is True
 
+
 def test_game_over():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     nv.mgr.setGameStateSecondHalf()
@@ -33,6 +36,7 @@ def test_game_over():
     nv.refresh_time()
     assert nv.mgr.gameStateGameOver() is True
     assert nv.mgr.gameClockRunning() is False
+
 
 def test_edit_score():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
