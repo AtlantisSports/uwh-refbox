@@ -388,7 +388,7 @@ def EditPenalty(master, tb_offset, mgr, cfg, team_color, on_delete, on_submit,
                        height=100, width=cfg.getint('hardware', 'screen_y'))
     title.grid(row=0, column=0, columnspan=2)
 
-    penalty = penalty or Penalty(0, team_color, 60)
+    penalty = penalty or Penalty('', team_color, 60)
     duration = tk.IntVar()
     duration.set(penalty.duration())
 
