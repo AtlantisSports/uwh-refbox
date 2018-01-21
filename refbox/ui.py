@@ -3,8 +3,7 @@ from tkinter import ttk
 from configparser import ConfigParser
 import os
 from .timeoutmanager import TimeoutManager
-from .gamemanager import GameManager
-from .gamemanager import TeamColor, Penalty
+from uwh.gamemanager import GameManager, TeamColor, Penalty
 from functools import partial
 
 _font_name = 'Consolas'

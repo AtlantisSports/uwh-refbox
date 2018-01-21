@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from refbox.ui import NormalView, RefboxConfigParser
-from refbox.gamemanager import GameManager
 from refbox.noiomanager import IOManager
+from uwh.gamemanager import GameManager
 
 cfg = RefboxConfigParser()
 cfg.read('timeshark.cfg')

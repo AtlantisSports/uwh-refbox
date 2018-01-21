@@ -1,0 +1,4 @@
+[submodule "deps/uwh-common"]
+	path = deps/uwh-common
+	url = https://github.com/Navisjon/uwh-common.git
+	branch = master
