@@ -1,5 +1,5 @@
 from . import timeoutmanager
-from .gamemanager import GameManager, GameState, TimeoutState, Penalty, TeamColor
+from uwh.gamemanager import GameManager, GameState, TimeoutState, Penalty, TeamColor
 
 class Observable(object):
     def __init__(self):

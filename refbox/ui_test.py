@@ -1,5 +1,5 @@
 from . import ui
-from .gamemanager import GameManager
+from uwh.gamemanager import GameManager
 from .noiomanager import IOManager
 
 def test_refbox_config_parser():
