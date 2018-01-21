@@ -8,6 +8,7 @@ class TimeoutManager(object):
         mgr.setGameStateGameOver()
         mgr.setGameClockRunning(False)
         mgr.setGameClock(0)
+        mgr.deleteAllPenalties()
 
     def click(self, mgr, half_play_duration):
         if mgr.gameStateGameOver():
