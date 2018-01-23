@@ -17,20 +17,9 @@ mgr = GameManager()
 if cfg.getboolean('hardware', 'has_xbee'):
     xbee_port = cfg.get('xbee', 'port')
     xbee_baud = cfg.getint('xbee', 'baud')
-    s = XBeeServer(mgr, xbee_port, xbee_baud)
-
+    xbee = XBeeServer(mgr, xbee_port, xbee_baud)
     xbee_clients = json.loads(cfg.get('xbee', 'clients'))
-
-    def broadcast_loop(s, xbee_clients):
-        while True:
-            for c in xbee_clients:
-                remote = s.recipient_from_address(c)
-                s.send_GameKeyFrame(remote)
-            time.sleep(0.1)
-
-    thread = threading.Thread(target=broadcast_loop, args=(s, xbee_clients))
-    thread.daemon = True
-    thread.start()
+    xbee.broadcast_thread(xbee_clients)
 
 nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=True, cfg=cfg)
 nv.root.mainloop()
