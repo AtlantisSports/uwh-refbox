@@ -10,14 +10,24 @@ _font_name = 'Consolas'
 
 def RefboxConfigParser():
     defaults = {
+        # hardware
         'screen_x': '800',
         'screen_y': '480',
         'version': '1',
+        'has_xbee': 'False',
+
+        # xbee
+        'port': '/dev/tty.usbserial-DN03ZRU8',
+        'baud': '9600',
+        'clients': '[]',
+
+        # game
         'half_play_duration': '600',
         'half_time_duration': '180'
     }
     parser = ConfigParser(defaults=defaults)
     parser.add_section('hardware')
+    parser.add_section('xbee')
     parser.add_section('game')
     return parser
 
