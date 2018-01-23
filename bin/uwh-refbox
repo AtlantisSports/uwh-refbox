@@ -3,11 +3,7 @@
 from refbox.ui import NormalView, RefboxConfigParser
 from refbox.noiomanager import IOManager
 from uwh.gamemanager import GameManager
-from uwh.xbee_comms import XBeeServer, XBeeClient
-
-import json
-import threading
-import time
+from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
 
 cfg = RefboxConfigParser()
 cfg.read('timeshark.cfg')
@@ -15,11 +11,8 @@ cfg.read('timeshark.cfg')
 mgr = GameManager()
 
 if cfg.getboolean('hardware', 'has_xbee'):
-    xbee_port = cfg.get('xbee', 'port')
-    xbee_baud = cfg.getint('xbee', 'baud')
-    xbee = XBeeServer(mgr, xbee_port, xbee_baud)
-    xbee_clients = json.loads(cfg.get('xbee', 'clients'))
-    xbee.broadcast_thread(xbee_clients)
+    xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
+    xbee.broadcast_thread(xbee_clients(cfg))
 
 nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=True, cfg=cfg)
 nv.root.mainloop()
