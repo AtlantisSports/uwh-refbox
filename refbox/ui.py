@@ -311,7 +311,7 @@ class PenaltiesColumn(object):
         self.team_color = team_color
         self.refresh_ms = refresh_ms
 
-        self.listbox = tk.Listbox(borderwidth=0)
+        self.listbox = tk.Listbox(borderwidth=0, width=25)
         self.listbox.config(bg="grey", fg="white", font=(_font_name, 14))
 
         self.listbox.after(refresh_ms, self.update_listbox)
