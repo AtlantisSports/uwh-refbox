@@ -331,10 +331,10 @@ class PlayerSelectNumpad(tk.Frame):
         tk.Frame.__init__(self, root, height=button_height * 5,
                           width=button_width * 3, bg="black")
 
-        content_var = tk.StringVar()
+        self._content_var = tk.StringVar()
 
         label_font = (_font_name, 18)
-        label = SizedLabel(self, content_var, "black", "white", label_font,
+        label = SizedLabel(self, self._content_var, "black", "white", label_font,
                            height=button_height, width=button_width * 3)
         label.grid(row=0, column=0, columnspan=3)
 
@@ -344,32 +344,31 @@ class PlayerSelectNumpad(tk.Frame):
                 [0, "del"]]
 
         self._content = '{}'.format(content)
-
-        def clicked(val):
-            if val == "del":
-                if self._content != '':
-                    self._content = self._content[:-1]
-            elif val is not None:
-                self._content += '{}'.format(val)
-            if self._content == '':
-                content_var.set('Player ?')
-            else:
-                content_var.set('Player {}'.format(self._content))
-
-        clicked(None)
+        self.clicked(None)
 
         for y in range(0, len(grid)):
             for x in range(0, len(grid[y])):
                 val = grid[y][x]
                 w = button_width * 2 if val == "del" else button_width
                 h = button_height
-                btn = SizedButton(self, partial(clicked, val),
+                btn = SizedButton(self, partial(self.clicked, val),
                                   '{}'.format(val), "LightBlue.TButton", h, w)
                 btn.config(border=1)
                 if val == "del":
                     btn.grid(row=y + 1, column=x, columnspan=2)
                 else:
                     btn.grid(row=y + 1, column=x)
+
+    def clicked(self, val):
+        if val == "del":
+            if self._content != '':
+                self._content = self._content[:-1]
+        elif val is not None:
+            self._content += '{}'.format(val)
+        if self._content == '':
+            self._content_var.set('Player ?')
+        else:
+            self._content_var.set('Player {}'.format(self._content))
 
     def get_value(self):
         return self._content

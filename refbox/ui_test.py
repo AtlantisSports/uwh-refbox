@@ -55,3 +55,27 @@ def test_edit_time():
     nv.mgr.setGameClock(2)
     nv.edit_time()
     assert nv.mgr.gameClock() == 2
+
+
+def test_PlayerSelectNumpad():
+    root = ui.sized_frame(None, 1, 2)
+    psn = ui.PlayerSelectNumpad(root, '')
+
+    assert psn.get_value() == ''
+
+    psn.clicked('1')
+    psn.clicked('3')
+    assert psn.get_value() == '13'
+
+    psn.clicked('del')
+    assert psn.get_value() == '1'
+
+    psn.clicked('del')
+    assert psn.get_value() == ''
+
+    psn.clicked('del')
+    assert psn.get_value() == ''
+
+    psn.clicked('4')
+    psn.clicked('2')
+    assert psn.get_value() == '42'
