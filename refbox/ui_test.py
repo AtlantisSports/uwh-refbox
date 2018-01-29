@@ -1,5 +1,6 @@
+import tkinter as tk
 from . import ui
-from uwh.gamemanager import GameManager, TeamColor
+from uwh.gamemanager import GameManager, TeamColor, Penalty
 from .noiomanager import IOManager
 
 def test_refbox_config_parser():
@@ -84,3 +85,56 @@ def test_add_penalty():
     nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
     nv.mgr.setGameClock(2)
     nv.add_penalty(TeamColor.black)
+
+def test_PenaltyEditor_submit():
+    def on_submit(self, player, duration):
+       assert player == '42'
+       assert duration == 5 * 60
+       self.submit_was_clicked = True
+
+    def on_delete(self):
+       self.delete_was_clicked = True
+
+    mgr = GameManager()
+    cfg = ui.RefboxConfigParser()
+    root = tk.Tk()
+    editor = ui.PenaltyEditor(root, 0, mgr, cfg, TeamColor.black, on_delete, on_submit, None)
+    editor.submit_was_clicked = False
+    editor.delete_was_clicked = False
+
+    editor._numpad.clicked('4')
+    editor._numpad.clicked('2')
+
+    editor.time_select(5 * 60)
+
+    editor.submit_clicked()
+    assert editor.submit_was_clicked == True
+    assert editor.delete_was_clicked == False
+
+
+def test_PenaltyEditor_delete():
+    penalty = Penalty(37, TeamColor.black, 3 * 60)
+
+    def on_submit(self, player, duration):
+       self.submit_was_clicked = True
+
+    def on_delete(self, penalty):
+       assert penalty.duration() == 3 * 60
+       assert penalty.player() == 37
+       self.delete_was_clicked = True
+
+    mgr = GameManager()
+    cfg = ui.RefboxConfigParser()
+    root = tk.Tk()
+    editor = ui.PenaltyEditor(root, 0, mgr, cfg, TeamColor.black, on_delete, on_submit, penalty)
+    editor.submit_was_clicked = False
+    editor.delete_was_clicked = False
+
+    editor._numpad.clicked('4')
+    editor._numpad.clicked('2')
+
+    editor.time_select(5 * 60)
+
+    editor.delete_clicked()
+    assert editor.submit_was_clicked == False
+    assert editor.delete_was_clicked == True

@@ -374,108 +374,116 @@ class PlayerSelectNumpad(tk.Frame):
         return self._content
 
 
-def EditPenalty(master, tb_offset, mgr, cfg, team_color, on_delete, on_submit,
-                penalty=None):
-    root = tk.Toplevel(master, background='black')
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
-                                       cfg.getint('hardware', 'screen_y'),
-                                       0, tb_offset))
+class PenaltyEditor(object):
+    def __init__(self, master, tb_offset, mgr, cfg, team_color, on_delete, on_submit,
+                 penalty=None):
+        self.root = tk.Toplevel(master, background='black')
+        self.root.resizable(width=tk.FALSE, height=tk.FALSE)
+        self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
+                                                cfg.getint('hardware', 'screen_y'),
+                                                0, tb_offset))
 
-    maybe_hide_cursor(root)
+        maybe_hide_cursor(self.root)
 
-    root.overrideredirect(1)
-    root.transient(master)
+        self.root.overrideredirect(1)
+        self.root.transient(master)
 
-    if team_color == TeamColor.white:
-        title_str = "White Penalty"
-    else:
-        title_str = "Black Penalty"
-    label_font = (_font_name, 48)
-    title = SizedLabel(root, title_str, "black", "white", label_font,
-                       height=100, width=cfg.getint('hardware', 'screen_y'))
-    title.grid(row=0, column=0, columnspan=2)
+        self.on_delete = on_delete
+        self.on_submit = on_submit
 
-    penalty = penalty or Penalty('', team_color, 60)
-    duration = tk.IntVar()
-    duration.set(penalty.duration())
+        if team_color == TeamColor.white:
+            title_str = "White Penalty"
+        else:
+            title_str = "Black Penalty"
+        label_font = (_font_name, 48)
+        title = SizedLabel(self.root, title_str, "black", "white", label_font,
+                           height=100, width=cfg.getint('hardware', 'screen_y'))
+        title.grid(row=0, column=0, columnspan=2)
 
-    numpad = PlayerSelectNumpad(root, penalty.player())
-    numpad.grid(row=1, column=0)
+        self._penalty = penalty or Penalty('', team_color, 60)
+        self._duration = tk.IntVar()
+        self._duration.set(self._penalty.duration())
 
-    def time_select(kind):
-        one_min.config(relief=tk.RAISED, border=4)
-        two_min.config(relief=tk.RAISED, border=4)
-        five_min.config(relief=tk.RAISED, border=4)
-        dismissal.config(relief=tk.RAISED, border=4)
+        # Player Selection
+        self._numpad = PlayerSelectNumpad(self.root, self._penalty.player())
+        self._numpad.grid(row=1, column=0)
+
+        frame_height = 75 * 5
+        frame_width = 300
+
+        # Penalty Duration
+        time_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
+                              bg="grey")
+        time_frame.grid(row=1, column=1)
+        self._one_min = SizedButton(time_frame, partial(self.time_select, 60),
+                                    "1 min", "Yellow.TButton", frame_height / 4,
+                                    frame_width)
+        self._one_min.grid(row=1, column=0)
+
+        self._two_min = SizedButton(time_frame, partial(self.time_select, 120),
+                                    "2 min", "Yellow.TButton", frame_height / 4,
+                                    frame_width)
+        self._two_min.grid(row=2, column=0)
+
+        self._five_min = SizedButton(time_frame, partial(self.time_select, 300),
+                                     "5 min", "Yellow.TButton", frame_height / 4,
+                                     frame_width)
+        self._five_min.grid(row=3, column=0)
+
+        self._dismissal = SizedButton(time_frame, partial(self.time_select, -1),
+                                      "Dismissal", "Red.TButton", frame_height / 4,
+                                      frame_width)
+        self._dismissal.grid(row=4, column=0)
+        self.time_select(self._penalty.duration())
+
+        space = tk.Frame(self.root, height=50, width=50, bg='black')
+        space.grid(row=2, column=0, columnspan=2)
+
+        frame_height = 100
+        frame_width = cfg.getint('hardware', 'screen_x')
+
+        # Actions
+        submit_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
+                                bg="dark grey")
+        submit_frame.grid(row=3, column=0, columnspan=2)
+
+        cancel = SizedButton(submit_frame, self.cancel_clicked, "Cancel",
+                             "Yellow.TButton", frame_height, frame_width / 3)
+        cancel.grid(row=0, column=0)
+
+        delete = SizedButton(submit_frame, self.delete_clicked,
+                             "Delete", "Red.TButton", frame_height, frame_width / 3)
+        delete.grid(row=0, column=1)
+
+        submit = SizedButton(submit_frame, self.submit_clicked, "Submit",
+                             "Green.TButton", frame_height, frame_width / 3)
+        submit.grid(row=0, column=2)
+
+    def time_select(self, kind):
+        self._one_min.config(relief=tk.RAISED, border=4)
+        self._two_min.config(relief=tk.RAISED, border=4)
+        self._five_min.config(relief=tk.RAISED, border=4)
+        self._dismissal.config(relief=tk.RAISED, border=4)
         if kind == 60:
-            one_min.config(relief=tk.SUNKEN)
+            self._one_min.config(relief=tk.SUNKEN)
         elif kind == 120:
-            two_min.config(relief=tk.SUNKEN)
+            self._two_min.config(relief=tk.SUNKEN)
         elif kind == 300:
-            five_min.config(relief=tk.SUNKEN)
+            self._five_min.config(relief=tk.SUNKEN)
         elif kind == -1:
-            dismissal.config(relief=tk.SUNKEN)
-        duration.set(kind)
+            self._dismissal.config(relief=tk.SUNKEN)
+        self._duration.set(kind)
 
-    frame_height = 75 * 5
-    frame_width = 300
-    time_frame = tk.Frame(root, height=frame_height, width=frame_width, bg="grey")
-    time_frame.grid(row=1, column=1)
+    def cancel_clicked(self):
+        self.root.destroy()
 
-    one_min = SizedButton(time_frame, partial(time_select, 60), "1 min",
-                          "Yellow.TButton", frame_height / 4,
-                          frame_width)
-    one_min.grid(row=1, column=0)
+    def delete_clicked(self):
+        self.root.destroy()
+        self.on_delete(self, self._penalty)
 
-    two_min = SizedButton(time_frame, partial(time_select, 120), "2 min",
-                          "Yellow.TButton", frame_height / 4,
-                          frame_width)
-    two_min.grid(row=2, column=0)
-
-    five_min = SizedButton(time_frame, partial(time_select, 300), "5 min",
-                           "Yellow.TButton", frame_height / 4,
-                           frame_width)
-    five_min.grid(row=3, column=0)
-
-    dismissal = SizedButton(time_frame, partial(time_select, -1), "Dismissal",
-                            "Red.TButton", frame_height / 4,
-                            frame_width)
-    dismissal.grid(row=4, column=0)
-
-    time_select(penalty.duration())
-
-    space = tk.Frame(root, height=50, width=50, bg='black')
-    space.grid(row=2, column=0, columnspan=2)
-
-    frame_height = 100
-    frame_width = cfg.getint('hardware', 'screen_x')
-    submit_frame = tk.Frame(root, height=frame_height, width=frame_width, bg="dark grey")
-    submit_frame.grid(row=3, column=0, columnspan=2)
-
-    def cancel_clicked():
-        root.destroy()
-
-    cancel = SizedButton(submit_frame, cancel_clicked, "Cancel",
-                         "Yellow.TButton", frame_height, frame_width / 3)
-    cancel.grid(row=0, column=0)
-
-    def delete_clicked(penalty):
-        root.destroy()
-        on_delete(penalty)
-
-    delete = SizedButton(submit_frame, partial(delete_clicked, penalty), "Delete",
-                         "Red.TButton", frame_height, frame_width / 3)
-    delete.grid(row=0, column=1)
-
-    def submit_clicked(penalty, numpad, duration):
-        root.destroy()
-        on_submit(numpad.get_value(), duration.get())
-
-    submit = SizedButton(submit_frame, partial(submit_clicked, penalty,
-                                               numpad, duration),
-                         "Submit", "Green.TButton", frame_height, frame_width / 3)
-    submit.grid(row=0, column=2)
+    def submit_clicked(self):
+        self.root.destroy()
+        self.on_submit(self, self._numpad.get_value(), self._duration.get())
 
 
 def create_button_style(name, background, sz, foreground='black'):
@@ -562,17 +570,17 @@ class NormalView(object):
 
     def edit_penalty(self, team_color, idx):
         def submit_clicked(player, duration):
-            mgr.penalties(team_color)[idx].setPlayer(player)
-            mgr.penalties(team_color)[idx].setDuration(duration)
-        EditPenalty(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
-                    mgr.delPenalty, submit_clicked,
-                    mgr.penalties(team_color)[idx])
+            self.mgr.penalties(team_color)[idx].setPlayer(player)
+            self.mgr.penalties(team_color)[idx].setDuration(duration)
+        PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
+                      self.mgr.delPenalty, submit_clicked,
+                      self.mgr.penalties(team_color)[idx])
 
     def add_penalty(self, team_color):
-        def submit_clicked(player, duration):
-            mgr.addPenalty(Penalty(player, team_color, duration))
-        EditPenalty(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
-                    lambda x: None, submit_clicked)
+        def submit_clicked(self, player, duration):
+            self.mgr.addPenalty(Penalty(player, team_color, duration))
+        PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
+                      lambda x: None, partial(submit_clicked, self))
 
     def center_column(self, refresh_ms):
         clock_height = 120
