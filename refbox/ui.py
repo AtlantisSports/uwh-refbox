@@ -499,11 +499,11 @@ class PenaltyEditor(object):
 
     def delete_clicked(self):
         self.root.destroy()
-        self.on_delete(self, self._penalty)
+        self.on_delete(self._penalty)
 
     def submit_clicked(self):
         self.root.destroy()
-        self.on_submit(self, self._numpad.get_value(), self._duration.get())
+        self.on_submit(self._numpad.get_value(), self._duration.get())
 
 
 def create_button_style(name, background, sz, foreground='black'):

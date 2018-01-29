@@ -89,13 +89,13 @@ def test_add_penalty():
     nv.add_penalty(TeamColor.black)
 
 def test_PenaltyEditor_submit():
-    def on_submit(self, player, duration):
+    def on_submit(player, duration):
        assert player == '42'
        assert duration == 5 * 60
-       self.submit_was_clicked = True
+       editor.submit_was_clicked = True
 
-    def on_delete(self):
-       self.delete_was_clicked = True
+    def on_delete():
+       editor.delete_was_clicked = True
 
     mgr = GameManager()
     cfg = ui.RefboxConfigParser()
@@ -117,13 +117,13 @@ def test_PenaltyEditor_submit():
 def test_PenaltyEditor_delete():
     penalty = Penalty(37, TeamColor.black, 3 * 60)
 
-    def on_submit(self, player, duration):
-       self.submit_was_clicked = True
+    def on_submit(player, duration):
+       editor.submit_was_clicked = True
 
-    def on_delete(self, penalty):
+    def on_delete(penalty):
        assert penalty.duration() == 3 * 60
        assert penalty.player() == 37
-       self.delete_was_clicked = True
+       editor.delete_was_clicked = True
 
     mgr = GameManager()
     cfg = ui.RefboxConfigParser()
