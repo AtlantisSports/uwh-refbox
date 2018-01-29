@@ -138,3 +138,52 @@ def test_PenaltyEditor_delete():
     editor.delete_clicked()
     assert editor.submit_was_clicked == False
     assert editor.delete_was_clicked == True
+
+def test_TimeEditor():
+    def on_submit():
+        pass
+
+    def on_cancel():
+        pass
+
+    cfg = ui.RefboxConfigParser()
+    root = tk.Tk()
+
+    editor = ui.TimeEditor(root, 0, 5 * 60 + 2, on_submit, on_cancel, cfg)
+
+    editor.game_clock_m_dn()
+    assert editor.clock_at_pause_var.get() == 4 * 60 + 2
+
+    editor.game_clock_s_dn()
+    assert editor.clock_at_pause_var.get() == 4 * 60 + 1
+
+    editor.game_clock_m_dn()
+    assert editor.clock_at_pause_var.get() == 3 * 60 + 1
+
+    editor.game_clock_s_dn()
+    assert editor.clock_at_pause_var.get() == 3 * 60 + 0
+
+    editor.game_clock_s_dn()
+    assert editor.clock_at_pause_var.get() == 2 * 60 + 59
+
+    editor.game_clock_m_dn()
+    assert editor.clock_at_pause_var.get() == 1 * 60 + 59
+
+    editor.game_clock_m_dn()
+    assert editor.clock_at_pause_var.get() == 59
+
+    editor.game_clock_m_dn()
+    assert editor.clock_at_pause_var.get() == 0
+
+    editor.game_clock_s_dn()
+    assert editor.clock_at_pause_var.get() == 0
+
+    editor.game_clock_m_up()
+    assert editor.clock_at_pause_var.get() == 60
+
+    editor.game_clock_s_up()
+    assert editor.clock_at_pause_var.get() == 61
+
+    editor.game_clock_s_dn()
+    editor.game_clock_s_dn()
+    assert editor.clock_at_pause_var.get() == 59

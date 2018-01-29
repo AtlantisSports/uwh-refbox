@@ -67,89 +67,101 @@ def maybe_hide_cursor(root):
     if os.uname().machine == 'armv7l':
         root.configure(cursor='none')
 
-def EditTime(master, tb_offset, clock_at_pause, on_submit, on_cancel, cfg):
-    root = tk.Toplevel(master, background='black')
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
-                                       cfg.getint('hardware', 'screen_y'),
-                                       0, 0))
+class TimeEditor(object):
+    def __init__(self, master, tb_offset, clock_at_pause, on_submit, on_cancel, cfg):
+        self.root = tk.Toplevel(master, background='black')
+        self.root.resizable(width=tk.FALSE, height=tk.FALSE)
+        self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
+                                           cfg.getint('hardware', 'screen_y'),
+                                           0, 0))
 
-    maybe_hide_cursor(root)
+        maybe_hide_cursor(self.root)
 
-    root.overrideredirect(1)
-    root.transient(master)
+        self.root.overrideredirect(1)
+        self.root.transient(master)
 
-    space = tk.Frame(root, height=50, width=100, bg="black")
-    space.grid(row=0, column=0)
+        self.on_submit = on_submit
+        self.on_cancel = on_cancel
 
-    clock_at_pause_var = tk.IntVar(value=clock_at_pause)
+        space = tk.Frame(self.root, height=50, width=100, bg="black")
+        space.grid(row=0, column=0)
 
-    game_clock_font = (_font_name, 72)
+        self.clock_at_pause_var = tk.IntVar(value=clock_at_pause)
 
-    def game_clock_s_up():
-        x = clock_at_pause_var.get()
-        clock_at_pause_var.set(x + 1)
+        game_clock_font = (_font_name, 72)
 
-    def game_clock_s_dn():
-        x = clock_at_pause_var.get()
+        m_up_button = SizedButton(self.root, self.game_clock_m_up, u"Min \u2191",
+                                  "LightBlue.TButton",
+                                  80, cfg.getint('hardware', 'screen_x') / 4)
+        m_up_button.grid(row=1, column=0)
+
+        m_dn_button = SizedButton(self.root, self.game_clock_m_dn, u"Min \u2193",
+                                  "Grey.TButton",
+                                  80, cfg.getint('hardware', 'screen_x') / 4)
+        m_dn_button.grid(row=2, column=0)
+
+        s_up_button = SizedButton(self.root, self.game_clock_s_up, u"Sec \u2191",
+                                  "LightBlue.TButton",
+                                  80, cfg.getint('hardware', 'screen_x') / 4)
+        s_up_button.grid(row=1, column=3)
+
+        s_dn_button = SizedButton(self.root, self.game_clock_s_dn, u"Sec \u2193",
+                                  "Grey.TButton",
+                                  80, cfg.getint('hardware', 'screen_x') / 4)
+        s_dn_button.grid(row=2, column=3)
+
+        cancel_button = SizedButton(self.root, self.cancel_clicked, "CANCEL",
+                                    "Red.TButton",
+                                    150, cfg.getint('hardware', 'screen_x') / 2)
+        cancel_button.grid(row=3, column=0, columnspan=2)
+
+        submit_button = SizedButton(self.root, self.submit_clicked, "SUBMIT",
+                                    "Green.TButton",
+                                    150, cfg.getint('hardware', 'screen_x') / 2)
+        submit_button.grid(row=3, column=2, columnspan=2)
+
+        self.game_clock_var = tk.StringVar()
+
+        self.clock_at_pause_var.trace('w', self.on_clock_changed)
+        self.on_clock_changed()
+
+        game_clock_new = SizedLabel(self.root, self.game_clock_var, "black", "blue",
+                                    game_clock_font,
+                                    160, cfg.getint('hardware', 'screen_x') / 2)
+        game_clock_new.grid(row=1, rowspan=2, column=1, columnspan=2)
+
+    def on_clock_changed(self, *args):
+        x = self.clock_at_pause_var.get()
+        self.game_clock_var.set('%d:%02d' % (x // 60, x % 60))
+
+    def game_clock_s_up(self):
+        x = self.clock_at_pause_var.get()
+        self.clock_at_pause_var.set(x + 1)
+
+    def game_clock_s_dn(self):
+        x = self.clock_at_pause_var.get()
         if x > 0:
-            clock_at_pause_var.set(x - 1)
+            self.clock_at_pause_var.set(x - 1)
 
-    def game_clock_m_up():
-        x = clock_at_pause_var.get()
-        clock_at_pause_var.set(x + 60)
+    def game_clock_m_up(self):
+        x = self.clock_at_pause_var.get()
+        self.clock_at_pause_var.set(x + 60)
 
-    def game_clock_m_dn():
-        x = clock_at_pause_var.get()
+    def game_clock_m_dn(self):
+        x = self.clock_at_pause_var.get()
         if x - 60 >= 0:
-            clock_at_pause_var.set(x - 60)
+            self.clock_at_pause_var.set(x - 60)
         else:
-            clock_at_pause_var.set(0)
+            self.clock_at_pause_var.set(0)
 
-    def cancel_clicked():
-        root.destroy()
-        on_cancel()
+    def cancel_clicked(self):
+        self.root.destroy()
+        self.on_cancel()
 
-    def submit_clicked():
-        root.destroy()
-        on_submit(clock_at_pause_var.get())
+    def submit_clicked(self):
+        self.root.destroy()
+        self.on_submit(self.clock_at_pause_var.get())
 
-    m_up_button = SizedButton(root, game_clock_m_up, u"Min \u2191", "LightBlue.TButton",
-                              80, cfg.getint('hardware', 'screen_x') / 4)
-    m_up_button.grid(row=1, column=0)
-
-    m_dn_button = SizedButton(root, game_clock_m_dn, u"Min \u2193", "Grey.TButton",
-                              80, cfg.getint('hardware', 'screen_x') / 4)
-    m_dn_button.grid(row=2, column=0)
-
-    s_up_button = SizedButton(root, game_clock_s_up, u"Sec \u2191", "LightBlue.TButton",
-                              80, cfg.getint('hardware', 'screen_x') / 4)
-    s_up_button.grid(row=1, column=3)
-
-    s_dn_button = SizedButton(root, game_clock_s_dn, u"Sec \u2193", "Grey.TButton",
-                              80, cfg.getint('hardware', 'screen_x') / 4)
-    s_dn_button.grid(row=2, column=3)
-
-    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton",
-                                150, cfg.getint('hardware', 'screen_x') / 2)
-    cancel_button.grid(row=3, column=0, columnspan=2)
-
-    submit_button = SizedButton(root, submit_clicked, "SUBMIT", "Green.TButton",
-                                150, cfg.getint('hardware', 'screen_x') / 2)
-    submit_button.grid(row=3, column=2, columnspan=2)
-
-    game_clock_var = tk.StringVar()
-
-    def on_clock_changed(*args):
-        x = clock_at_pause_var.get()
-        game_clock_var.set('%d:%02d' % (x // 60, x % 60))
-    on_clock_changed()
-
-    clock_at_pause_var.trace('w', on_clock_changed)
-
-    game_clock_new = SizedLabel(root, game_clock_var, "black", "blue", game_clock_font,
-                                160, cfg.getint('hardware', 'screen_x') / 2)
-    game_clock_new.grid(row=1, rowspan=2, column=1, columnspan=2)
 
 def EditScore(master, tb_offset, score, is_black, on_submit, cfg):
     root = tk.Toplevel(master, background='black')
@@ -689,5 +701,5 @@ class NormalView(object):
         def cancel_clicked():
             self.mgr.setGameClockRunning(was_running)
 
-        EditTime(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked, self.cfg)
+        TimeEditor(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked, self.cfg)
 
