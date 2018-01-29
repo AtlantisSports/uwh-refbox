@@ -598,10 +598,10 @@ class NormalView(object):
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
         if self.cfg.getint('hardware', 'version') == 2:
-            PenaltiesColumn(self.root, 0, TeamColor.white, refresh_ms, mgr,
+            PenaltiesColumn(self.root, 0, TeamColor.white, refresh_ms, self.mgr,
                             lambda idx: self.edit_penalty(TeamColor.white, idx),
                             lambda: self.add_penalty(TeamColor.white), self.cfg)
-            PenaltiesColumn(self.root, 2, TeamColor.black, refresh_ms, mgr,
+            PenaltiesColumn(self.root, 2, TeamColor.black, refresh_ms, self.mgr,
                             lambda idx: self.edit_penalty(TeamColor.black, idx),
                             lambda: self.add_penalty(TeamColor.black), self.cfg)
 
