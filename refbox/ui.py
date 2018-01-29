@@ -553,26 +553,26 @@ class NormalView(object):
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
         if self.cfg.getint('hardware', 'version') == 2:
-            def edit_penalty(self, team_color, idx):
-                def submit_clicked(player, duration):
-                    mgr.penalties(team_color)[idx].setPlayer(player)
-                    mgr.penalties(team_color)[idx].setDuration(duration)
-                EditPenalty(self.root, self.tb_offset, mgr, self.cfg, team_color,
-                            mgr.delPenalty, submit_clicked,
-                            mgr.penalties(team_color)[idx])
-
-            def add_penalty(self, team_color):
-                def submit_clicked(player, duration):
-                    mgr.addPenalty(Penalty(player, team_color, duration))
-                EditPenalty(self.root, self.tb_offset, mgr, self.cfg, team_color,
-                            lambda x: None, submit_clicked)
-
             PenaltiesColumn(self.root, 0, TeamColor.white, refresh_ms, mgr,
-                            lambda idx: edit_penalty(self, TeamColor.white, idx),
-                            lambda: add_penalty(self, TeamColor.white), self.cfg)
+                            lambda idx: self.edit_penalty(TeamColor.white, idx),
+                            lambda: self.add_penalty(TeamColor.white), self.cfg)
             PenaltiesColumn(self.root, 2, TeamColor.black, refresh_ms, mgr,
-                            lambda idx: edit_penalty(self, TeamColor.black, idx),
-                            lambda: add_penalty(self, TeamColor.black), self.cfg)
+                            lambda idx: self.edit_penalty(TeamColor.black, idx),
+                            lambda: self.add_penalty(TeamColor.black), self.cfg)
+
+    def edit_penalty(self, team_color, idx):
+        def submit_clicked(player, duration):
+            mgr.penalties(team_color)[idx].setPlayer(player)
+            mgr.penalties(team_color)[idx].setDuration(duration)
+        EditPenalty(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
+                    mgr.delPenalty, submit_clicked,
+                    mgr.penalties(team_color)[idx])
+
+    def add_penalty(self, team_color):
+        def submit_clicked(player, duration):
+            mgr.addPenalty(Penalty(player, team_color, duration))
+        EditPenalty(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
+                    lambda x: None, submit_clicked)
 
     def center_column(self, refresh_ms):
         clock_height = 120

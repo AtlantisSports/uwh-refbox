@@ -1,5 +1,5 @@
 from . import ui
-from uwh.gamemanager import GameManager
+from uwh.gamemanager import GameManager, TeamColor
 from .noiomanager import IOManager
 
 def test_refbox_config_parser():
@@ -79,3 +79,8 @@ def test_PlayerSelectNumpad():
     psn.clicked('4')
     psn.clicked('2')
     assert psn.get_value() == '42'
+
+def test_add_penalty():
+    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+    nv.mgr.setGameClock(2)
+    nv.add_penalty(TeamColor.black)
