@@ -260,3 +260,39 @@ def test_ScoreIncrementer():
 
     incrementer.no_clicked()
     assert incrementer.submit_was_clicked == False
+
+def test_PenaltiesColumn():
+    root = ui.sized_frame(None, 1, 2)
+
+    cfg = ui.RefboxConfigParser()
+    mgr = GameManager()
+
+    def edit_penalty(idx):
+        assert idx == 1
+        pc.edit_was_clicked = True
+
+    def add_penalty():
+        pc.add_was_clicked = True
+
+    pc = ui.PenaltiesColumn(root, 0, TeamColor.black, 50, mgr, edit_penalty, add_penalty, cfg)
+    pc.update_listbox()
+    pc.add_was_clicked = False
+    pc.edit_was_clicked = False
+
+    pc.add_clicked()
+    assert pc.add_was_clicked == True
+    assert pc.edit_was_clicked == False
+
+    pc = ui.PenaltiesColumn(root, 2, TeamColor.white, 50, mgr, edit_penalty, add_penalty, cfg)
+    pc.update_listbox()
+    pc.add_was_clicked = False
+    pc.edit_was_clicked = False
+
+    penalty = Penalty(37, TeamColor.white, 3 * 60)
+    mgr.addPenalty(penalty)
+
+    pc.select_set(1)
+
+    pc.edit_clicked()
+    assert pc.add_was_clicked == False
+    assert pc.edit_was_clicked == True

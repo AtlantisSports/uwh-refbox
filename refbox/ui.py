@@ -301,16 +301,39 @@ def sel_index_or_none(listbox):
     sel = listbox.curselection()
     return None if len(sel) != 1 else sel[0]
 
-def PenaltiesColumn(root, col, team_color, refresh_ms, mgr, edit_penalty, add_penalty, cfg):
-    listbox = tk.Listbox(borderwidth=0)
+class PenaltiesColumn(object):
+    def __init__(self, root, col, team_color, refresh_ms, mgr, edit_penalty,
+                 add_penalty, cfg):
+        self.edit_penalty = edit_penalty
+        self.add_penalty = add_penalty
+        self.selection = None
+        self.mgr = mgr
+        self.team_color = team_color
+        self.refresh_ms = refresh_ms
 
-    listbox.config(bg="grey", fg="white", font=(_font_name, 14))
+        self.listbox = tk.Listbox(borderwidth=0)
+        self.listbox.config(bg="grey", fg="white", font=(_font_name, 14))
 
-    def update_listbox():
-        sel = sel_index_or_none(listbox)
-        listbox.delete(0, tk.END)
-        for p in mgr.penalties(team_color):
-            remaining = p.timeRemaining(mgr.gameClock())
+        self.listbox.after(refresh_ms, self.update_listbox)
+
+        self.listbox.grid(row=3, column=col)
+
+        button_height = 70
+        button_width = cfg.getint('hardware', 'screen_x') / 4
+
+        edit = SizedButton(root, self.edit_clicked, "Edit", "Yellow.TButton",
+                           button_height, button_width)
+        edit.grid(row=4, column=col)
+
+        add = SizedButton(root, self.add_clicked, "Penalty", "Red.TButton",
+                          button_height, button_width)
+        add.grid(row=5, column=col)
+
+    def update_listbox(self):
+        sel = self.selection or sel_index_or_none(self.listbox)
+        self.listbox.delete(0, tk.END)
+        for p in self.mgr.penalties(self.team_color):
+            remaining = p.timeRemaining(self.mgr.gameClock())
             if p.dismissed():
                 time_str = "Dismissed"
             elif remaining != 0:
@@ -318,31 +341,25 @@ def PenaltiesColumn(root, col, team_color, refresh_ms, mgr, edit_penalty, add_pe
             else:
                 time_str = "Served"
             label = "#{} - {}".format(p.player(), time_str)
-            listbox.insert(tk.END, label)
-        if sel is not None and 0 <= sel < len(mgr.penalties(team_color)):
-            listbox.select_set(sel)
-        listbox.after(refresh_ms, update_listbox)
-    listbox.after(refresh_ms, update_listbox)
+            self.listbox.insert(tk.END, label)
+        if sel is not None and 0 <= sel < len(self.mgr.penalties(self.team_color)):
+            self.listbox.select_set(sel)
+        self.listbox.after(self.refresh_ms, self.update_listbox)
 
-    listbox.grid(row=3, column=col)
+    def select_set(self, idx):
+        self.listbox.select_set(idx)
+        self.selection = idx
 
-    button_height = 70
-    button_width = cfg.getint('hardware', 'screen_x') / 4
-
-    def edit_helper():
-        sel = sel_index_or_none(listbox)
+    def edit_clicked(self):
+        sel = self.selection or sel_index_or_none(self.listbox)
+        print("edit clicked")
         if sel is not None:
-            edit_penalty(sel)
+            print("sel not none")
+            self.edit_penalty(sel)
 
-    edit = SizedButton(root, edit_helper, "Edit", "Yellow.TButton",
-                       button_height, button_width)
-    edit.grid(row=4, column=col)
+    def add_clicked(self):
+        self.add_penalty()
 
-    add = SizedButton(root, add_penalty, "Penalty", "Red.TButton",
-                      button_height, button_width)
-    add.grid(row=5, column=col)
-
-    return root
 
 class PlayerSelectNumpad(tk.Frame):
     def __init__(self, root, content):
