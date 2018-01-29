@@ -239,3 +239,24 @@ def test_ScoreEditor():
 
     editor.cancel_clicked()
     assert editor.submit_was_clicked == False
+
+
+def test_ScoreIncrementer():
+    def on_submit(new_score):
+        assert new_score == 43
+        incrementer.submit_was_clicked = True
+
+    cfg = ui.RefboxConfigParser()
+    root = tk.Tk()
+
+    incrementer = ui.ScoreIncrementer(root, 0, 42, True, on_submit, cfg)
+    incrementer.submit_was_clicked = False
+
+    incrementer.yes_clicked()
+    assert incrementer.submit_was_clicked == True
+
+    incrementer = ui.ScoreIncrementer(root, 0, 42, True, on_submit, cfg)
+    incrementer.submit_was_clicked = False
+
+    incrementer.no_clicked()
+    assert incrementer.submit_was_clicked == False

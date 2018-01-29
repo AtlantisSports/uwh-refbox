@@ -222,43 +222,48 @@ class ScoreEditor(object):
         self.on_submit(self.score_var.get())
 
 
-def IncrementScore(master, tb_offset, score, is_black, on_submit, cfg):
-    root = tk.Toplevel(master, background='black')
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
-                                       cfg.getint('hardware', 'screen_y'),
-                                       0, tb_offset))
+class ScoreIncrementer(object):
+    def __init__(self, master, tb_offset, score, is_black, on_submit, cfg):
+        self.root = tk.Toplevel(master, background='black')
+        self.root.resizable(width=tk.FALSE, height=tk.FALSE)
+        self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
+                                                cfg.getint('hardware', 'screen_y'),
+                                                0, tb_offset))
 
-    maybe_hide_cursor(root)
+        maybe_hide_cursor(self.root)
 
-    root.overrideredirect(1)
-    root.transient(master)
+        self.root.overrideredirect(1)
+        self.root.transient(master)
 
-    space = tk.Frame(root, height=100, width=100, bg="black")
-    space.grid(row=0, column=0)
+        self.on_submit = on_submit
+        self.score = score
 
-    header_font = (_font_name, 36)
-    color = "BLACK" if is_black else "WHITE"
-    header_text = "SCORE {}?".format(color)
-    header = SizedLabel(root, header_text, "black", "white", header_font,
-                        50, cfg.getint('hardware', 'screen_x')/ 2)
-    header.grid(row=1, columnspan=2, column=0)
+        space = tk.Frame(self.root, height=100, width=100, bg="black")
+        space.grid(row=0, column=0)
 
-    def no_clicked():
-        root.destroy()
+        header_font = (_font_name, 36)
+        color = "BLACK" if is_black else "WHITE"
+        header_text = "SCORE {}?".format(color)
+        header = SizedLabel(self.root, header_text, "black", "white", header_font,
+                            50, cfg.getint('hardware', 'screen_x')/ 2)
+        header.grid(row=1, columnspan=2, column=0)
 
-    no_button = SizedButton(root, no_clicked, "NO", "Red.TButton",
-                            150, cfg.getint('hardware', 'screen_x') / 2)
-    no_button.grid(row=2, column=0)
+        no_button = SizedButton(self.root, self.no_clicked, "NO", "Red.TButton",
+                                150, cfg.getint('hardware', 'screen_x') / 2)
+        no_button.grid(row=2, column=0)
 
-    def yes_clocked():
-        root.destroy()
-        if score < 99:
-            on_submit(score + 1)
+        yes_button = SizedButton(self.root, self.yes_clicked, "YES", "Green.TButton",
+                                 150, cfg.getint('hardware', 'screen_x') / 2)
+        yes_button.grid(row=2, column=1)
 
-    yes_button = SizedButton(root, yes_clocked, "YES", "Green.TButton",
-                             150, cfg.getint('hardware', 'screen_x') / 2)
-    yes_button.grid(row=2, column=1)
+    def no_clicked(self):
+        self.root.destroy()
+
+    def yes_clicked(self):
+        self.root.destroy()
+        if self.score < 99:
+            self.on_submit(self.score + 1)
+
 
 def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
                 score_changed, increment_score, cfg):
@@ -685,12 +690,12 @@ class NormalView(object):
                     True, lambda x: self.mgr.setBlackScore(x), self.cfg)
 
     def increment_white_score(self):
-        IncrementScore(self.root, self.tb_offset, self.mgr.whiteScore(),
-                       False, lambda x: self.mgr.setWhiteScore(x), self.cfg)
+        ScoreIncrementer(self.root, self.tb_offset, self.mgr.whiteScore(),
+                         False, lambda x: self.mgr.setWhiteScore(x), self.cfg)
 
     def increment_black_score(self):
-        IncrementScore(self.root, self.tb_offset, self.mgr.blackScore(),
-                       True, lambda x: self.mgr.setBlackScore(x), self.cfg)
+        ScoreIncrementer(self.root, self.tb_offset, self.mgr.blackScore(),
+                         True, lambda x: self.mgr.setBlackScore(x), self.cfg)
 
     def edit_time(self):
         was_running = self.mgr.gameClockRunning()
