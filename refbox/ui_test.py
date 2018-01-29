@@ -31,7 +31,7 @@ def test_normal_view():
 
 
 def test_game_over():
-    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=True)
+    nv = ui.NormalView(GameManager(), IOManager(), NO_TITLE_BAR=False)
     nv.mgr.setGameStateSecondHalf()
     nv.mgr.setGameClock(0)
     nv.mgr.setGameClockRunning(True)
@@ -107,6 +107,9 @@ def test_PenaltyEditor_submit():
     editor._numpad.clicked('4')
     editor._numpad.clicked('2')
 
+    editor.time_select(2 * 60)
+    editor.time_select(1 * 60)
+    editor.time_select(-1)
     editor.time_select(5 * 60)
 
     editor.submit_clicked()
@@ -128,7 +131,7 @@ def test_PenaltyEditor_delete():
     mgr = GameManager()
     cfg = ui.RefboxConfigParser()
     root = tk.Tk()
-    editor = ui.PenaltyEditor(root, 0, mgr, cfg, TeamColor.black, on_delete, on_submit, penalty)
+    editor = ui.PenaltyEditor(root, 0, mgr, cfg, TeamColor.white, on_delete, on_submit, penalty)
     editor.submit_was_clicked = False
     editor.delete_was_clicked = False
 
@@ -140,6 +143,13 @@ def test_PenaltyEditor_delete():
     editor.delete_clicked()
     assert editor.submit_was_clicked == False
     assert editor.delete_was_clicked == True
+
+def test_PenaltyEditor_cancel():
+    mgr = GameManager()
+    cfg = ui.RefboxConfigParser()
+    root = tk.Tk()
+    editor = ui.PenaltyEditor(root, 0, mgr, cfg, TeamColor.white, lambda: None, lambda: None)
+    editor.cancel_clicked()
 
 def test_TimeEditor():
     def on_submit(new_time):
@@ -267,6 +277,19 @@ def test_PenaltiesColumn():
     cfg = ui.RefboxConfigParser()
     mgr = GameManager()
 
+    penalty = Penalty(37, TeamColor.white, 3 * 60)
+    mgr.addPenalty(penalty)
+
+    penalty = Penalty(38, TeamColor.black, 5 * 60)
+    mgr.addPenalty(penalty)
+
+    penalty = Penalty(38, TeamColor.black, -1)
+    mgr.addPenalty(penalty)
+
+    penalty = Penalty(38, TeamColor.black, 5 * 60, 10 * 60)
+    mgr.addPenalty(penalty)
+    mgr.setGameClock(0)
+
     def edit_penalty(idx):
         assert idx == 1
         pc.edit_was_clicked = True
@@ -275,6 +298,7 @@ def test_PenaltiesColumn():
         pc.add_was_clicked = True
 
     pc = ui.PenaltiesColumn(root, 0, TeamColor.black, 50, mgr, edit_penalty, add_penalty, cfg)
+    pc.select_set(1)
     pc.update_listbox()
     pc.add_was_clicked = False
     pc.edit_was_clicked = False
@@ -287,9 +311,6 @@ def test_PenaltiesColumn():
     pc.update_listbox()
     pc.add_was_clicked = False
     pc.edit_was_clicked = False
-
-    penalty = Penalty(37, TeamColor.white, 3 * 60)
-    mgr.addPenalty(penalty)
 
     pc.select_set(1)
 
