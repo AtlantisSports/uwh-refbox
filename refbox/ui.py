@@ -163,61 +163,64 @@ class TimeEditor(object):
         self.on_submit(self.clock_at_pause_var.get())
 
 
-def EditScore(master, tb_offset, score, is_black, on_submit, cfg):
-    root = tk.Toplevel(master, background='black')
-    root.resizable(width=tk.FALSE, height=tk.FALSE)
-    root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
-                                       cfg.getint('hardware', 'screen_y'),
-                                       0, tb_offset))
+class ScoreEditor(object):
+    def __init__(self, master, tb_offset, score, is_black, on_submit, cfg):
+        self.root = tk.Toplevel(master, background='black')
+        self.root.resizable(width=tk.FALSE, height=tk.FALSE)
+        self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
+                                           cfg.getint('hardware', 'screen_y'),
+                                           0, tb_offset))
 
-    maybe_hide_cursor(root)
+        maybe_hide_cursor(self.root)
 
-    root.overrideredirect(1)
-    root.transient(master)
+        self.root.overrideredirect(1)
+        self.root.transient(master)
 
+        self.on_submit = on_submit
 
-    header_font = (_font_name, 36)
-    header_text = "BLACK" if is_black else "WHITE"
-    header = SizedLabel(root, header_text, "black", "white", header_font, 50, 200)
-    header.grid(row=0, columnspan=2, column=3)
+        header_font = (_font_name, 36)
+        header_text = "BLACK" if is_black else "WHITE"
+        header = SizedLabel(self.root, header_text, "black", "white", header_font, 50, 200)
+        header.grid(row=0, columnspan=2, column=3)
 
-    score_var = tk.IntVar(value=score)
-    score_height = 120
+        self.score_var = tk.IntVar(value=score)
+        score_height = 120
 
-    def dn():
-        x = score_var.get()
-        if x > 0:
-            score_var.set(x - 1)
+        dn_button = SizedButton(self.root, self.dn, "-", "LightBlue.TButton", score_height, 100)
+        dn_button.grid(row=1, column=2)
 
-    dn_button = SizedButton(root, dn, "-", "LightBlue.TButton", score_height, 100)
-    dn_button.grid(row=1, column=2)
+        label_font = (_font_name, 96)
+        label = SizedLabel(self.root, self.score_var, "black", "white", label_font, score_height, 200)
+        label.grid(row=1, column=3, columnspan=2)
 
-    label_font = (_font_name, 96)
-    label = SizedLabel(root, score_var, "black", "white", label_font, score_height, 200)
-    label.grid(row=1, column=3, columnspan=2)
+        up_button = SizedButton(self.root, self.up, "+", "LightBlue.TButton", score_height, 100)
+        up_button.grid(row=1, column=5)
 
-    def up():
-        x = score_var.get()
+        cancel_button = SizedButton(self.root, self.cancel_clicked, "CANCEL", "Red.TButton",
+                                    150, cfg.getint('hardware', 'screen_x') / 2)
+        cancel_button.grid(row=2, column=0, columnspan=4)
+
+        submit_button = SizedButton(self.root, self.submit_clicked, "SUBMIT", "Green.TButton",
+                                    150, cfg.getint('hardware', 'screen_x') / 2)
+        submit_button.grid(row=2, column=4, columnspan=4)
+
+    def up(self):
+        x = self.score_var.get()
         if x < 99:
-            score_var.set(x + 1)
+            self.score_var.set(x + 1)
 
-    up_button = SizedButton(root, up, "+", "LightBlue.TButton", score_height, 100)
-    up_button.grid(row=1, column=5)
+    def dn(self):
+        x = self.score_var.get()
+        if x > 0:
+            self.score_var.set(x - 1)
 
-    def cancel_clicked():
-        root.destroy()
+    def cancel_clicked(self):
+        self.root.destroy()
 
-    cancel_button = SizedButton(root, cancel_clicked, "CANCEL", "Red.TButton",
-                                150, cfg.getint('hardware', 'screen_x') / 2)
-    cancel_button.grid(row=2, column=0, columnspan=4)
+    def submit_clicked(self):
+        self.root.destroy()
+        self.on_submit(self.score_var.get())
 
-    def submit_clicked():
-        root.destroy()
-        on_submit(score_var.get())
-
-    submit_button = SizedButton(root, submit_clicked, "SUBMIT", "Green.TButton",
-                                150, cfg.getint('hardware', 'screen_x') / 2)
-    submit_button.grid(row=2, column=4, columnspan=4)
 
 def IncrementScore(master, tb_offset, score, is_black, on_submit, cfg):
     root = tk.Toplevel(master, background='black')
@@ -674,12 +677,12 @@ class NormalView(object):
         self.root.after(1000, lambda: self.iomgr.setSound(0))
 
     def edit_white_score(self):
-        EditScore(self.root, self.tb_offset, self.mgr.whiteScore(),
-                  False, lambda x: self.mgr.setWhiteScore(x), self.cfg)
+        ScoreEditor(self.root, self.tb_offset, self.mgr.whiteScore(),
+                    False, lambda x: self.mgr.setWhiteScore(x), self.cfg)
 
     def edit_black_score(self):
-        EditScore(self.root, self.tb_offset, self.mgr.blackScore(),
-                  True, lambda x: self.mgr.setBlackScore(x), self.cfg)
+        ScoreEditor(self.root, self.tb_offset, self.mgr.blackScore(),
+                    True, lambda x: self.mgr.setBlackScore(x), self.cfg)
 
     def increment_white_score(self):
         IncrementScore(self.root, self.tb_offset, self.mgr.whiteScore(),

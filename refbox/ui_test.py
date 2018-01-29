@@ -3,6 +3,8 @@ from . import ui
 from uwh.gamemanager import GameManager, TeamColor, Penalty
 from .noiomanager import IOManager
 
+import itertools
+
 def test_refbox_config_parser():
     cfg = ui.RefboxConfigParser()
     assert type(cfg.getint('game', 'half_play_duration')) == int
@@ -204,3 +206,36 @@ def test_TimeEditor():
     editor.cancel_clicked()
     assert editor.submit_was_clicked == False
     assert editor.cancel_was_clicked == True
+
+
+def test_ScoreEditor():
+    def on_submit(new_score):
+        assert new_score == 99
+        editor.submit_was_clicked = True
+
+    cfg = ui.RefboxConfigParser()
+    root = tk.Tk()
+    editor = ui.ScoreEditor(root, 0, 1, True, on_submit, cfg)
+    editor.submit_was_clicked = False
+
+    editor.dn()
+    editor.dn()
+    editor.dn()
+    assert editor.score_var.get() == 0
+
+    editor.up()
+    assert editor.score_var.get() == 1
+
+    for _ in itertools.repeat(None, 110):
+        editor.up()
+
+    assert editor.score_var.get() == 99
+
+    editor.submit_clicked()
+    assert editor.submit_was_clicked == True
+
+    editor = ui.ScoreEditor(root, 0, 42, True, on_submit, cfg)
+    editor.submit_was_clicked = False
+
+    editor.cancel_clicked()
+    assert editor.submit_was_clicked == False
