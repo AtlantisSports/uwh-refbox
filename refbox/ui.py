@@ -297,9 +297,28 @@ def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
 
     return root
 
-def sel_index_or_none(listbox):
-    sel = listbox.curselection()
-    return None if len(sel) != 1 else sel[0]
+
+class PenaltyButton(object):
+    def __init__(self, root, penalty, width, height, refresh_ms, mgr, edit_clicked):
+        self.penalty = penalty
+        self.refresh_ms = refresh_ms
+        self.mgr = mgr
+        self.var = tk.StringVar()
+        self.button = SizedButton(root, edit_clicked, self.var, "Small.White.TButton",
+                                  height, width)
+        self.button.after(refresh_ms, self.refresh)
+
+    def refresh(self):
+        remaining = self.penalty.timeRemaining(self.mgr.gameClock())
+        if self.penalty.dismissed():
+            time_str = "Dismissed"
+        elif remaining != 0:
+            time_str = "%d:%02d" % (remaining // 60, remaining % 60)
+        else:
+            time_str = "Served"
+        self.var.set("#{} - {}".format(self.penalty.player(), time_str))
+        self.button.after(self.refresh_ms, self.refresh)
+
 
 class PenaltiesColumn(object):
     def __init__(self, root, col, team_color, refresh_ms, mgr, edit_penalty,
@@ -311,54 +330,54 @@ class PenaltiesColumn(object):
         self.team_color = team_color
         self.refresh_ms = refresh_ms
 
-        self.listbox = tk.Listbox(borderwidth=0, width=25)
-        self.listbox.config(bg="grey", fg="white", font=(_font_name, 14))
+        self.buttons = []
 
-        self.listbox.after(refresh_ms, self.update_listbox)
+        self.col_width = cfg.getint('hardware', 'screen_x') / 4
 
-        self.listbox.grid(row=3, column=col)
+        self.outer = sized_frame(root, 250, self.col_width)
+        self.outer.grid(row=3, column=col)
+
+        self.canvas = tk.Canvas(self.outer, background="#cccccc")
+        self.canvas.pack(side=tk.RIGHT)
+
+        self.scrollbar = tk.Scrollbar(self.outer, command=self.canvas.yview)
+        self.scrollbar.pack(side=tk.LEFT, fill='y')
+
+        self.canvas.configure(yscrollcommand = self.scrollbar.set)
+
+        self.canvas.bind('<Configure>', lambda _: self.canvas.configure(scrollregion=self.canvas.bbox('all')))
+
+        self.frame = tk.Frame(self.canvas)
+        self.canvas.create_window((0,0), window=self.frame, anchor='nw')
 
         button_height = 70
-        button_width = cfg.getint('hardware', 'screen_x') / 4
-
-        edit = SizedButton(root, self.edit_clicked, "Edit", "Yellow.TButton",
-                           button_height, button_width)
-        edit.grid(row=4, column=col)
+        button_width = self.col_width
 
         add = SizedButton(root, self.add_clicked, "Penalty", "Red.TButton",
                           button_height, button_width)
-        add.grid(row=5, column=col)
+        add.grid(row=4, column=col)
 
-    def update_listbox(self):
-        sel = self.selection or sel_index_or_none(self.listbox)
-        self.listbox.delete(0, tk.END)
         for p in self.mgr.penalties(self.team_color):
-            remaining = p.timeRemaining(self.mgr.gameClock())
-            if p.dismissed():
-                time_str = "Dismissed"
-            elif remaining != 0:
-                time_str = "%d:%02d" % (remaining // 60, remaining % 60)
-            else:
-                time_str = "Served"
-            label = "#{} - {}".format(p.player(), time_str)
-            self.listbox.insert(tk.END, label)
-        if sel is not None and 0 <= sel < len(self.mgr.penalties(self.team_color)):
-            self.listbox.select_set(sel)
-        self.listbox.after(self.refresh_ms, self.update_listbox)
+            self.add_button(p)
 
-    def select_set(self, idx):
-        self.listbox.select_set(idx)
-        self.selection = idx
+    def redraw(self):
+        for b in self.buttons:
+            b.button.destroy()
 
-    def edit_clicked(self):
-        sel = self.selection or sel_index_or_none(self.listbox)
-        print("edit clicked")
-        if sel is not None:
-            print("sel not none")
-            self.edit_penalty(sel)
+        for p in self.mgr.penalties(self.team_color):
+            self.add_button(p)
 
     def add_clicked(self):
         self.add_penalty()
+
+    def edit_clicked(self, p):
+        self.edit_penalty(p)
+
+    def add_button(self, p):
+        b = PenaltyButton(self.frame, p, self.col_width, 50,
+                          self.refresh_ms, self.mgr, partial(self.edit_penalty, p))
+        b.button.pack()
+        self.buttons.append(b)
 
 
 class PlayerSelectNumpad(tk.Frame):
@@ -546,6 +565,9 @@ def create_styles():
     create_button_style('Dark.White.TButton', 'light grey', font_size)
     create_button_style('Yellow.TButton', 'yellow', font_size)
 
+    font_size = 14
+    create_button_style('Small.White.TButton', 'white', font_size)
+
 
 class NormalView(object):
 
@@ -597,24 +619,32 @@ class NormalView(object):
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
         if self.cfg.getint('hardware', 'version') == 2:
-            PenaltiesColumn(self.root, 0, TeamColor.white, refresh_ms, self.mgr,
-                            lambda idx: self.edit_penalty(TeamColor.white, idx),
-                            lambda: self.add_penalty(TeamColor.white), self.cfg)
-            PenaltiesColumn(self.root, 2, TeamColor.black, refresh_ms, self.mgr,
-                            lambda idx: self.edit_penalty(TeamColor.black, idx),
-                            lambda: self.add_penalty(TeamColor.black), self.cfg)
+            self.penalties = [None, None]
+            wht =  PenaltiesColumn(self.root, 0, TeamColor.white, refresh_ms, self.mgr,
+                                   lambda idx: self.edit_penalty(TeamColor.white, idx),
+                                   lambda: self.add_penalty(TeamColor.white), self.cfg)
+            self.penalties[TeamColor.white] = wht
+            blk = PenaltiesColumn(self.root, 2, TeamColor.black, refresh_ms, self.mgr,
+                                  lambda idx: self.edit_penalty(TeamColor.black, idx),
+                                  lambda: self.add_penalty(TeamColor.black), self.cfg)
+            self.penalties[TeamColor.black] = blk
 
-    def edit_penalty(self, team_color, idx):
+    def edit_penalty(self, team_color, p):
         def submit_clicked(player, duration):
-            self.mgr.penalties(team_color)[idx].setPlayer(player)
-            self.mgr.penalties(team_color)[idx].setDuration(duration)
+            p.setPlayer(player)
+            p.setDuration(duration)
+            self.penalties[team_color].redraw()
+        def delete_clicked(penalty):
+            self.mgr.delPenalty(penalty)
+            self.penalties[team_color].redraw()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
-                      self.mgr.delPenalty, submit_clicked,
-                      self.mgr.penalties(team_color)[idx])
+                      delete_clicked, submit_clicked, p)
 
     def add_penalty(self, team_color):
         def submit_clicked(self, player, duration):
-            self.mgr.addPenalty(Penalty(player, team_color, duration))
+            p = Penalty(player, team_color, duration)
+            self.mgr.addPenalty(p)
+            self.penalties[team_color].redraw()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
                       lambda x: None, partial(submit_clicked, self))
 

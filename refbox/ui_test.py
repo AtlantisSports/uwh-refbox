@@ -298,22 +298,9 @@ def test_PenaltiesColumn():
         pc.add_was_clicked = True
 
     pc = ui.PenaltiesColumn(root, 0, TeamColor.black, 50, mgr, edit_penalty, add_penalty, cfg)
-    pc.select_set(1)
-    pc.update_listbox()
     pc.add_was_clicked = False
     pc.edit_was_clicked = False
 
     pc.add_clicked()
     assert pc.add_was_clicked == True
     assert pc.edit_was_clicked == False
-
-    pc = ui.PenaltiesColumn(root, 2, TeamColor.white, 50, mgr, edit_penalty, add_penalty, cfg)
-    pc.update_listbox()
-    pc.add_was_clicked = False
-    pc.edit_was_clicked = False
-
-    pc.select_set(1)
-
-    pc.edit_clicked()
-    assert pc.add_was_clicked == False
-    assert pc.edit_was_clicked == True
