@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
 from refbox.ui import NormalView, RefboxConfigParser, is_rpi
-from refbox.noiomanager import IOManager
 from uwh.gamemanager import GameManager, PoolLayout
 from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
+
+if is_rpi():
+    from refbox.noiomanager import IOManager
+else:
+    from refbox.iomanager import IOManager
 
 cfg = RefboxConfigParser()
 cfg.read('timeshark.cfg')
