@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from refbox.ui import NormalView, RefboxConfigParser
-from refbox.noiomanager import IOManager
+#from refbox.noiomanager import IOManager
+from refbox.iomanager import IOManager
 from uwh.gamemanager import GameManager
 from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
 
