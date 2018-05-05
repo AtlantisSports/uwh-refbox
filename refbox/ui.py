@@ -591,7 +591,6 @@ class NormalView(object):
         def poll_clicker(self):
             if self.iomgr.readClicker():
                 print("remote clicked")
-                self.gong_clicked()
             else:
                 self.iomgr.setSound(0)
             self.root.after(refresh_ms, lambda: poll_clicker(self))
