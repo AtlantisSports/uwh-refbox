@@ -629,6 +629,10 @@ class NormalView(object):
                                   lambda: self.add_penalty(TeamColor.black), self.cfg)
             self.penalties[TeamColor.black] = blk
 
+    def redraw_penalties(self):
+        self.penalties[TeamColor.white].redraw()
+        self.penalties[TeamColor.black].redraw()
+
     def edit_penalty(self, team_color, p):
         def submit_clicked(player, duration):
             p.setPlayer(player)
@@ -694,6 +698,8 @@ class NormalView(object):
         if game_clock <= 0 and self.mgr.gameClockRunning():
             if self.mgr.gameStateFirstHalf():
                 self.mgr.pauseOutstandingPenalties()
+                self.mgr.deleteAllPenalties()
+                self.redraw_penalties()
                 self.mgr.setGameStateHalfTime()
                 self.mgr.setGameClock(half_time_duration)
                 self.gong_clicked()
@@ -701,10 +707,14 @@ class NormalView(object):
                 self.mgr.setGameStateSecondHalf()
                 self.mgr.setGameClock(half_play_duration)
                 self.mgr.restartOutstandingPenalties()
+                self.mgr.deleteServedPenalties()
+                self.redraw_penalties()
                 self.gong_clicked()
             elif self.mgr.gameStateSecondHalf():
                 self.gong_clicked()
                 self.mgr.pauseOutstandingPenalties()
+                self.mgr.deleteServedPenalties()
+                self.redraw_penalties()
                 self.timeout_mgr.set_game_over(self.mgr)
 
         if self.mgr.timeoutStateRef():
