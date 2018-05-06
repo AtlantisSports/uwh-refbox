@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from refbox.ui import NormalView, RefboxConfigParser
+from refbox.ui import NormalView, RefboxConfigParser, is_rpi
 from refbox.noiomanager import IOManager
 from uwh.gamemanager import GameManager
 from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
@@ -14,5 +14,5 @@ if cfg.getboolean('hardware', 'has_xbee'):
     xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
     xbee.broadcast_thread(xbee_clients(cfg))
 
-nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=True, cfg=cfg)
+nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=is_rpi(), cfg=cfg)
 nv.root.mainloop()

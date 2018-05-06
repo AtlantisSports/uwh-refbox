@@ -61,10 +61,12 @@ def SizedButton(root, callback, text, style, height, width):
     b.pack(fill=tk.BOTH, expand=1)
     return sf
 
+def is_rpi():
+    return os.uname().machine == 'armv7l'
 
 def maybe_hide_cursor(root):
     # Don't show a cursor on Pi.
-    if os.uname().machine == 'armv7l':
+    if is_rpi():
         root.configure(cursor='none')
 
 class TimeEditor(object):
