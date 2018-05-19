@@ -3,7 +3,7 @@ from tkinter import ttk
 from configparser import ConfigParser
 import os
 from .timeoutmanager import TimeoutManager
-from uwh.gamemanager import GameManager, TeamColor, Penalty
+from uwh.gamemanager import GameManager, TeamColor, Penalty, TimeoutState
 from functools import partial
 
 _font_name = 'Consolas'
@@ -24,7 +24,8 @@ def RefboxConfigParser():
 
         # game
         'half_play_duration': '600',
-        'half_time_duration': '180'
+        'half_time_duration': '180',
+        'team_timeout_duration': '120'
     }
     parser = ConfigParser(defaults=defaults)
     parser.add_section('hardware')
@@ -545,6 +546,61 @@ class PenaltyEditor(object):
         self.on_submit(self._numpad.get_value(), self._duration.get())
 
 
+class TimeoutEditor(object):
+    def __init__(self, master, tb_offset, mgr, cfg, on_ref, on_white, on_black):
+        self.root = tk.Toplevel(master, background='black')
+        self.root.resizable(width=tk.FALSE, height=tk.FALSE)
+        self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
+                                                cfg.getint('hardware', 'screen_y'),
+                                                0, tb_offset))
+
+        maybe_hide_cursor(self.root)
+
+        self.root.overrideredirect(1)
+        self.root.transient(master)
+
+        self.on_ref = on_ref
+        self.on_white = on_white
+        self.on_black = on_black
+
+        frame_height = 100
+        frame_width = cfg.getint('hardware', 'screen_x')
+
+        # Actions
+        submit_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
+                                bg="dark grey")
+        submit_frame.grid(row=3, column=0, columnspan=2)
+
+        cancel = SizedButton(submit_frame, self.cancel_clicked, "Cancel",
+                             "Yellow.TButton", frame_height, frame_width / 3)
+        cancel.grid(row=0, column=0)
+
+        white = SizedButton(submit_frame, self.white_clicked,
+                            "White Timeout", "White.TButton",
+                            frame_height, frame_width / 3)
+        white.grid(row=0, column=1)
+
+        black = SizedButton(submit_frame, self.black_clicked,
+                            "Black Timeout", "Blue.TButton",
+                            frame_height, frame_width / 3)
+        black.grid(row=0, column=2)
+
+    def ref_clicked(self):
+        self.root.destroy()
+        self.on_ref()
+
+    def white_clicked(self):
+        self.root.destroy()
+        self.on_white()
+
+    def black_clicked(self):
+        self.root.destroy()
+        self.on_black()
+
+    def cancel_clicked(self):
+        self.root.destroy()
+
+
 def create_button_style(name, background, sz, foreground='black'):
     style = ttk.Style()
     style.configure(name, foreground=foreground, background=background,
@@ -655,6 +711,20 @@ class NormalView(object):
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
                       lambda x: None, partial(submit_clicked, self))
 
+    def timeout_clicked(self):
+        half_play_duration = self.cfg.getint('game', 'half_play_duration')
+        def ref_clicked():
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
+        def white_clicked():
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.white)
+        def black_clicked():
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.black)
+        if self.timeout_mgr.ready_to_start() or self.timeout_mgr.ready_to_resume():
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+        else:
+            TimeoutEditor(self.root, self.tb_offset, self.mgr, self.cfg,
+                          ref_clicked, white_clicked, black_clicked)
+
     def center_column(self, refresh_ms):
         clock_height = 120
         clock_width = self.cfg.getint('hardware', 'screen_x') / 2
@@ -681,10 +751,9 @@ class NormalView(object):
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
         time_button_var = tk.StringVar()
-        self.timeout_mgr = TimeoutManager(time_button_var)
-        half_play_duration = self.cfg.getint('game', 'half_play_duration')
+        self.timeout_mgr = TimeoutManager(time_button_var, self.cfg.getint('game', 'team_timeout_duration'))
         time_button = SizedButton(self.root,
-                                  lambda: self.timeout_mgr.click(self.mgr, half_play_duration),
+                                  lambda: self.timeout_clicked(),
                                   time_button_var, "Yellow.TButton",
                                   150, clock_width)
         time_button.grid(row=2, column=1)
@@ -699,7 +768,11 @@ class NormalView(object):
         half_time_duration = self.cfg.getint('game', 'half_time_duration')
 
         if game_clock <= 0 and self.mgr.gameClockRunning():
-            if self.mgr.gameStateFirstHalf():
+            if self.mgr.timeoutStateWhite():
+                self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            elif self.mgr.timeoutStateBlack():
+                self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            elif self.mgr.gameStateFirstHalf():
                 self.mgr.pauseOutstandingPenalties()
                 self.mgr.deleteAllPenalties()
                 self.redraw_penalties()
@@ -721,7 +794,11 @@ class NormalView(object):
                 self.timeout_mgr.set_game_over(self.mgr)
 
         if self.mgr.timeoutStateRef():
-            self.status_var.set("TIMEOUT")
+            self.status_var.set("REF TIMEOUT")
+        elif self.mgr.timeoutStateWhite():
+            self.status_var.set("WHITE T/O")
+        elif self.mgr.timeoutStateBlack():
+            self.status_var.set("BLACK T/O")
         elif self.mgr.gameStateFirstHalf():
             self.status_var.set("FIRST HALF")
         elif self.mgr.gameStateHalfTime():
