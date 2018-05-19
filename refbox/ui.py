@@ -15,6 +15,7 @@ def RefboxConfigParser():
         'screen_y': '480',
         'version': '1',
         'has_xbee': 'False',
+        'white_on_right': 'True',
 
         # xbee
         'port': '/dev/tty.usbserial-DN03ZRU8',

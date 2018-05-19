@@ -2,13 +2,18 @@
 
 from refbox.ui import NormalView, RefboxConfigParser, is_rpi
 from refbox.noiomanager import IOManager
-from uwh.gamemanager import GameManager
+from uwh.gamemanager import GameManager, PoolLayout
 from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
 
 cfg = RefboxConfigParser()
 cfg.read('timeshark.cfg')
 
 mgr = GameManager()
+
+if cfg.getboolean('hardware', 'white_on_right'):
+    mgr.setLayout(PoolLayout.white_on_right)
+else:
+    mrg.setLayout(PoolLayout.white_on_left)
 
 if cfg.getboolean('hardware', 'has_xbee'):
     xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
