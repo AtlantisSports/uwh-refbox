@@ -384,11 +384,11 @@ class PenaltiesColumn(object):
 
         self.col_width = cfg.getint('hardware', 'screen_x') / 4
 
-        self.outer = sized_frame(root, 250, self.col_width)
+        self.outer = sized_frame(root, 380, self.col_width)
         self.outer.grid(row=3, column=col)
 
         self.canvas = tk.Canvas(self.outer, background="#cccccc")
-        self.canvas.pack(side=tk.RIGHT)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
         self.scrollbar = tk.Scrollbar(self.outer, command=self.canvas.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -908,7 +908,7 @@ class NormalView(object):
                                   150, clock_width)
         time_button.grid(row=2, column=1)
 
-        self.settings_view = SettingsView(self.root, self.tb_offset, 400, clock_width,
+        self.settings_view = SettingsView(self.root, self.tb_offset, 450, clock_width,
                                           self.mgr, self.cfg, self.uwhscores)
         self.timeout_mgr.add_reset_handler(self.settings_view.next_game)
 
