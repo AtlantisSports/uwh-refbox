@@ -229,6 +229,49 @@ class ScoreEditor(object):
         self.on_submit(self.score_var.get())
 
 
+class ConfirmDialog(object):
+    #FIXME: merge this with the ScoreIncrementer
+
+    def __init__(self, master, tb_offset, prompt, on_yes, on_no, cfg):
+        self.root = tk.Toplevel(master, background='black')
+        self.root.resizable(width=tk.FALSE, height=tk.FALSE)
+        self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
+                                                cfg.getint('hardware', 'screen_y'),
+                                                0, tb_offset))
+
+        maybe_hide_cursor(self.root)
+
+        self.root.overrideredirect(1)
+        self.root.transient(master)
+
+        self.on_yes = on_yes
+        self.on_no = on_no
+
+        space = tk.Frame(self.root, height=100, width=100, bg="black")
+        space.grid(row=0, column=0)
+
+        header_font = (_font_name, 20)
+        header = SizedLabel(self.root, prompt, "black", "white", header_font,
+                            50, cfg.getint('hardware', 'screen_x'))
+        header.grid(row=1, columnspan=2, column=0)
+
+        no_button = SizedButton(self.root, self.no_clicked, "NO", "Red.TButton",
+                                150, cfg.getint('hardware', 'screen_x') / 2)
+        no_button.grid(row=2, column=0)
+
+        yes_button = SizedButton(self.root, self.yes_clicked, "YES", "Green.TButton",
+                                 150, cfg.getint('hardware', 'screen_x') / 2)
+        yes_button.grid(row=2, column=1)
+
+    def no_clicked(self):
+        self.root.destroy()
+        self.on_no()
+
+    def yes_clicked(self):
+        self.root.destroy()
+        self.on_yes()
+
+
 class ScoreIncrementer(object):
     def __init__(self, master, tb_offset, score, is_black, on_submit, cfg):
         self.root = tk.Toplevel(master, background='black')
@@ -388,7 +431,9 @@ class PenaltiesColumn(object):
 
 
 class SettingsView(object):
-    def __init__(self, root, height, width, mgr, cfg, uwhscores):
+    def __init__(self, root, tb_offset, height, width, mgr, cfg, uwhscores):
+        self.root = root
+        self.tb_offset = tb_offset
         self.mgr = mgr
         self.cfg = cfg
         self.uwhscores = uwhscores
@@ -409,28 +454,44 @@ class SettingsView(object):
         self.listbox.pack(expand=1, fill=tk.BOTH)
         self.cur_selection = None
 
+        self.listbox.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.listbox.yview)
+
         def response(games):
             self.games = [g for g in games if g['pool'] == pool]
 
-            def desc(game):
-                return "#{} {} - {} vs {}".format(game['game_type'], game['gid'],
-                                                  game['white'], game['black'])
-
             for game in self.games:
-                self.listbox.insert(tk.END, desc(game))
+                self.listbox.insert(tk.END, self.desc(game))
+
+            if len(self.games) > 0:
+                self.listbox.selection_set(0)
+                self.cur_selection = self.listbox.curselection()
+            self.outer.after(250, self.poll)
 
         self.uwhscores.get_game_list(tid, response)
 
-        self.listbox.config(yscrollcommand=scrollbar.set)
-        scrollbar.config(command=self.listbox.yview)
-        self.outer.after(250, self.poll)
+    def desc(self, game):
+        return "#{} {} - {} vs {}".format(game['game_type'], game['gid'],
+                                          game['white'], game['black'])
 
     def poll(self):
         now = self.listbox.curselection()
         if now != self.cur_selection:
+            temp = self.cur_selection
             self.cur_selection = now
-            if now:
+
+            def on_yes():
                 self.mgr.setGid(self.games[now[0]]['gid'])
+                self.cur_selection = now
+            def on_no():
+                self.listbox.selection_clear(0, tk.END)
+                self.listbox.selection_set(temp[0])
+                self.cur_selection = temp
+
+            ConfirmDialog(self.root, self.tb_offset,
+                          "Switch to {}?".format(self.desc(self.games[now[0]])),
+                          on_yes, on_no, self.cfg)
+
         self.outer.after(250, self.poll)
 
 
@@ -837,7 +898,7 @@ class NormalView(object):
                                   150, clock_width)
         time_button.grid(row=2, column=1)
 
-        self.settings_view = SettingsView(self.root, 400, clock_width,
+        self.settings_view = SettingsView(self.root, self.tb_offset, 400, clock_width,
                                           self.mgr, self.cfg, self.uwhscores)
 
     def refresh_time(self):
