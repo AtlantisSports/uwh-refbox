@@ -348,7 +348,7 @@ class PenaltiesColumn(object):
         self.canvas.pack(side=tk.RIGHT)
 
         self.scrollbar = tk.Scrollbar(self.outer, command=self.canvas.yview)
-        self.scrollbar.pack(side=tk.LEFT, fill='y')
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.canvas.configure(yscrollcommand = self.scrollbar.set)
 
@@ -387,9 +387,13 @@ class PenaltiesColumn(object):
         self.buttons.append(b)
 
 
-class SettingsView(tk.Frame):
+class SettingsView(object):
     def __init__(self, root, height, width, mgr, cfg, uwhscores):
+        self.mgr = mgr
+        self.cfg = cfg
         self.uwhscores = uwhscores
+
+        self.games = []
 
         tid = cfg.get('game', 'tid')
         pool = cfg.get('game', 'pool')
@@ -397,34 +401,38 @@ class SettingsView(tk.Frame):
         self.outer = sized_frame(root, height, width)
         self.outer.grid(row=3, column=1, rowspan=2)
 
-        self.cur_var = tk.StringVar()
-        self.cur_var.set('Current')
-        cur_l = tk.Label(self.outer, textvariable=self.cur_var)
-        cur_l.pack()
+        scrollbar = tk.Scrollbar(self.outer, width=30)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.next_var = tk.StringVar()
-        self.next_var.set('Next')
-        next_l = tk.Label(self.outer, textvariable=self.next_var)
-        next_l.pack()
+        self.listbox = tk.Listbox(self.outer, font=(_font_name, 18),
+                                  selectmode=tk.SINGLE)
+        self.listbox.pack(expand=1, fill=tk.BOTH)
+        self.cur_selection = None
 
-        def games(response):
-            games = [g for g in response if g['pool'] == pool]
+        def response(games):
+            self.games = [g for g in games if g['pool'] == pool]
 
             def desc(game):
-                return "{} #{} - {} vs {}".format(game['game_type'], game['gid'],
+                return "#{} {} - {} vs {}".format(game['game_type'], game['gid'],
                                                   game['white'], game['black'])
 
-            if len(games) > 2:
-                self.cur_var.set(desc(games[0]))
-                self.next_var.set(desc(games[1]))
-            elif len(games) > 1:
-                self.cur_var.set(desc(games[0]))
-                self.next_var.set('None next')
-            else:
-                self.cur_var.set('None current')
-                self.next_var.set('None next')
+            for game in self.games:
+                self.listbox.insert(tk.END, desc(game))
 
-        self.uwhscores.get_game_list(tid, games)
+        self.uwhscores.get_game_list(tid, response)
+
+        self.listbox.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.listbox.yview)
+        self.outer.after(250, self.poll)
+
+    def poll(self):
+        now = self.listbox.curselection()
+        if now != self.cur_selection:
+            self.cur_selection = now
+            if now:
+                self.mgr.setGid(self.games[now[0]]['gid'])
+        self.outer.after(250, self.poll)
+
 
 class PlayerSelectNumpad(tk.Frame):
     def __init__(self, root, content):
