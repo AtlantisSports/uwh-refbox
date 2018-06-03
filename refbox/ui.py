@@ -464,8 +464,8 @@ class SettingsView(object):
                 self.listbox.insert(tk.END, self.desc(game))
 
             if len(self.games) > 0:
-                self.listbox.selection_set(0)
-                self.cur_selection = self.listbox.curselection()
+                self.select(0)
+
             self.outer.after(250, self.poll)
 
         self.uwhscores.get_game_list(tid, response)
@@ -474,6 +474,12 @@ class SettingsView(object):
         return "#{} {} - {} vs {}".format(game['game_type'], game['gid'],
                                           game['white'], game['black'])
 
+    def select(self, idx):
+        self.listbox.selection_clear(0, tk.END)
+        self.listbox.selection_set(idx)
+        self.cur_selection = (idx,)
+        self.mgr.setGid(self.games[idx]['gid'])
+
     def poll(self):
         now = self.listbox.curselection()
         if now != self.cur_selection:
@@ -481,18 +487,22 @@ class SettingsView(object):
             self.cur_selection = now
 
             def on_yes():
-                self.mgr.setGid(self.games[now[0]]['gid'])
-                self.cur_selection = now
+                self.select(now[0])
             def on_no():
-                self.listbox.selection_clear(0, tk.END)
-                self.listbox.selection_set(temp[0])
-                self.cur_selection = temp
+                self.select(temp[0])
 
             ConfirmDialog(self.root, self.tb_offset,
                           "Switch to {}?".format(self.desc(self.games[now[0]])),
                           on_yes, on_no, self.cfg)
 
         self.outer.after(250, self.poll)
+
+    def next_game(self):
+        if self.cur_selection:
+            next_idx = self.cur_selection[0] + 1
+            if next_idx < len(self.games):
+                self.select(next_idx)
+                self.mgr.setGid(int(self.games[next_idx]['gid']))
 
 
 class PlayerSelectNumpad(tk.Frame):
@@ -900,6 +910,7 @@ class NormalView(object):
 
         self.settings_view = SettingsView(self.root, self.tb_offset, 400, clock_width,
                                           self.mgr, self.cfg, self.uwhscores)
+        self.timeout_mgr.add_reset_handler(self.settings_view.next_game)
 
     def refresh_time(self):
         game_clock = self.mgr.gameClock()

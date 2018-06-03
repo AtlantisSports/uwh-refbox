@@ -6,6 +6,7 @@ class TimeoutManager(object):
         self._text = var
         self._team_timeout_duration = team_timeout_duration
         self._clock_at_timeout = None
+        self._reset_handlers = []
 
     def ready_to_start(self):
         return self._text.get() == "START" or self._text.get() == "RESET"
@@ -19,6 +20,11 @@ class TimeoutManager(object):
         mgr.setGameClockRunning(False)
         mgr.setGameClock(0)
         mgr.deleteAllPenalties()
+        for handler in self._reset_handlers:
+            handler()
+
+    def add_reset_handler(self, callback):
+        self._reset_handlers += [callback]
 
     def click(self, mgr, half_play_duration, state):
         if mgr.gameStateGameOver():
