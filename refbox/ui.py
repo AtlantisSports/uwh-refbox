@@ -28,6 +28,7 @@ def RefboxConfigParser():
         'team_timeout_duration': '60',
         'pool' : '1',
         'tid' : '16',
+        'uwhscores_url' : 'http://localhost:5000/api/v1',
     }
     parser = ConfigParser(defaults=defaults)
     parser.add_section('hardware')
@@ -386,6 +387,45 @@ class PenaltiesColumn(object):
         self.buttons.append(b)
 
 
+class SettingsView(tk.Frame):
+    def __init__(self, root, height, width, mgr, cfg, uwhscores):
+        self.uwhscores = uwhscores
+
+        tid = cfg.get('game', 'tid')
+        pool = cfg.get('game', 'pool')
+
+        self.outer = sized_frame(root, height, width)
+        self.outer.grid(row=3, column=1, rowspan=2)
+
+        self.cur_var = tk.StringVar()
+        self.cur_var.set('Current')
+        cur_l = tk.Label(self.outer, textvariable=self.cur_var)
+        cur_l.pack()
+
+        self.next_var = tk.StringVar()
+        self.next_var.set('Next')
+        next_l = tk.Label(self.outer, textvariable=self.next_var)
+        next_l.pack()
+
+        def games(response):
+            games = [g for g in response if g['pool'] == pool]
+
+            def desc(game):
+                return "{} #{} - {} vs {}".format(game['game_type'], game['gid'],
+                                                  game['white'], game['black'])
+
+            if len(games) > 2:
+                self.cur_var.set(desc(games[0]))
+                self.next_var.set(desc(games[1]))
+            elif len(games) > 1:
+                self.cur_var.set(desc(games[0]))
+                self.next_var.set('None next')
+            else:
+                self.cur_var.set('None current')
+                self.next_var.set('None next')
+
+        self.uwhscores.get_game_list(tid, games)
+
 class PlayerSelectNumpad(tk.Frame):
     def __init__(self, root, content):
         button_width = 75
@@ -653,12 +693,13 @@ def create_styles():
 
 class NormalView(object):
 
-    def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None):
+    def __init__(self, mgr, iomgr, NO_TITLE_BAR, cfg=None, uwhscores=None):
         self.mgr = GameManager([mgr])
         self.iomgr = iomgr
         self.cfg = cfg or RefboxConfigParser()
         self.mgr.setGameStateFirstHalf()
         self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
+        self.uwhscores = uwhscores
 
 
         self.root = tk.Tk()
@@ -787,6 +828,9 @@ class NormalView(object):
                                   time_button_var, "Yellow.TButton",
                                   150, clock_width)
         time_button.grid(row=2, column=1)
+
+        self.settings_view = SettingsView(self.root, 400, clock_width,
+                                          self.mgr, self.cfg, self.uwhscores)
 
     def refresh_time(self):
         game_clock = self.mgr.gameClock()

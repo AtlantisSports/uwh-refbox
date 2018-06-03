@@ -3,6 +3,7 @@
 from refbox.ui import NormalView, RefboxConfigParser, is_rpi
 from uwh.gamemanager import GameManager, PoolLayout
 from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
+from uwh.uwhscores_comms import UWHScores
 
 if is_rpi():
     from refbox.noiomanager import IOManager
@@ -23,11 +24,14 @@ if cfg.getboolean('hardware', 'white_on_right'):
 else:
     mrg.setLayout(PoolLayout.white_on_left)
 
+url = cfg.get('game', 'uwhscores_url')
+uwhscores = UWHScores(url)
+
 if cfg.getboolean('hardware', 'has_xbee'):
     xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
     xbee.broadcast_thread(xbee_clients(cfg))
 
-nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=is_rpi(), cfg=cfg)
+nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=is_rpi(), cfg=cfg, uwhscores=uwhscores)
 
 def quit(event):
     print("Quitting...")
