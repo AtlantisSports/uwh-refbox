@@ -52,6 +52,7 @@ def SizedLabel(root, text, bg, fg, font, height, width):
         l = tk.Label(sf, textvariable=text, bg=bg, fg=fg, font=font)
 
     l.pack(fill=tk.BOTH, expand=1)
+    sf._inner = l
     return sf
 
 
@@ -890,6 +891,7 @@ class NormalView(object):
         status_label = SizedLabel(self.root, self.status_var, "black", "#000fff000", status_font,
                                   status_height, status_width)
         status_label.grid(row=0, column=1)
+        self.status_label = status_label
 
         self.game_clock_var = tk.StringVar()
         self.game_clock_var.set("##:##")
@@ -949,22 +951,31 @@ class NormalView(object):
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("REF TIMEOUT")
+            self.status_label._inner.config(fg="#ffff00")
         elif self.mgr.timeoutStatePenaltyShot():
             self.status_var.set("PENALTY SHOT")
+            self.status_label._inner.config(fg="#ff0000")
         elif self.mgr.timeoutStateWhite():
             self.status_var.set("WHITE T/O")
+            self.status_label._inner.config(fg="#ffff00")
         elif self.mgr.timeoutStateBlack():
             self.status_var.set("BLACK T/O")
+            self.status_label._inner.config(fg="#ffff00")
         elif self.mgr.gameStatePreGame():
             self.status_var.set("PRE GAME")
+            self.status_label._inner.config(fg="#00ff00")
         elif self.mgr.gameStateFirstHalf():
             self.status_var.set("FIRST HALF")
+            self.status_label._inner.config(fg="#00ff00")
         elif self.mgr.gameStateHalfTime():
             self.status_var.set("HALF TIME")
+            self.status_label._inner.config(fg="#00ff00")
         elif self.mgr.gameStateSecondHalf():
             self.status_var.set("SECOND HALF")
+            self.status_label._inner.config(fg="#00ff00")
         elif self.mgr.gameStateGameOver():
             self.status_var.set("GAME OVER")
+            self.status_label._inner.config(fg="#ffff00")
 
         refresh_ms = 50
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
