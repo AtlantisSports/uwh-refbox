@@ -24,11 +24,14 @@ class TimeoutManager(object):
         if mgr.gameStateGameOver():
             mgr.setBlackScore(0)
             mgr.setWhiteScore(0)
-            mgr.setGameStateFirstHalf()
+            mgr.setGameStatePreGame()
             mgr.setGameClock(half_play_duration)
             mgr.deleteAllPenalties()
             self._text.set("START")
             return
+
+        if mgr.gameStatePreGame():
+            mgr.setGameStateFirstHalf()
 
         if mgr.timeoutStateNone() and state != TimeoutState.none:
             self._clock_at_timeout = mgr.gameClock()

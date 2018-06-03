@@ -766,7 +766,7 @@ class NormalView(object):
         self.mgr = GameManager([mgr])
         self.iomgr = iomgr
         self.cfg = cfg or RefboxConfigParser()
-        self.mgr.setGameStateFirstHalf()
+        self.mgr.setGameStatePreGame()
         self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
         self.uwhscores = uwhscores
 
@@ -944,6 +944,8 @@ class NormalView(object):
             self.status_var.set("WHITE T/O")
         elif self.mgr.timeoutStateBlack():
             self.status_var.set("BLACK T/O")
+        elif self.mgr.gameStatePreGame():
+            self.status_var.set("PRE GAME")
         elif self.mgr.gameStateFirstHalf():
             self.status_var.set("FIRST HALF")
         elif self.mgr.gameStateHalfTime():
