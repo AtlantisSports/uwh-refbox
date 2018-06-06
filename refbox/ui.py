@@ -469,7 +469,8 @@ class SettingsView(object):
 
             self.outer.after(250, self.poll)
 
-        self.uwhscores.get_game_list(tid, response)
+        if self.uwhscores:
+            self.uwhscores.get_game_list(tid, response)
 
     def desc(self, game):
         return "#{} {} - {} vs {}".format(game['game_type'], game['gid'],
