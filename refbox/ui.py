@@ -782,7 +782,6 @@ class NormalView(object):
         self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
         self.uwhscores = uwhscores
 
-
         self.root = tk.Tk()
         self.root.configure(background='black')
 
@@ -822,6 +821,7 @@ class NormalView(object):
             self.root.after(refresh_ms, lambda: poll_clicker(self))
         self.root.after(refresh_ms, lambda: poll_clicker(self))
 
+        self.penalties = [None, None]
         if self.cfg.getint('hardware', 'version') == 2:
             self.penalties = [None, None]
             wht =  PenaltiesColumn(self.root, 0, TeamColor.white, refresh_ms, self.mgr,
@@ -834,17 +834,27 @@ class NormalView(object):
             self.penalties[TeamColor.black] = blk
 
     def redraw_penalties(self):
-        self.penalties[TeamColor.white].redraw()
-        self.penalties[TeamColor.black].redraw()
+        self.redraw_penalties_white()
+        self.redraw_penalties_black()
+
+    def redraw_penalties_white(self):
+        white = self.penalties[TeamColor.white]
+        if white:
+            white.redraw()
+
+    def redraw_penalties_black(self):
+        black = self.penalties[TeamColor.black]
+        if black:
+            black.redraw()
 
     def edit_penalty(self, team_color, p):
         def submit_clicked(player, duration):
             p.setPlayer(player)
             p.setDuration(duration)
-            self.penalties[team_color].redraw()
+            self.redraw_penalties_white()
         def delete_clicked(penalty):
             self.mgr.delPenalty(penalty)
-            self.penalties[team_color].redraw()
+            self.redraw_penalties_black()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
                       delete_clicked, submit_clicked, p)
 
@@ -852,6 +862,10 @@ class NormalView(object):
         def submit_clicked(self, player, duration):
             p = Penalty(player, team_color, duration)
             self.mgr.addPenalty(p)
+            if team_color == TeamColor.white:
+                self.redraw_penalties_white()
+            else:
+                self.redraw_penalties_white()
             self.penalties[team_color].redraw()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
                       lambda x: None, partial(submit_clicked, self))
