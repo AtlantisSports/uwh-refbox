@@ -17,11 +17,11 @@ def test_click():
     assert mgr.gameState() == GameState.first_half
     assert mgr.timeoutState() == TimeoutState.none
 
-    timeout_mgr = timeoutmanager.TimeoutManager(Observable())
+    timeout_mgr = timeoutmanager.TimeoutManager(Observable(), 60)
     assert timeout_mgr._text.get() == "START"
 
     # Test when button says START.
-    timeout_mgr.click(mgr, 0)
+    timeout_mgr.click(mgr, 60, TimeoutState.none)
     assert mgr.gameClockRunning() is True
     assert mgr.gameState() == GameState.first_half
     assert mgr.timeoutState() == TimeoutState.none
@@ -33,14 +33,14 @@ def test_click():
     assert len(mgr.penalties(TeamColor.white)) == 1
 
     # Test when button says TIMEOUT.
-    timeout_mgr.click(mgr, 0)
+    timeout_mgr.click(mgr, 60, TimeoutState.ref)
+    assert timeout_mgr._text.get() == "RESUME"
     assert mgr.gameClockRunning() is False
     assert mgr.gameState() == GameState.first_half
     assert mgr.timeoutState() == TimeoutState.ref
-    assert timeout_mgr._text.get() == "RESUME"
 
     # Test when button says RESUME.
-    timeout_mgr.click(mgr, 0)
+    timeout_mgr.click(mgr, 60, TimeoutState.none)
     assert mgr.gameClockRunning() is True
     assert mgr.gameState() == GameState.first_half
     assert mgr.timeoutState() == TimeoutState.none
@@ -56,11 +56,11 @@ def test_click():
     assert mgr.gameState() == GameState.game_over
 
     # Test when button says RESET.
-    timeout_mgr.click(mgr, 0)
+    timeout_mgr.click(mgr, 60, TimeoutState.none)
     assert mgr.blackScore() == 0
     assert mgr.whiteScore() == 0
     assert mgr.gameClockRunning() is False
-    assert mgr.gameState() == GameState.first_half
+    assert mgr.gameState() == GameState.pre_game
     assert mgr.timeoutState() == TimeoutState.none
     assert timeout_mgr._text.get() == "START"
     assert len(mgr.penalties(TeamColor.white)) == 0
