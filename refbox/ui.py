@@ -28,7 +28,7 @@ def RefboxConfigParser():
         'team_timeout_duration': '60',
         'pool' : '1',
         'tid' : '16',
-        'uwhscores_url' : 'http://localhost:5000/api/v1',
+        'uwhscores_url' : 'http://uwhscores.com/api/v1',
     }
     parser = ConfigParser(defaults=defaults)
     parser.add_section('hardware')
