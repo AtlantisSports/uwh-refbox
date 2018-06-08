@@ -849,7 +849,10 @@ class NormalView(object):
 
     def edit_penalty(self, team_color, p):
         def submit_clicked(player, duration):
-            p.setPlayer(player)
+            try:
+                p.setPlayer(int(player))
+            except ValueError:
+                pass
             p.setDuration(duration)
             self.redraw_penalties_white()
         def delete_clicked(penalty):
@@ -860,6 +863,10 @@ class NormalView(object):
 
     def add_penalty(self, team_color):
         def submit_clicked(self, player, duration):
+            try:
+                player = int(player)
+            except ValueError:
+                player = -1
             p = Penalty(player, team_color, duration)
             self.mgr.addPenalty(p)
             if team_color == TeamColor.white:
