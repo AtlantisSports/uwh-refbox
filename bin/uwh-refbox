@@ -6,9 +6,9 @@ from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_cl
 from uwh.uwhscores_comms import UWHScores
 
 if is_rpi():
-    from refbox.noiomanager import IOManager
-else:
     from refbox.iomanager import IOManager
+else:
+    from refbox.noiomanager import IOManager
 
 cfg = RefboxConfigParser()
 cfg.read('timeshark.cfg')
