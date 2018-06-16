@@ -473,7 +473,7 @@ class SettingsView(object):
             self.uwhscores.get_game_list(tid, response)
 
     def desc(self, game):
-        return "#{} {} - {} vs {}".format(game['game_type'], game['gid'],
+        return "{} #{} - {} vs {}".format(game['game_type'], game['gid'],
                                           game['white'], game['black'])
 
     def select(self, idx):
