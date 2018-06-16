@@ -447,10 +447,24 @@ class SettingsView(object):
         self.outer = sized_frame(root, height, width)
         self.outer.grid(row=3, column=1, rowspan=2)
 
-        scrollbar = tk.Scrollbar(self.outer, width=30)
+        self.info = sized_frame(self.outer, height / 2, width)
+        self.info.grid(row=0, column=0)
+
+        label_font = ("Courier New", 14)
+        self.game_info_var = tk.StringVar()
+        self.game_info_var.set("foobar")
+        game_info = SizedLabel(self.info, self.game_info_var, "black", "white",
+                               label_font, height=height / 2, width=width)
+        game_info._inner.config(justify=tk.LEFT)
+        game_info.grid(row=0, column=0)
+
+        self.game_list = sized_frame(self.outer, height / 2, width)
+        self.game_list.grid(row=1, column=0)
+
+        scrollbar = tk.Scrollbar(self.game_list, width=30)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.listbox = tk.Listbox(self.outer, font=(_font_name, 18),
+        self.listbox = tk.Listbox(self.game_list, font=(_font_name, 18),
                                   selectmode=tk.SINGLE)
         self.listbox.pack(expand=1, fill=tk.BOTH)
         self.cur_selection = None
@@ -480,7 +494,44 @@ class SettingsView(object):
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(idx)
         self.cur_selection = (idx,)
-        self.mgr.setGid(self.games[idx]['gid'])
+        self.game = self.games[idx]
+        self.mgr.setGid(self.game['gid'])
+
+        rules = self.game['timing_rules']
+        info =  self.desc(self.game) + "\n"
+        info += "\n"
+        info += "First Half:    " + self.fmt_time(rules['half_duration']) + "\n"
+        info += "Half Time:     " + self.fmt_time(rules['half_time_duration']) + "\n"
+        info += "Second Half:   " + self.fmt_time(rules['half_duration']) + "\n"
+        info += "Minimum Break: " + self.fmt_time(rules['min_game_break']) + "\n"
+        info += "\n"
+        if rules['overtime_allowed']:
+            info += "Overtime:        Yes\n"
+        else:
+            info += "Overtime:         No\n"
+        if rules['sudden_death_allowed']:
+            duration = rules['max_sudden_death_duration']
+            if duration:
+                info += "Sudden Death:  " + self.fmt_time(duration) + " max\n"
+            else:
+                info += "Sudden Death:    Yes\n"
+        else:
+            info += "Sudden Death:     No\n"
+
+        timeouts = rules['game_timeouts']
+        to_allowed = timeouts['allowed']
+        if to_allowed > 0:
+            info += "Timeouts Allowed:    " + str(to_allowed)
+            if timeouts['per_half']:
+                info += " / half\n"
+            else:
+                info += " / game\n"
+            info += "Timeout Duration:    " + self.fmt_time(timeouts['duration'])
+
+        self.game_info_var.set(info)
+
+    def fmt_time(self, time):
+        return "%2d:%02d" % (time // 60, time % 60)
 
     def poll(self):
         now = self.listbox.curselection()
