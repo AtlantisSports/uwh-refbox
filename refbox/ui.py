@@ -503,9 +503,8 @@ class SettingsView(object):
         info += "White: " + self.game['white'] + "\n"
         info += "Black: " + self.game['black'] + "\n"
         info += "\n"
-        info += "First Half:    " + self.fmt_time(rules['half_duration']) + "\n"
+        info += "1st/2nd Half:  " + self.fmt_time(rules['half_duration']) + "\n"
         info += "Half Time:     " + self.fmt_time(rules['half_time_duration']) + "\n"
-        info += "Second Half:   " + self.fmt_time(rules['half_duration']) + "\n"
         info += "Minimum Break: " + self.fmt_time(rules['min_game_break']) + "\n"
         info += "\n"
         if rules['overtime_allowed']:
