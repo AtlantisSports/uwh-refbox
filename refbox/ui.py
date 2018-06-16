@@ -432,8 +432,9 @@ class PenaltiesColumn(object):
 
 
 class SettingsView(object):
-    def __init__(self, root, tb_offset, height, width, mgr, cfg, uwhscores):
-        self.root = root
+    def __init__(self, parent, tb_offset, height, width, mgr, cfg, uwhscores):
+        self.parent = parent
+        self.root = parent.root
         self.tb_offset = tb_offset
         self.mgr = mgr
         self.cfg = cfg
@@ -444,7 +445,7 @@ class SettingsView(object):
         tid = cfg.get('game', 'tid')
         pool = cfg.get('game', 'pool')
 
-        self.outer = sized_frame(root, height, width)
+        self.outer = sized_frame(self.root, height, width)
         self.outer.grid(row=3, column=1, rowspan=2)
 
         self.info = sized_frame(self.outer, height / 2, width)
@@ -452,7 +453,6 @@ class SettingsView(object):
 
         label_font = ("Courier New", 14)
         self.game_info_var = tk.StringVar()
-        self.game_info_var.set("foobar")
         game_info = SizedLabel(self.info, self.game_info_var, "black", "white",
                                label_font, height=height / 2, width=width)
         game_info._inner.config(justify=tk.LEFT)
@@ -491,10 +491,11 @@ class SettingsView(object):
                                         game['white'], game['black'])
 
     def select(self, idx):
+        self.game = self.games[idx]
+        self.parent.set_game_info(self.game)
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(idx)
         self.cur_selection = (idx,)
-        self.game = self.games[idx]
         self.mgr.setGid(self.game['gid'])
 
         rules = self.game['timing_rules']
@@ -831,9 +832,11 @@ class NormalView(object):
         self.mgr = GameManager([mgr])
         self.iomgr = iomgr
         self.cfg = cfg or RefboxConfigParser()
+        self.uwhscores = uwhscores
+        self.game_info = None
+        self.not_yet_started = True
         self.mgr.setGameStatePreGame()
         self.mgr.setGameClock(self.half_play_duration())
-        self.uwhscores = uwhscores
 
         self.root = tk.Tk()
         self.root.configure(background='black')
@@ -931,21 +934,25 @@ class NormalView(object):
                       lambda x: None, partial(submit_clicked, self))
 
     def timeout_clicked(self):
-        half_play_duration = self.cfg.getint('game', 'half_play_duration')
         def ref_clicked():
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.ref)
+            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
+                                   TimeoutState.ref)
             self.redraw_penalties()
         def shot_clicked():
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.penalty_shot)
+            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
+                                   TimeoutState.penalty_shot)
             self.redraw_penalties()
         def white_clicked():
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.white)
+            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
+                                   TimeoutState.white)
             self.redraw_penalties()
         def black_clicked():
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.black)
+            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
+                                   TimeoutState.black)
             self.redraw_penalties()
         if self.timeout_mgr.ready_to_start() or self.timeout_mgr.ready_to_resume():
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
+                                   TimeoutState.none)
             self.redraw_penalties()
         else:
             TimeoutEditor(self.root, self.tb_offset, self.mgr, self.cfg,
@@ -978,14 +985,14 @@ class NormalView(object):
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
         time_button_var = tk.StringVar()
-        self.timeout_mgr = TimeoutManager(time_button_var, self.team_timeout_duration())
+        self.timeout_mgr = TimeoutManager(time_button_var, lambda: self.team_timeout_duration())
         time_button = SizedButton(self.root,
                                   lambda: self.timeout_clicked(),
                                   time_button_var, "Yellow.TButton",
                                   150, clock_width)
         time_button.grid(row=2, column=1)
 
-        self.settings_view = SettingsView(self.root, self.tb_offset, 450, clock_width,
+        self.settings_view = SettingsView(self, self.tb_offset, 450, clock_width,
                                           self.mgr, self.cfg, self.uwhscores)
         self.timeout_mgr.add_reset_handler(self.settings_view.next_game)
 
@@ -1058,6 +1065,7 @@ class NormalView(object):
     def gong_clicked(self):
         print("gong clicked")
         self.mgr.setGameClockRunning(True)
+        self.not_yet_started = False
         self.iomgr.setSound(1)
         self.root.after(1000, lambda: self.iomgr.setSound(0))
 
@@ -1092,11 +1100,22 @@ class NormalView(object):
         TimeEditor(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked, self.cfg)
 
     def half_play_duration(self):
+        if self.game_info:
+            return self.game_info['timing_rules']['half_duration']
         return self.cfg.getint('game', 'half_play_duration')
 
     def half_time_duration(self):
+        if self.game_info:
+            return self.game_info['timing_rules']['half_time_duration']
         return self.cfg.getint('game', 'half_time_duration')
 
     def team_timeout_duration(self):
+        if self.game_info:
+            return self.game_info['timing_rules']['game_timeouts']['duration']
         return self.cfg.getint('game', 'team_timeout_duration')
 
+    def set_game_info(self, game):
+        self.game_info = game
+        if self.not_yet_started:
+            self.mgr.setGameStatePreGame()
+            self.mgr.setGameClock(self.half_play_duration())
