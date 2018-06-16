@@ -253,7 +253,7 @@ class ConfirmDialog(object):
 
         header_font = (_font_name, 20)
         header = SizedLabel(self.root, prompt, "black", "white", header_font,
-                            50, cfg.getint('hardware', 'screen_x'))
+                            200, cfg.getint('hardware', 'screen_x'))
         header.grid(row=1, columnspan=2, column=0)
 
         no_button = SizedButton(self.root, self.no_clicked, "NO", "Red.TButton",
@@ -548,7 +548,8 @@ class SettingsView(object):
                 self.select(temp[0])
 
             ConfirmDialog(self.root, self.tb_offset,
-                          "Switch to {}?".format(self.desc(self.games[now[0]])),
+                          "Switch to {}?\n\n\nWARNING: this will reset the game!"
+                              .format(self.desc(self.games[now[0]])),
                           on_yes, on_no, self.cfg)
 
         self.outer.after(250, self.poll)
