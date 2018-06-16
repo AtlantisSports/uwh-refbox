@@ -499,6 +499,9 @@ class SettingsView(object):
 
         rules = self.game['timing_rules']
         info =  self.desc(self.game) + "\n"
+        info = "Game:  " + self.game['game_type'] + str(self.game['gid']) + "\n"
+        info += "White: " + self.game['white'] + "\n"
+        info += "Black: " + self.game['black'] + "\n"
         info += "\n"
         info += "First Half:    " + self.fmt_time(rules['half_duration']) + "\n"
         info += "Half Time:     " + self.fmt_time(rules['half_time_duration']) + "\n"
