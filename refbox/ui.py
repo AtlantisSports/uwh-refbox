@@ -832,7 +832,7 @@ class NormalView(object):
         self.iomgr = iomgr
         self.cfg = cfg or RefboxConfigParser()
         self.mgr.setGameStatePreGame()
-        self.mgr.setGameClock(self.cfg.getint('game', 'half_play_duration'))
+        self.mgr.setGameClock(self.half_play_duration())
         self.uwhscores = uwhscores
 
         self.root = tk.Tk()
@@ -978,7 +978,7 @@ class NormalView(object):
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
         time_button_var = tk.StringVar()
-        self.timeout_mgr = TimeoutManager(time_button_var, self.cfg.getint('game', 'team_timeout_duration'))
+        self.timeout_mgr = TimeoutManager(time_button_var, self.team_timeout_duration())
         time_button = SizedButton(self.root,
                                   lambda: self.timeout_clicked(),
                                   time_button_var, "Yellow.TButton",
@@ -995,8 +995,8 @@ class NormalView(object):
         game_secs = game_clock % 60
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
-        half_play_duration = self.cfg.getint('game', 'half_play_duration')
-        half_time_duration = self.cfg.getint('game', 'half_time_duration')
+        half_play_duration = self.half_play_duration()
+        half_time_duration = self.half_time_duration()
 
         if game_clock <= 0 and self.mgr.gameClockRunning():
             if self.mgr.timeoutStateWhite():
@@ -1090,4 +1090,13 @@ class NormalView(object):
             self.mgr.setGameClockRunning(was_running)
 
         TimeEditor(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked, self.cfg)
+
+    def half_play_duration(self):
+        return self.cfg.getint('game', 'half_play_duration')
+
+    def half_time_duration(self):
+        return self.cfg.getint('game', 'half_time_duration')
+
+    def team_timeout_duration(self):
+        return self.cfg.getint('game', 'team_timeout_duration')
 
