@@ -172,7 +172,7 @@ class TimeEditor(object):
 
 
 class ScoreEditor(object):
-    def __init__(self, master, tb_offset, black, white, on_submit, cfg):
+    def __init__(self, master, tb_offset, reason, black, white, on_submit, cfg):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
@@ -186,52 +186,59 @@ class ScoreEditor(object):
 
         self.on_submit = on_submit
 
+        score_font = (_font_name, 72)
+
         space = tk.Frame(self.root, height=50, width=100, bg="black")
         space.grid(row=0, column=0)
 
-        score_font = (_font_name, 72)
+        reason_label = SizedLabel(self.root, reason, "black", "white",
+                                  score_font, 50, cfg.getint('hardware', 'screen_x'))
+        reason_label.grid(row=1, column=0, columnspan=4)
+
+        space = tk.Frame(self.root, height=50, width=100, bg="black")
+        space.grid(row=2, column=0)
 
         w_up_button = SizedButton(self.root, self.score_w_up, u"White \u2191",
                                   "LightBlue.TButton",
                                   80, cfg.getint('hardware', 'screen_x') / 4)
-        w_up_button.grid(row=1, column=0)
+        w_up_button.grid(row=3, column=0)
 
         w_dn_button = SizedButton(self.root, self.score_w_dn, u"White \u2193",
                                   "Grey.TButton",
                                   80, cfg.getint('hardware', 'screen_x') / 4)
-        w_dn_button.grid(row=2, column=0)
+        w_dn_button.grid(row=4, column=0)
 
         b_up_button = SizedButton(self.root, self.score_b_up, u"Black \u2191",
                                   "LightBlue.TButton",
                                   80, cfg.getint('hardware', 'screen_x') / 4)
-        b_up_button.grid(row=1, column=3)
+        b_up_button.grid(row=3, column=3)
 
         b_dn_button = SizedButton(self.root, self.score_b_dn, u"Black \u2193",
                                   "Grey.TButton",
                                   80, cfg.getint('hardware', 'screen_x') / 4)
-        b_dn_button.grid(row=2, column=3)
+        b_dn_button.grid(row=4, column=3)
 
         cancel_button = SizedButton(self.root, self.cancel_clicked, "CANCEL",
                                     "Red.TButton",
                                     150, cfg.getint('hardware', 'screen_x') / 2)
-        cancel_button.grid(row=3, column=0, columnspan=2)
+        cancel_button.grid(row=5, column=0, columnspan=2)
 
         submit_button = SizedButton(self.root, self.submit_clicked, "SUBMIT",
                                     "Green.TButton",
                                     150, cfg.getint('hardware', 'screen_x') / 2)
-        submit_button.grid(row=3, column=2, columnspan=2)
+        submit_button.grid(row=5, column=2, columnspan=2)
 
         self.white_display_var = tk.StringVar()
         white_display = SizedLabel(self.root, self.white_display_var, "black", "white",
                                     score_font,
                                     160, cfg.getint('hardware', 'screen_x') / 4)
-        white_display.grid(row=1, rowspan=2, column=1)
+        white_display.grid(row=3, rowspan=2, column=1)
 
         self.black_display_var = tk.StringVar()
         black_display = SizedLabel(self.root, self.black_display_var, "black", "blue",
                                     score_font,
                                     160, cfg.getint('hardware', 'screen_x') / 4)
-        black_display.grid(row=1, rowspan=2, column=2)
+        black_display.grid(row=3, rowspan=2, column=2)
 
         self.black_var = tk.IntVar(value=black)
         self.white_var = tk.IntVar(value=white)
@@ -1042,10 +1049,10 @@ class NormalView(object):
         game_secs = game_clock % 60
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
-        half_play_duration = self.half_play_duration()
-        half_time_duration = self.half_time_duration()
-
         if game_clock <= 0 and self.mgr.gameClockRunning():
+            half_play_duration = self.half_play_duration()
+            half_time_duration = self.half_time_duration()
+
             if self.mgr.timeoutStateWhite():
                 self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
             elif self.mgr.timeoutStateBlack():
@@ -1070,6 +1077,12 @@ class NormalView(object):
                 self.mgr.deleteAllPenalties()
                 self.redraw_penalties()
                 self.timeout_mgr.set_game_over(self.mgr)
+                def set_score(black, white):
+                    self.mgr.setBlackScore(black)
+                    self.mgr.setWhiteScore(white)
+                ScoreEditor(self.root, self.tb_offset, "Finalize Scores",
+                            self.mgr.blackScore(),
+                            self.mgr.whiteScore(), set_score, self.cfg)
 
         if self.mgr.timeoutStateRef():
             self.status_var.set("REF TIMEOUT")
@@ -1113,7 +1126,8 @@ class NormalView(object):
         def set_score(black, white):
             self.mgr.setBlackScore(black)
             self.mgr.setWhiteScore(white)
-        ScoreEditor(self.root, self.tb_offset, self.mgr.blackScore(),
+        ScoreEditor(self.root, self.tb_offset, "Edit Scores",
+                    self.mgr.blackScore(),
                     self.mgr.whiteScore(), set_score, self.cfg)
 
     def increment_white_score(self):
