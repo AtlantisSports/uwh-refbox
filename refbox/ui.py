@@ -231,8 +231,6 @@ class ScoreEditor(object):
 
 
 class ConfirmDialog(object):
-    #FIXME: merge this with the ScoreIncrementer
-
     def __init__(self, master, tb_offset, prompt, on_yes, on_no, cfg):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
@@ -274,7 +272,7 @@ class ConfirmDialog(object):
 
 
 class ScoreIncrementer(object):
-    def __init__(self, master, tb_offset, score, is_black, on_submit, cfg):
+    def __init__(self, master, tb_offset, is_black, on_submit, cfg):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
@@ -287,17 +285,20 @@ class ScoreIncrementer(object):
         self.root.transient(master)
 
         self.on_submit = on_submit
-        self.score = score
 
         space = tk.Frame(self.root, height=100, width=100, bg="black")
         space.grid(row=0, column=0)
+
+        # Player Selection
+        self._numpad = PlayerSelectNumpad(self.root, '')
+        self._numpad.grid(row=1, column=0)
 
         header_font = (_font_name, 36)
         color = "BLACK" if is_black else "WHITE"
         header_text = "SCORE {}?".format(color)
         header = SizedLabel(self.root, header_text, "black", "white", header_font,
                             50, cfg.getint('hardware', 'screen_x')/ 2)
-        header.grid(row=1, columnspan=2, column=0)
+        header.grid(row=1, column=1)
 
         no_button = SizedButton(self.root, self.no_clicked, "NO", "Red.TButton",
                                 150, cfg.getint('hardware', 'screen_x') / 2)
@@ -312,8 +313,7 @@ class ScoreIncrementer(object):
 
     def yes_clicked(self):
         self.root.destroy()
-        if self.score < 99:
-            self.on_submit(self.score + 1)
+        self.on_submit(self._numpad.get_value())
 
 
 def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
@@ -1079,12 +1079,13 @@ class NormalView(object):
                     True, lambda x: self.mgr.setBlackScore(x), self.cfg)
 
     def increment_white_score(self):
-        ScoreIncrementer(self.root, self.tb_offset, self.mgr.whiteScore(),
-                         False, lambda x: self.mgr.setWhiteScore(x), self.cfg)
+        ScoreIncrementer(self.root, self.tb_offset, False,
+                         lambda player_no: self.mgr.addWhiteGoal(player_no),
+                         self.cfg)
 
     def increment_black_score(self):
-        ScoreIncrementer(self.root, self.tb_offset, self.mgr.blackScore(),
-                         True, lambda x: self.mgr.setBlackScore(x), self.cfg)
+        ScoreIncrementer(self.root, self.tb_offset, True,
+                         lambda x: self.mgr.addBlackGoal(x), self.cfg)
 
     def edit_time(self):
         was_running = self.mgr.gameClockRunning()
