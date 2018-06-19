@@ -49,11 +49,11 @@ class TimeoutManager(object):
                 mgr.setTimeoutStatePenaltyShot()
             elif state == TimeoutState.white:
                 mgr.setTimeoutStateWhite()
-                mgr.setGameClock(self._team_timeout_duration)
+                mgr.setGameClock(self._team_timeout_duration())
                 mgr.setGameClockRunning(True)
             elif state == TimeoutState.black:
                 mgr.setTimeoutStateBlack()
-                mgr.setGameClock(self._team_timeout_duration)
+                mgr.setGameClock(self._team_timeout_duration())
                 mgr.setGameClockRunning(True)
             self._text.set('RESUME')
             return
