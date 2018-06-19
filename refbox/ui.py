@@ -3,7 +3,7 @@ from tkinter import ttk
 from configparser import ConfigParser
 import os
 from .timeoutmanager import TimeoutManager
-from uwh.gamemanager import GameManager, TeamColor, Penalty, TimeoutState
+from uwh.gamemanager import GameManager, GameState, TeamColor, Penalty, TimeoutState
 from functools import partial
 
 _font_name = 'Consolas'
@@ -882,7 +882,7 @@ class NormalView(object):
         self.uwhscores = uwhscores
         self.game_info = None
         self.not_yet_started = True
-        self.mgr.setGameStatePreGame()
+        self.mgr.setGameState(GameState.pre_game)
         self.mgr.setGameClock(self.half_play_duration())
 
         self.root = tk.Tk()
@@ -1053,25 +1053,25 @@ class NormalView(object):
             half_play_duration = self.half_play_duration()
             half_time_duration = self.half_time_duration()
 
-            if self.mgr.timeoutStateWhite():
+            if self.mgr.timeoutState() == TimeoutState.white:
                 self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
-            elif self.mgr.timeoutStateBlack():
+            elif self.mgr.timeoutState() == TimeoutState.black:
                 self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
-            elif self.mgr.gameStateFirstHalf():
+            elif self.mgr.gameState() == GameState.first_half:
                 self.mgr.deleteServedPenalties()
                 self.mgr.pauseOutstandingPenalties()
                 self.redraw_penalties()
-                self.mgr.setGameStateHalfTime()
+                self.mgr.setGameState(GameState.half_time)
                 self.mgr.setGameClock(half_time_duration)
                 self.gong_clicked()
-            elif self.mgr.gameStateHalfTime():
-                self.mgr.setGameStateSecondHalf()
+            elif self.mgr.gameState() == GameState.half_time:
+                self.mgr.setGameState(GameState.second_half)
                 self.mgr.setGameClock(half_play_duration)
                 self.mgr.restartOutstandingPenalties()
                 self.mgr.deleteServedPenalties()
                 self.redraw_penalties()
                 self.gong_clicked()
-            elif self.mgr.gameStateSecondHalf():
+            elif self.mgr.gameState() == GameState.second_half:
                 self.gong_clicked()
                 self.mgr.pauseOutstandingPenalties()
                 self.mgr.deleteAllPenalties()
@@ -1084,33 +1084,23 @@ class NormalView(object):
                             self.mgr.blackScore(),
                             self.mgr.whiteScore(), set_score, self.cfg)
 
-        if self.mgr.timeoutStateRef():
-            self.status_var.set("REF TIMEOUT")
-            self.status_label._inner.config(fg="#ffff00")
-        elif self.mgr.timeoutStatePenaltyShot():
-            self.status_var.set("PENALTY SHOT")
-            self.status_label._inner.config(fg="#ff0000")
-        elif self.mgr.timeoutStateWhite():
-            self.status_var.set("WHITE T/O")
-            self.status_label._inner.config(fg="#ffff00")
-        elif self.mgr.timeoutStateBlack():
-            self.status_var.set("BLACK T/O")
-            self.status_label._inner.config(fg="#ffff00")
-        elif self.mgr.gameStatePreGame():
-            self.status_var.set("PRE GAME")
-            self.status_label._inner.config(fg="#00ff00")
-        elif self.mgr.gameStateFirstHalf():
-            self.status_var.set("FIRST HALF")
-            self.status_label._inner.config(fg="#00ff00")
-        elif self.mgr.gameStateHalfTime():
-            self.status_var.set("HALF TIME")
-            self.status_label._inner.config(fg="#00ff00")
-        elif self.mgr.gameStateSecondHalf():
-            self.status_var.set("SECOND HALF")
-            self.status_label._inner.config(fg="#00ff00")
-        elif self.mgr.gameStateGameOver():
-            self.status_var.set("GAME OVER")
-            self.status_label._inner.config(fg="#ffff00")
+        if self.mgr.timeoutState() != TimeoutState.none:
+            text, color = {
+                TimeoutState.ref          : ("REF TIMEOUT",  "#ffff00"),
+                TimeoutState.penalty_shot : ("PENALTY SHOT", "#ff0000"),
+                TimeoutState.white        : ("WHITE T/O",    "#ffffff"),
+                TimeoutState.black        : ("BLACK T/O",    "#0000ff"),
+            }[self.mgr.timeoutState()]
+        else:
+            text, color = {
+                GameState.pre_game        : ("PRE GAME",    "#ffff00"),
+                GameState.first_half      : ("FIRST HALF",  "#00ff00"),
+                GameState.half_time       : ("HALF TIME",   "#ff8000"),
+                GameState.second_half     : ("SECOND HALF", "#00ff00"),
+                GameState.game_over       : ("GAME OVER",   "#ff0000"),
+            }[self.mgr.gameState()]
+        self.status_var.set(text)
+        self.status_label._inner.config(fg=color)
 
         refresh_ms = 50
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
@@ -1172,5 +1162,5 @@ class NormalView(object):
     def set_game_info(self, game):
         self.game_info = game
         if self.not_yet_started:
-            self.mgr.setGameStatePreGame()
+            self.mgr.setGameState(GameState.pre_game)
             self.mgr.setGameClock(self.half_play_duration())

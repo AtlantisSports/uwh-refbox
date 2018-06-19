@@ -1,4 +1,4 @@
-from uwh.gamemanager import TimeoutState
+from uwh.gamemanager import TimeoutState, GameState
 
 class TimeoutManager(object):
     def __init__(self, var, team_timeout_duration):
@@ -16,7 +16,7 @@ class TimeoutManager(object):
 
     def set_game_over(self, mgr):
         self._text.set("RESET")
-        mgr.setGameStateGameOver()
+        mgr.setGameState(GameState.game_over)
         mgr.setGameClockRunning(False)
         mgr.setGameClock(0)
         mgr.deleteAllPenalties()
@@ -25,10 +25,10 @@ class TimeoutManager(object):
         self._reset_handlers += [callback]
 
     def click(self, mgr, get_half_play_duration, state):
-        if mgr.gameStateGameOver():
+        if mgr.gameState() == GameState.game_over:
             mgr.setBlackScore(0)
             mgr.setWhiteScore(0)
-            mgr.setGameStatePreGame()
+            mgr.setGameState(GameState.pre_game)
             mgr.setGameClock(get_half_play_duration())
             mgr.deleteAllPenalties()
             for handler in self._reset_handlers:
@@ -36,23 +36,18 @@ class TimeoutManager(object):
             self._text.set("START")
             return
 
-        if mgr.gameStatePreGame():
-            mgr.setGameStateFirstHalf()
+        if mgr.gameState() == GameState.pre_game:
+            mgr.setGameState(GameState.first_half)
 
-        if mgr.timeoutStateNone() and state != TimeoutState.none:
+        if mgr.timeoutState() == TimeoutState.none and state != TimeoutState.none:
             self._clock_at_timeout = mgr.gameClock()
             mgr.pauseOutstandingPenalties()
             mgr.setGameClockRunning(False)
-            if state == TimeoutState.ref:
-                mgr.setTimeoutStateRef()
-            elif state == TimeoutState.penalty_shot:
-                mgr.setTimeoutStatePenaltyShot()
-            elif state == TimeoutState.white:
-                mgr.setTimeoutStateWhite()
+            mgr.setTimeoutState(state)
+            if state == TimeoutState.white:
                 mgr.setGameClock(self._team_timeout_duration())
                 mgr.setGameClockRunning(True)
             elif state == TimeoutState.black:
-                mgr.setTimeoutStateBlack()
                 mgr.setGameClock(self._team_timeout_duration())
                 mgr.setGameClockRunning(True)
             self._text.set('RESUME')
@@ -63,5 +58,5 @@ class TimeoutManager(object):
             mgr.setGameClock(self._clock_at_timeout)
             self._clock_at_timeout = None
         mgr.restartOutstandingPenalties()
-        mgr.setTimeoutStateNone()
+        mgr.setTimeoutState(TimeoutState.none)
         self._text.set('TIMEOUT')
