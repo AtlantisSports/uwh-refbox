@@ -34,6 +34,7 @@ def RefboxConfigParser():
         'pre_sudden_death_duration': '60',
         'sudden_death_allowed': 'False',
         'max_sudden_death_duration': '1800',
+        'overtime_timeouts_allowed': 'False',
         'pool' : '1',
         'tid' : '16',
         'uwhscores_url' : 'http://uwhscores.com/api/v1/',
@@ -779,8 +780,8 @@ class PenaltyEditor(object):
 
 
 class TimeoutEditor(object):
-    def __init__(self, master, tb_offset, mgr, cfg, on_ref, on_white, on_black, on_shot):
-        self.root = tk.Toplevel(master, background='black')
+    def __init__(self, root, normal_view, tb_offset, mgr, cfg, on_ref, on_white, on_black, on_shot):
+        self.root = tk.Toplevel(root, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
                                                 cfg.getint('hardware', 'screen_y'),
@@ -789,7 +790,7 @@ class TimeoutEditor(object):
         maybe_hide_cursor(self.root)
 
         self.root.overrideredirect(1)
-        self.root.transient(master)
+        self.root.transient(root)
 
         self.on_ref = on_ref
         self.on_white = on_white
@@ -812,27 +813,39 @@ class TimeoutEditor(object):
 
 
         # Actions
+        row = 0
         ref = SizedButton(submit_frame, self.ref_clicked, "Ref Timeout",
                              "Yellow.TButton", frame_height / 5, frame_width / 2)
-        ref.grid(row=0, column=0)
+        ref.grid(row=row, column=0)
+        row += 1
 
-        white = SizedButton(submit_frame, self.white_clicked,
-                            "White Timeout", "White.TButton",
-                            frame_height / 5, frame_width / 2)
-        white.grid(row=1, column=0)
+        if (mgr.gameState() == GameState.first_half or
+            mgr.gameState() == GameState.second_half or
+            (normal_view.overtime_timeouts_allowed() and
+             (mgr.gameState() == GameState.sudden_death or
+              mgr.gameState() == GameState.ot_first or
+              mgr.gameState() == GameState.ot_second))):
+            white = SizedButton(submit_frame, self.white_clicked,
+                                "White Timeout", "White.TButton",
+                                frame_height / 5, frame_width / 2)
+            white.grid(row=row, column=0)
+            row += 1
 
-        black = SizedButton(submit_frame, self.black_clicked,
-                            "Black Timeout", "Blue.TButton",
-                            frame_height / 5, frame_width / 2)
-        black.grid(row=2, column=0)
+            black = SizedButton(submit_frame, self.black_clicked,
+                                "Black Timeout", "Blue.TButton",
+                                frame_height / 5, frame_width / 2)
+            black.grid(row=row, column=0)
+            row += 1
 
         shot = SizedButton(submit_frame, self.shot_clicked, "Penalty Shot",
                              "Cyan.TButton", frame_height / 5, frame_width / 2)
-        shot.grid(row=3, column=0)
+        shot.grid(row=row, column=0)
+        row += 1
 
         cancel = SizedButton(submit_frame, self.cancel_clicked, "Cancel",
                              "Red.TButton", frame_height / 5, frame_width / 2)
-        cancel.grid(row=4, column=0)
+        cancel.grid(row=row, column=0)
+        row += 1
 
     def ref_clicked(self):
         self.root.destroy()
@@ -1010,7 +1023,7 @@ class NormalView(object):
                                    TimeoutState.none)
             self.redraw_penalties()
         else:
-            TimeoutEditor(self.root, self.tb_offset, self.mgr, self.cfg,
+            TimeoutEditor(self.root, self, self.tb_offset, self.mgr, self.cfg,
                           ref_clicked, white_clicked, black_clicked, shot_clicked)
 
     def center_column(self, refresh_ms):
@@ -1265,6 +1278,14 @@ class NormalView(object):
             except Exception:
                 pass
         return self.cfg.getint('game', 'pre_sudden_death_duration')
+
+    def overtime_timeouts_allowed(self):
+        if self.game_info:
+            try:
+                return self.game_info['timing_rules']['overtime_timeouts_allowed']
+            except Exception:
+                pass
+        return self.cfg.getboolean('game', 'overtime_timeouts_allowed')
 
     def set_game_info(self, game):
         self.game_info = game
