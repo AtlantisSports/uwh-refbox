@@ -28,10 +28,10 @@ def RefboxConfigParser():
         'team_timeout_duration': '60',
         'has_overtime': 'False',
         'ot_half_play_duration': '300',
-        'delay_2nd_to_ot1': '180',
-        'delay_ot1_to_ot2': '60',
-        'delay_ot2_to_sd': '60',
-        'delay_2nd_to_sd': '60',
+        'pre_overtime_break': '180',
+        'overtime_break_duration': '60',
+        'pre_sudden_death_duration': '60',
+        'pre_sudden_death_duration': '60',
         'sudden_death_allowed': 'False',
         'max_sudden_death_duration': '1800',
         'pool' : '1',
@@ -1102,17 +1102,17 @@ class NormalView(object):
                 self.gong_clicked()
                 if (self.mgr.blackScore() == self.mgr.whiteScore() and
                     self.has_overtime()):
-                    self.game_break(self.delay_2nd_to_ot1(), GameState.pre_ot)
+                    self.game_break(self.pre_overtime_break(), GameState.pre_ot)
                 elif (self.mgr.blackScore() == self.mgr.whiteScore() and
                       self.has_sudden_death()):
-                    self.game_break(self.delay_2nd_to_sd(), GameState.pre_sudden_death)
+                    self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
                 else:
                     self.game_over()
             elif self.mgr.gameState() == GameState.pre_ot:
                 self.play_resumed(self.overtime_duration(), GameState.ot_first)
                 self.gong_clicked()
             elif self.mgr.gameState() == GameState.ot_first:
-                self.game_break(self.delay_ot1_to_ot2(), GameState.ot_half)
+                self.game_break(self.overtime_break_duration(), GameState.ot_half)
                 self.gong_clicked()
             elif self.mgr.gameState() == GameState.ot_half:
                 self.play_resumed(self.overtime_duration(), GameState.ot_second)
@@ -1120,7 +1120,7 @@ class NormalView(object):
             elif self.mgr.gameState() == GameState.ot_second:
                 if (self.mgr.blackScore() == self.mgr.whiteScore() and
                     self.has_sudden_death()):
-                    self.game_break(self.delay_ot2_to_sd(), GameState.pre_sudden_death)
+                    self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
                     self.gong_clicked()
                 else:
                     self.gong_clicked()
@@ -1242,17 +1242,29 @@ class NormalView(object):
                 return duration
         return self.cfg.getint('game', 'max_sudden_death_duration')
 
-    def delay_2nd_to_ot1(self):
-        return self.cfg.getint('game', 'delay_2nd_to_ot1')
+    def pre_overtime_break(self):
+        if self.game_info:
+            try:
+                return self.game_info['timing_rules']['pre_overtime_break']
+            except Exception:
+                pass
+        return self.cfg.getint('game', 'pre_overtime_break')
 
-    def delay_ot1_to_ot2(self):
-        return self.cfg.getint('game', 'delay_ot1_to_ot2')
+    def overtime_break_duration(self):
+        if self.game_info:
+            try:
+                return self.game_info['timing_rules']['overtime_break_duration']
+            except Exception:
+                pass
+        return self.cfg.getint('game', 'overtime_break_duration')
 
-    def delay_ot2_to_sd(self):
-        return self.cfg.getint('game', 'delay_ot2_to_sd')
-
-    def delay_2nd_to_sd(self):
-        return self.cfg.getint('game', 'delay_2nd_to_sd')
+    def pre_sudden_death_duration(self):
+        if self.game_info:
+            try:
+                return self.game_info['timing_rules']['pre_sudden_death_duration']
+            except Exception:
+                pass
+        return self.cfg.getint('game', 'pre_sudden_death_duration')
 
     def set_game_info(self, game):
         self.game_info = game
