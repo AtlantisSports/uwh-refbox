@@ -29,6 +29,7 @@ class TimeoutManager(object):
             mgr.setBlackScore(0)
             mgr.setWhiteScore(0)
             mgr.setGameState(GameState.pre_game)
+            mgr.setGameClockRunning(False)
             mgr.setGameClock(get_half_play_duration())
             mgr.deleteAllPenalties()
             for handler in self._reset_handlers:
