@@ -1066,6 +1066,7 @@ class NormalView(object):
 
     def game_over(self):
         self.mgr.deleteAllPenalties()
+        self.mgr.delAllGoals()
         self.redraw_penalties()
         self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(0)

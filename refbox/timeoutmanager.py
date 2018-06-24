@@ -20,6 +20,7 @@ class TimeoutManager(object):
         mgr.setGameClockRunning(False)
         mgr.setGameClock(0)
         mgr.deleteAllPenalties()
+        mgr.delAllGoals()
 
     def add_reset_handler(self, callback):
         self._reset_handlers += [callback]
@@ -32,6 +33,7 @@ class TimeoutManager(object):
             mgr.setGameClockRunning(False)
             mgr.setGameClock(get_half_play_duration())
             mgr.deleteAllPenalties()
+            mgr.delAllGoals()
             for handler in self._reset_handlers:
                 handler()
             self._text.set("START")
