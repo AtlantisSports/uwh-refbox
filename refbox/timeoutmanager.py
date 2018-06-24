@@ -47,10 +47,8 @@ class TimeoutManager(object):
             mgr.pauseOutstandingPenalties()
             mgr.setGameClockRunning(False)
             mgr.setTimeoutState(state)
-            if state == TimeoutState.white:
-                mgr.setGameClock(self._team_timeout_duration())
-                mgr.setGameClockRunning(True)
-            elif state == TimeoutState.black:
+            if (state == TimeoutState.white or
+                state == TimeoutState.black):
                 mgr.setGameClock(self._team_timeout_duration())
                 mgr.setGameClockRunning(True)
             self._text.set('RESUME')

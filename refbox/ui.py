@@ -26,6 +26,7 @@ def RefboxConfigParser():
         'half_play_duration': '600',
         'half_time_duration': '180',
         'team_timeout_duration': '60',
+        'team_timeouts_allowed': 1,
         'has_overtime': 'False',
         'ot_half_play_duration': '300',
         'pre_overtime_break': '180',
@@ -819,12 +820,13 @@ class TimeoutEditor(object):
         ref.grid(row=row, column=0)
         row += 1
 
-        if (mgr.gameState() == GameState.first_half or
-            mgr.gameState() == GameState.second_half or
-            (normal_view.overtime_timeouts_allowed() and
-             (mgr.gameState() == GameState.sudden_death or
-              mgr.gameState() == GameState.ot_first or
-              mgr.gameState() == GameState.ot_second))):
+        if (normal_view.team_timeouts_allowed() and
+            (mgr.gameState() == GameState.first_half or
+             mgr.gameState() == GameState.second_half or
+             (normal_view.overtime_timeouts_allowed() and
+              (mgr.gameState() == GameState.sudden_death or
+               mgr.gameState() == GameState.ot_first or
+               mgr.gameState() == GameState.ot_second)))):
             white = SizedButton(submit_frame, self.white_clicked,
                                 "White Timeout", "White.TButton",
                                 frame_height / 5, frame_width / 2)
@@ -1230,6 +1232,11 @@ class NormalView(object):
         if self.game_info:
             return self.game_info['timing_rules']['half_time_duration']
         return self.cfg.getint('game', 'half_time_duration')
+
+    def team_timeouts_allowed(self):
+        if self.game_info:
+            return self.game_info['timing_rules']['game_timeouts']['allowed']
+        return self.cfg.getint('game', 'team_timeouts_allowed')
 
     def team_timeout_duration(self):
         if self.game_info:
