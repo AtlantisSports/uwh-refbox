@@ -600,6 +600,7 @@ class SettingsView(object):
 
             def on_yes():
                 self.select(now[0])
+                self.parent.timeout_mgr.reset(self.mgr, lambda: self.parent.half_play_duration())
             def on_no():
                 self.select(temp[0])
 

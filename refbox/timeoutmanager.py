@@ -25,18 +25,21 @@ class TimeoutManager(object):
     def add_reset_handler(self, callback):
         self._reset_handlers += [callback]
 
+    def reset(self, mgr, get_half_play_duration):
+        mgr.setBlackScore(0)
+        mgr.setWhiteScore(0)
+        mgr.setGameState(GameState.pre_game)
+        mgr.setGameClockRunning(False)
+        mgr.setGameClock(get_half_play_duration())
+        mgr.deleteAllPenalties()
+        mgr.delAllGoals()
+        for handler in self._reset_handlers:
+            handler()
+        self._text.set("START")
+
     def click(self, mgr, get_half_play_duration, state):
         if mgr.gameState() == GameState.game_over:
-            mgr.setBlackScore(0)
-            mgr.setWhiteScore(0)
-            mgr.setGameState(GameState.pre_game)
-            mgr.setGameClockRunning(False)
-            mgr.setGameClock(get_half_play_duration())
-            mgr.deleteAllPenalties()
-            mgr.delAllGoals()
-            for handler in self._reset_handlers:
-                handler()
-            self._text.set("START")
+            self.reset(mgr, get_half_play_duration)
             return
 
         if mgr.gameState() == GameState.pre_game:
