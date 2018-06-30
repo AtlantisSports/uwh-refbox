@@ -981,10 +981,10 @@ class NormalView(object):
             except ValueError:
                 pass
             p.setDuration(duration)
-            self.redraw_penalties_white()
+            self.redraw_penalties()
         def delete_clicked(penalty):
             self.mgr.delPenalty(penalty)
-            self.redraw_penalties_black()
+            self.redraw_penalties()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
                       delete_clicked, submit_clicked, p)
 
