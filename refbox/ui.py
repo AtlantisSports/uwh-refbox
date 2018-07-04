@@ -1080,18 +1080,30 @@ class NormalView(object):
         self.timeout_mgr.add_reset_handler(self.settings_view.next_game)
 
     def game_over(self):
-        self.mgr.deleteAllPenalties()
-        self.mgr.delAllGoals()
-        self.redraw_penalties()
+        state = self.mgr.gameState()
         self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(0)
-        self.timeout_mgr.set_game_over(self.mgr)
-        def set_score(black, white):
-            self.mgr.setBlackScore(black)
-            self.mgr.setWhiteScore(white)
-        ScoreEditor(self.root, self.tb_offset, "Finalize Scores",
-                    self.mgr.blackScore(),
-                    self.mgr.whiteScore(), set_score, self.cfg)
+
+        def edit_scores():
+            def set_score(black, white):
+                self.mgr.setBlackScore(black)
+                self.mgr.setWhiteScore(white)
+                self.mgr.setGameState(state)
+            ScoreEditor(self.root, self.tb_offset, "Edit Final Scores",
+                        self.mgr.blackScore(),
+                        self.mgr.whiteScore(), set_score, self.cfg).wait()
+
+        ConfirmDialog(self.root, self.tb_offset,
+                      "Final score correct?\n\nWhite: %d Black: %d"
+                         % (self.mgr.whiteScore(), self.mgr.blackScore()),
+                      lambda:None, edit_scores, self.cfg).wait()
+
+        if self.advance_game_state(state):
+            self.mgr.setGameState(GameState.game_over)
+            self.mgr.deleteAllPenalties()
+            self.mgr.delAllGoals()
+            self.redraw_penalties()
+            self.timeout_mgr.set_game_over(self.mgr)
 
     def game_break(self, new_duration, new_state):
         self.mgr.deleteServedPenalties()
@@ -1108,6 +1120,55 @@ class NormalView(object):
         self.mgr.setGameState(new_state)
         self.timeout_mgr.set_ready(self.mgr)
 
+    def advance_game_state(self, old_state):
+        half_play_duration = self.half_play_duration()
+        half_time_duration = self.half_time_duration()
+
+        if self.mgr.timeoutState() == TimeoutState.white:
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+        elif self.mgr.timeoutState() == TimeoutState.black:
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+        elif old_state == GameState.first_half:
+            self.game_break(half_time_duration, GameState.half_time)
+            self.gong_clicked()
+        elif old_state == GameState.half_time:
+            self.play_ready(half_play_duration, GameState.second_half)
+        elif old_state == GameState.second_half:
+            if (self.mgr.blackScore() == self.mgr.whiteScore() and
+                self.has_overtime()):
+                self.gong_clicked()
+                self.game_break(self.pre_overtime_break(), GameState.pre_ot)
+            elif (self.mgr.blackScore() == self.mgr.whiteScore() and
+                  self.has_sudden_death()):
+                self.gong_clicked()
+                self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
+            else:
+                self.gong_clicked()
+                return True
+        elif old_state == GameState.pre_ot:
+            self.play_ready(self.overtime_duration(), GameState.ot_first)
+        elif old_state == GameState.ot_first:
+            self.game_break(self.overtime_break_duration(), GameState.ot_half)
+            self.gong_clicked()
+        elif old_state == GameState.ot_half:
+            self.play_ready(self.overtime_duration(), GameState.ot_second)
+        elif old_state == GameState.ot_second:
+            if (self.mgr.blackScore() == self.mgr.whiteScore() and
+                self.has_sudden_death()):
+                self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
+                self.gong_clicked()
+            else:
+                self.gong_clicked()
+                return True
+        elif old_state == GameState.pre_sudden_death:
+            self.play_ready(self.sudden_death_duration(), GameState.sudden_death)
+        elif old_state == GameState.sudden_death:
+            self.gong_clicked()
+            return True
+        elif old_state == GameState.game_over:
+            return True
+        return False
+
     def refresh_time(self):
         game_clock = self.mgr.gameClock()
         game_mins = game_clock // 60
@@ -1115,47 +1176,7 @@ class NormalView(object):
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
         if game_clock <= 0 and self.mgr.gameClockRunning():
-            half_play_duration = self.half_play_duration()
-            half_time_duration = self.half_time_duration()
-
-            if self.mgr.timeoutState() == TimeoutState.white:
-                self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
-            elif self.mgr.timeoutState() == TimeoutState.black:
-                self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
-            elif self.mgr.gameState() == GameState.first_half:
-                self.game_break(half_time_duration, GameState.half_time)
-                self.gong_clicked()
-            elif self.mgr.gameState() == GameState.half_time:
-                self.play_ready(half_play_duration, GameState.second_half)
-            elif self.mgr.gameState() == GameState.second_half:
-                self.gong_clicked()
-                if (self.mgr.blackScore() == self.mgr.whiteScore() and
-                    self.has_overtime()):
-                    self.game_break(self.pre_overtime_break(), GameState.pre_ot)
-                elif (self.mgr.blackScore() == self.mgr.whiteScore() and
-                      self.has_sudden_death()):
-                    self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
-                else:
-                    self.game_over()
-            elif self.mgr.gameState() == GameState.pre_ot:
-                self.play_ready(self.overtime_duration(), GameState.ot_first)
-            elif self.mgr.gameState() == GameState.ot_first:
-                self.game_break(self.overtime_break_duration(), GameState.ot_half)
-                self.gong_clicked()
-            elif self.mgr.gameState() == GameState.ot_half:
-                self.play_ready(self.overtime_duration(), GameState.ot_second)
-            elif self.mgr.gameState() == GameState.ot_second:
-                if (self.mgr.blackScore() == self.mgr.whiteScore() and
-                    self.has_sudden_death()):
-                    self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
-                    self.gong_clicked()
-                else:
-                    self.gong_clicked()
-                    self.game_over()
-            elif self.mgr.gameState() == GameState.pre_sudden_death:
-                self.play_ready(self.sudden_death_duration(), GameState.sudden_death)
-            elif self.mgr.gameState() == GameState.sudden_death:
-                self.gong_clicked()
+            if self.advance_game_state(self.mgr.gameState()):
                 self.game_over()
 
         if self.mgr.timeoutState() != TimeoutState.none:
