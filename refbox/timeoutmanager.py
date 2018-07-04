@@ -37,6 +37,10 @@ class TimeoutManager(object):
             handler()
         self._text.set("START")
 
+    def set_ready(self, mgr):
+        self._clock_at_timeout = None
+        self._text.set("RESUME")
+
     def click(self, mgr, get_half_play_duration, state):
         if mgr.gameState() == GameState.game_over:
             self.reset(mgr, get_half_play_duration)

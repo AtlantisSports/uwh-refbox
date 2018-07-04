@@ -1088,12 +1088,13 @@ class NormalView(object):
         self.mgr.setGameClock(new_duration)
         self.mgr.setGameState(new_state)
 
-    def play_resumed(self, new_duration, new_state):
-        self.mgr.restartOutstandingPenalties()
+    def play_ready(self, new_duration, new_state):
         self.mgr.deleteServedPenalties()
         self.redraw_penalties()
+        self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(new_duration)
         self.mgr.setGameState(new_state)
+        self.timeout_mgr.set_ready(self.mgr)
 
     def refresh_time(self):
         game_clock = self.mgr.gameClock()
@@ -1113,8 +1114,7 @@ class NormalView(object):
                 self.game_break(half_time_duration, GameState.half_time)
                 self.gong_clicked()
             elif self.mgr.gameState() == GameState.half_time:
-                self.play_resumed(half_play_duration, GameState.second_half)
-                self.gong_clicked()
+                self.play_ready(half_play_duration, GameState.second_half)
             elif self.mgr.gameState() == GameState.second_half:
                 self.gong_clicked()
                 if (self.mgr.blackScore() == self.mgr.whiteScore() and
@@ -1126,14 +1126,12 @@ class NormalView(object):
                 else:
                     self.game_over()
             elif self.mgr.gameState() == GameState.pre_ot:
-                self.play_resumed(self.overtime_duration(), GameState.ot_first)
-                self.gong_clicked()
+                self.play_ready(self.overtime_duration(), GameState.ot_first)
             elif self.mgr.gameState() == GameState.ot_first:
                 self.game_break(self.overtime_break_duration(), GameState.ot_half)
                 self.gong_clicked()
             elif self.mgr.gameState() == GameState.ot_half:
-                self.play_resumed(self.overtime_duration(), GameState.ot_second)
-                self.gong_clicked()
+                self.play_ready(self.overtime_duration(), GameState.ot_second)
             elif self.mgr.gameState() == GameState.ot_second:
                 if (self.mgr.blackScore() == self.mgr.whiteScore() and
                     self.has_sudden_death()):
@@ -1143,8 +1141,7 @@ class NormalView(object):
                     self.gong_clicked()
                     self.game_over()
             elif self.mgr.gameState() == GameState.pre_sudden_death:
-                self.play_resumed(self.sudden_death_duration(), GameState.sudden_death)
-                self.gong_clicked()
+                self.play_ready(self.sudden_death_duration(), GameState.sudden_death)
             elif self.mgr.gameState() == GameState.sudden_death:
                 self.gong_clicked()
                 self.game_over()
