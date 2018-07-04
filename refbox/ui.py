@@ -507,7 +507,7 @@ class SettingsView(object):
         self.info = sized_frame(self.outer, height / 2, width)
         self.info.grid(row=0, column=0)
 
-        label_font = ("Courier New", 14)
+        label_font = ("Courier New", 10)
         self.game_info_var = tk.StringVar()
         game_info = SizedLabel(self.info, self.game_info_var, "black", "white",
                                label_font, height=height / 2, width=width)
