@@ -173,12 +173,15 @@ class TimeEditor(object):
             self.clock_at_pause_var.set(0)
 
     def cancel_clicked(self):
-        self.root.destroy()
         self.on_cancel()
+        self.root.destroy()
 
     def submit_clicked(self):
-        self.root.destroy()
         self.on_submit(self.clock_at_pause_var.get())
+        self.root.destroy()
+
+    def wait(self):
+        self.root.wait_window()
 
 
 class ScoreEditor(object):
@@ -282,8 +285,11 @@ class ScoreEditor(object):
         self.root.destroy()
 
     def submit_clicked(self):
-        self.root.destroy()
         self.on_submit(self.black_var.get(), self.white_var.get())
+        self.root.destroy()
+
+    def wait(self):
+        self.root.wait_window()
 
 
 class ConfirmDialog(object):
@@ -319,12 +325,15 @@ class ConfirmDialog(object):
         yes_button.grid(row=2, column=1)
 
     def no_clicked(self):
-        self.root.destroy()
         self.on_no()
+        self.root.destroy()
 
     def yes_clicked(self):
-        self.root.destroy()
         self.on_yes()
+        self.root.destroy()
+
+    def wait(self):
+        self.root.wait_window()
 
 
 class ScoreIncrementer(object):
@@ -368,8 +377,11 @@ class ScoreIncrementer(object):
         self.root.destroy()
 
     def yes_clicked(self):
-        self.root.destroy()
         self.on_submit(self._numpad.get_value())
+        self.root.destroy()
+
+    def wait(self):
+        self.root.wait_window()
 
 
 def ScoreColumn(root, column, team_color, score_color, refresh_ms, get_score,
