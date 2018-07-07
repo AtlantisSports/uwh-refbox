@@ -582,11 +582,7 @@ class SettingsView(object):
         else:
             info += "Overtime:         No\n"
         if self.parent.has_sudden_death():
-            duration = self.parent.sudden_death_duration()
-            if duration:
-                info += "Sudden Death:  " + self.fmt_time(duration) + " max\n"
-            else:
-                info += "Sudden Death:    Yes\n"
+            info += "Sudden Death:    Yes\n"
         else:
             info += "Sudden Death:     No\n"
 
