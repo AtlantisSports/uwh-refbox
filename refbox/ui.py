@@ -26,16 +26,17 @@ def RefboxConfigParser():
         'half_play_duration': '600',
         'half_time_duration': '180',
         'team_timeout_duration': '60',
-        'team_timeouts_allowed': 1,
-        'has_overtime': 'False',
+        'team_timeouts_allowed': '1',
+        'has_overtime': 'True',
         'ot_half_play_duration': '300',
         'pre_overtime_break': '180',
         'overtime_break_duration': '60',
         'pre_sudden_death_duration': '60',
         'pre_sudden_death_duration': '60',
-        'sudden_death_allowed': 'False',
+        'sudden_death_allowed': 'True',
         'max_sudden_death_duration': '1800',
         'overtime_timeouts_allowed': 'False',
+        'team_timeouts_per_half': 'False',
         'pool' : '1',
         'tid' : '16',
         'uwhscores_url' : 'http://uwhscores.com/api/v1/',
@@ -572,16 +573,16 @@ class SettingsView(object):
         info += "White: " + self.game['white'] + "\n"
         info += "Black: " + self.game['black'] + "\n"
         info += "\n"
-        info += "1st/2nd Half:  " + self.fmt_time(rules['half_duration']) + "\n"
-        info += "Half Time:     " + self.fmt_time(rules['half_time_duration']) + "\n"
-        info += "Minimum Break: " + self.fmt_time(rules['min_game_break']) + "\n"
+        info += "1st/2nd Half:  " + self.fmt_time(self.parent.half_play_duration()) + "\n"
+        info += "Half Time:     " + self.fmt_time(self.parent.half_time_duration()) + "\n"
+        #info += "Minimum Break: " + self.fmt_time(rules['min_game_break']) + "\n"
         info += "\n"
-        if rules['overtime_allowed']:
+        if self.parent.has_overtime():
             info += "Overtime:        Yes\n"
         else:
             info += "Overtime:         No\n"
-        if rules['sudden_death_allowed']:
-            duration = rules['max_sudden_death_duration']
+        if self.parent.has_sudden_death():
+            duration = self.parent.sudden_death_duration()
             if duration:
                 info += "Sudden Death:  " + self.fmt_time(duration) + " max\n"
             else:
@@ -589,15 +590,14 @@ class SettingsView(object):
         else:
             info += "Sudden Death:     No\n"
 
-        timeouts = rules['game_timeouts']
-        to_allowed = timeouts['allowed']
+        to_allowed = self.parent.team_timeouts_allowed()
         if to_allowed > 0:
             info += "Timeouts Allowed:    " + str(to_allowed)
-            if timeouts['per_half']:
-                info += " / half\n"
+            if self.parent.team_timeouts_per_half():
+                info += " / team / half\n"
             else:
-                info += " / game\n"
-            info += "Timeout Duration:    " + self.fmt_time(timeouts['duration'])
+                info += " / team / game\n"
+            info += "Timeout Duration:    " + self.fmt_time(self.parent.team_timeout_duration())
 
         self.game_info_var.set(info)
 
@@ -1256,27 +1256,44 @@ class NormalView(object):
 
     def half_play_duration(self):
         if self.game_info:
-            return self.game_info['timing_rules']['half_duration']
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['half_duration']
         return self.cfg.getint('game', 'half_play_duration')
 
     def half_time_duration(self):
         if self.game_info:
-            return self.game_info['timing_rules']['half_time_duration']
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['half_time_duration']
         return self.cfg.getint('game', 'half_time_duration')
 
     def team_timeouts_allowed(self):
         if self.game_info:
-            return self.game_info['timing_rules']['game_timeouts']['allowed']
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['game_timeouts']['allowed']
         return self.cfg.getint('game', 'team_timeouts_allowed')
+
+    def team_timeouts_per_half(self):
+        if self.game_info:
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['game_timeouts']['per_half']
+        return self.cfg.getboolean('game', 'team_timeouts_per_half')
 
     def team_timeout_duration(self):
         if self.game_info:
-            return self.game_info['timing_rules']['game_timeouts']['duration']
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['game_timeouts']['duration']
         return self.cfg.getint('game', 'team_timeout_duration')
 
     def has_overtime(self):
         if self.game_info:
-            return self.game_info['timing_rules']['overtime_allowed']
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['overtime_allowed']
         return self.cfg.getboolean('game', 'has_overtime')
 
     def overtime_duration(self):
@@ -1284,46 +1301,58 @@ class NormalView(object):
 
     def has_sudden_death(self):
         if self.game_info:
-            return self.game_info['timing_rules']['sudden_death_allowed']
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                return rules['sudden_death_allowed']
         return self.cfg.getboolean('game', 'sudden_death_allowed')
 
     def sudden_death_duration(self):
         if self.game_info:
-            duration = self.game_info['timing_rules']['max_sudden_death_duration']
-            if duration:
-                return duration
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                duration = rules['max_sudden_death_duration']
+                if duration:
+                    return duration
         return self.cfg.getint('game', 'max_sudden_death_duration')
 
     def pre_overtime_break(self):
         if self.game_info:
-            try:
-                return self.game_info['timing_rules']['pre_overtime_break']
-            except Exception:
-                pass
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                try:
+                    return rules['pre_overtime_break']
+                except Exception:
+                    pass
         return self.cfg.getint('game', 'pre_overtime_break')
 
     def overtime_break_duration(self):
         if self.game_info:
-            try:
-                return self.game_info['timing_rules']['overtime_break_duration']
-            except Exception:
-                pass
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                try:
+                    return rules['overtime_break_duration']
+                except Exception:
+                    pass
         return self.cfg.getint('game', 'overtime_break_duration')
 
     def pre_sudden_death_duration(self):
         if self.game_info:
-            try:
-                return self.game_info['timing_rules']['pre_sudden_death_duration']
-            except Exception:
-                pass
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                try:
+                    return rules['pre_sudden_death_duration']
+                except Exception:
+                    pass
         return self.cfg.getint('game', 'pre_sudden_death_duration')
 
     def overtime_timeouts_allowed(self):
         if self.game_info:
-            try:
-                return self.game_info['timing_rules']['overtime_timeouts_allowed']
-            except Exception:
-                pass
+            rules = self.game_info['timing_rules']
+            if rules is not None:
+                try:
+                    return rules['overtime_timeouts_allowed']
+                except Exception:
+                    pass
         return self.cfg.getboolean('game', 'overtime_timeouts_allowed')
 
     def set_game_info(self, game):
