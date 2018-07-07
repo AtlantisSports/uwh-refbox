@@ -1095,22 +1095,23 @@ class NormalView(object):
                       lambda:None, edit_scores, self.cfg).wait()
 
         if self.advance_game_state(state):
-            self.post_score()
+            self.post_score(True)
             self.mgr.setGameState(GameState.game_over)
             self.mgr.deleteAllPenalties()
             self.mgr.delAllGoals()
             self.redraw_penalties()
             self.timeout_mgr.set_game_over(self.mgr)
 
-    def post_score(self):
+    def post_score(self, is_final):
         if self.game_info is not None:
-            self.uwhscores.post_score(
-                self.game_info['tid'],
-                self.game_info['gid'],
-                self.mgr.whiteScore(),
-                self.mgr.blackScore(),
-                self.game_info['black_id'],
-                self.game_info['white_id'])
+            if is_final:
+                self.uwhscores.post_score(
+                    self.game_info['tid'],
+                    self.game_info['gid'],
+                    self.mgr.whiteScore(),
+                    self.mgr.blackScore(),
+                    self.game_info['black_id'],
+                    self.game_info['white_id'])
 
     def game_break(self, new_duration, new_state):
         self.mgr.deleteServedPenalties()
@@ -1224,6 +1225,7 @@ class NormalView(object):
         def set_score(black, white):
             self.mgr.setBlackScore(black)
             self.mgr.setWhiteScore(white)
+            self.post_score(False)
             if (self.mgr.gameState() == GameState.sudden_death and
                 self.mgr.blackScore() != self.mgr.whiteScore()):
                 self.game_over()
@@ -1234,6 +1236,7 @@ class NormalView(object):
     def increment_white_score(self):
         def goal(player_no):
             self.mgr.addWhiteGoal(player_no)
+            self.post_score(False)
             if (self.mgr.gameState() == GameState.sudden_death and
                 self.mgr.blackScore() != self.mgr.whiteScore()):
                 self.game_over()
@@ -1242,6 +1245,7 @@ class NormalView(object):
     def increment_black_score(self):
         def goal(player_no):
             self.mgr.addBlackGoal(player_no)
+            self.post_score(False)
             if (self.mgr.gameState() == GameState.sudden_death and
                 self.mgr.blackScore() != self.mgr.whiteScore()):
                 self.game_over()
