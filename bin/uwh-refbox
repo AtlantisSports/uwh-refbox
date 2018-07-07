@@ -26,6 +26,9 @@ else:
 
 url = cfg.get('game', 'uwhscores_url')
 uwhscores = UWHScores(url)
+username = cfg.get('game', 'uwhscores_admin')
+password = cfg.get('game', 'uwhscores_password')
+uwhscores.login(username, password)
 
 if cfg.getboolean('hardware', 'has_xbee'):
     xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))

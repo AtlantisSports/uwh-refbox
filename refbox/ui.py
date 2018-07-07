@@ -1095,11 +1095,22 @@ class NormalView(object):
                       lambda:None, edit_scores, self.cfg).wait()
 
         if self.advance_game_state(state):
+            self.post_score()
             self.mgr.setGameState(GameState.game_over)
             self.mgr.deleteAllPenalties()
             self.mgr.delAllGoals()
             self.redraw_penalties()
             self.timeout_mgr.set_game_over(self.mgr)
+
+    def post_score(self):
+        if self.game_info is not None:
+            self.uwhscores.post_score(
+                self.game_info['tid'],
+                self.game_info['gid'],
+                self.mgr.whiteScore(),
+                self.mgr.blackScore(),
+                self.game_info['black_id'],
+                self.game_info['white_id'])
 
     def game_break(self, new_duration, new_state):
         self.mgr.deleteServedPenalties()
