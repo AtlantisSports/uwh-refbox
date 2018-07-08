@@ -2,8 +2,10 @@
 
 from refbox.ui import NormalView, RefboxConfigParser, is_rpi
 from uwh.gamemanager import GameManager, PoolLayout
-from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients
+from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients, xbee_id, xbee_ch
 from uwh.uwhscores_comms import UWHScores
+
+import socket
 
 if is_rpi():
     from refbox.iomanager import IOManager
@@ -32,6 +34,7 @@ uwhscores.login(username, password)
 
 if cfg.getboolean('hardware', 'has_xbee'):
     xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
+    xbee.setup(xbee_id(cfg), xbee_ch(cfg), socket.gethostname())
     xbee.broadcast_thread(xbee_clients(cfg))
 
 nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=is_rpi(), cfg=cfg, uwhscores=uwhscores)

@@ -21,6 +21,8 @@ def RefboxConfigParser():
         'port': '/dev/tty.usbserial-DN03ZRU8',
         'baud': '9600',
         'clients': '[]',
+        'ch': '000C',
+        'id': '000D',
 
         # game
         'half_play_duration': '600',
