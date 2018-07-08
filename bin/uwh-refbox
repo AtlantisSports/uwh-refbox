@@ -35,6 +35,10 @@ uwhscores.login(username, password)
 if cfg.getboolean('hardware', 'has_xbee'):
     xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
     xbee.setup(xbee_id(cfg), xbee_ch(cfg), socket.gethostname())
+    def found_client(remote):
+       print("{} - {}".format(remote.get_64bit_addr(), remote.get_node_id()))
+    print("Available Displays:")
+    xbee.client_discovery(found_client)
     xbee.broadcast_thread(xbee_clients(cfg))
 
 nv = NormalView(mgr, IOManager(), NO_TITLE_BAR=is_rpi(), cfg=cfg, uwhscores=uwhscores)
