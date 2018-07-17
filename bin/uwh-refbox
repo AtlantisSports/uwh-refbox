@@ -24,7 +24,7 @@ mgr.setGid(2)
 if cfg.getboolean('hardware', 'white_on_right'):
     mgr.setLayout(PoolLayout.white_on_right)
 else:
-    mrg.setLayout(PoolLayout.white_on_left)
+    mgr.setLayout(PoolLayout.white_on_left)
 
 url = cfg.get('game', 'uwhscores_url')
 uwhscores = UWHScores(url)
