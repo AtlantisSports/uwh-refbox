@@ -780,10 +780,10 @@ class PenaltyEditor(object):
         submit.grid(row=0, column=2)
 
     def time_select(self, kind):
-        self._one_min.config(relief=tk.RAISED, border=4)
-        self._two_min.config(relief=tk.RAISED, border=4)
-        self._five_min.config(relief=tk.RAISED, border=4)
-        self._dismissal.config(relief=tk.RAISED, border=4)
+        self._one_min.config(relief=tk.RAISED, border=6)
+        self._two_min.config(relief=tk.RAISED, border=6)
+        self._five_min.config(relief=tk.RAISED, border=6)
+        self._dismissal.config(relief=tk.RAISED, border=6)
         if kind == 60:
             self._one_min.config(relief=tk.SUNKEN)
         elif kind == 120:
@@ -795,8 +795,8 @@ class PenaltyEditor(object):
         self._duration.set(kind)
 
     def color_select(self, kind):
-        self._white.config(relief=tk.RAISED, border=1)
-        self._black.config(relief=tk.RAISED, border=1)
+        self._white.config(relief=tk.RAISED, border=6)
+        self._black.config(relief=tk.RAISED, border=6)
         if kind == TeamColor.white:
             self._white.config(relief=tk.SUNKEN)
         else:
