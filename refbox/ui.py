@@ -296,7 +296,8 @@ class ScoreEditor(object):
 
 
 class ConfirmDialog(object):
-    def __init__(self, master, tb_offset, prompt, on_yes, on_no, cfg):
+    def __init__(self, master, tb_offset, prompt, on_yes, on_no, cfg,
+                 yes_txt='YES', no_txt='NO'):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
@@ -319,11 +320,11 @@ class ConfirmDialog(object):
                             200, cfg.getint('hardware', 'screen_x'))
         header.grid(row=1, columnspan=2, column=0)
 
-        no_button = SizedButton(self.root, self.no_clicked, "NO", "Red.TButton",
+        no_button = SizedButton(self.root, self.no_clicked, no_txt, "Red.TButton",
                                 150, cfg.getint('hardware', 'screen_x') / 2)
         no_button.grid(row=2, column=0)
 
-        yes_button = SizedButton(self.root, self.yes_clicked, "YES", "Green.TButton",
+        yes_button = SizedButton(self.root, self.yes_clicked, yes_txt, "Green.TButton",
                                  150, cfg.getint('hardware', 'screen_x') / 2)
         yes_button.grid(row=2, column=1)
 
@@ -813,6 +814,9 @@ class PenaltyEditor(object):
         self.root.destroy()
         self.on_submit(self._team, self._numpad.get_value(), self._duration.get())
 
+    def wait(self):
+        self.root.wait_window()
+
 
 class TimeoutEditor(object):
     def __init__(self, root, normal_view, tb_offset, mgr, cfg, on_ref, on_white, on_black, on_shot):
@@ -1015,7 +1019,7 @@ class NormalView(object):
             self.mgr.delPenalty(penalty)
             self.redraw_penalties()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
-                      delete_clicked, submit_clicked, p)
+                      delete_clicked, submit_clicked, p).wait()
 
     def add_penalty(self, team_color):
         def submit_clicked(self, new_team, player, duration):
@@ -1024,10 +1028,15 @@ class NormalView(object):
             except ValueError:
                 player = -1
             p = Penalty(player, new_team, duration)
+
+            ConfirmDialog(self.root, self.tb_offset, "",
+                          lambda:self.add_penalty(team_color),
+                          lambda:None, self.cfg,
+                          "More Penalties", "Resume Play").wait()
             self.mgr.addPenalty(p)
             self.redraw_penalties()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
-                      lambda x: None, partial(submit_clicked, self))
+                      lambda x: None, partial(submit_clicked, self)).wait()
 
     def timeout_clicked(self):
         def ref_clicked():
