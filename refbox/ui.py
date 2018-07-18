@@ -682,6 +682,8 @@ class PlayerSelectNumpad(tk.Frame):
 class PenaltyEditor(object):
     def __init__(self, master, tb_offset, mgr, cfg, team_color, on_delete, on_submit,
                  penalty=None):
+        self._team = team_color
+
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
@@ -696,30 +698,42 @@ class PenaltyEditor(object):
         self.on_delete = on_delete
         self.on_submit = on_submit
 
-        if team_color == TeamColor.white:
-            title_str = "White Penalty"
-        else:
-            title_str = "Black Penalty"
+        title_str = "Penalty"
         label_font = (_font_name, 48)
         title = SizedLabel(self.root, title_str, "black", "white", label_font,
                            height=100, width=cfg.getint('hardware', 'screen_y'))
-        title.grid(row=0, column=0, columnspan=2)
+        title.grid(row=0, column=0, columnspan=3)
 
         self._penalty = penalty or Penalty('', team_color, 60)
         self._duration = tk.IntVar()
         self._duration.set(self._penalty.duration())
 
+        frame_height = 75 * 5
+        frame_width = 200
+
+        # Player Color
+        color_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
+                              bg="grey")
+        color_frame.grid(row=1, column=0)
+        self._white = SizedButton(color_frame, partial(self.color_select, TeamColor.white),
+                                    "White", "White.TButton", frame_height / 2,
+                                    frame_width)
+        self._white.grid(row=0, column=0)
+
+        self._black = SizedButton(color_frame, partial(self.color_select, TeamColor.black),
+                                    "Black", "Blue.TButton", frame_height / 2,
+                                    frame_width)
+        self._black.grid(row=1, column=0)
+        self.color_select(self._penalty.team())
+
         # Player Selection
         self._numpad = PlayerSelectNumpad(self.root, self._penalty.player())
-        self._numpad.grid(row=1, column=0)
-
-        frame_height = 75 * 5
-        frame_width = 300
+        self._numpad.grid(row=1, column=1)
 
         # Penalty Duration
         time_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
                               bg="grey")
-        time_frame.grid(row=1, column=1)
+        time_frame.grid(row=1, column=2)
         self._one_min = SizedButton(time_frame, partial(self.time_select, 60),
                                     "1 min", "Yellow.TButton", frame_height / 4,
                                     frame_width)
@@ -742,7 +756,7 @@ class PenaltyEditor(object):
         self.time_select(self._penalty.duration())
 
         space = tk.Frame(self.root, height=50, width=50, bg='black')
-        space.grid(row=2, column=0, columnspan=2)
+        space.grid(row=2, column=0, columnspan=3)
 
         frame_height = 100
         frame_width = cfg.getint('hardware', 'screen_x')
@@ -750,7 +764,7 @@ class PenaltyEditor(object):
         # Actions
         submit_frame = tk.Frame(self.root, height=frame_height, width=frame_width,
                                 bg="dark grey")
-        submit_frame.grid(row=3, column=0, columnspan=2)
+        submit_frame.grid(row=3, column=0, columnspan=3)
 
         cancel = SizedButton(submit_frame, self.cancel_clicked, "Cancel",
                              "Yellow.TButton", frame_height, frame_width / 3)
@@ -779,6 +793,15 @@ class PenaltyEditor(object):
             self._dismissal.config(relief=tk.SUNKEN)
         self._duration.set(kind)
 
+    def color_select(self, kind):
+        self._white.config(relief=tk.RAISED, border=1)
+        self._black.config(relief=tk.RAISED, border=1)
+        if kind == TeamColor.white:
+            self._white.config(relief=tk.SUNKEN)
+        else:
+            self._black.config(relief=tk.SUNKEN)
+        self._team = kind
+
     def cancel_clicked(self):
         self.root.destroy()
 
@@ -788,7 +811,7 @@ class PenaltyEditor(object):
 
     def submit_clicked(self):
         self.root.destroy()
-        self.on_submit(self._numpad.get_value(), self._duration.get())
+        self.on_submit(self._team, self._numpad.get_value(), self._duration.get())
 
 
 class TimeoutEditor(object):
@@ -971,22 +994,18 @@ class NormalView(object):
             self.penalties[TeamColor.black] = blk
 
     def redraw_penalties(self):
-        self.redraw_penalties_white()
-        self.redraw_penalties_black()
-
-    def redraw_penalties_white(self):
         white = self.penalties[TeamColor.white]
         if white:
             white.redraw()
 
-    def redraw_penalties_black(self):
         black = self.penalties[TeamColor.black]
         if black:
             black.redraw()
 
     def edit_penalty(self, team_color, p):
-        def submit_clicked(player, duration):
+        def submit_clicked(new_team, player, duration):
             try:
+                p.setTeam(new_team)
                 p.setPlayer(int(player))
             except ValueError:
                 pass
@@ -999,18 +1018,14 @@ class NormalView(object):
                       delete_clicked, submit_clicked, p)
 
     def add_penalty(self, team_color):
-        def submit_clicked(self, player, duration):
+        def submit_clicked(self, new_team, player, duration):
             try:
                 player = int(player)
             except ValueError:
                 player = -1
-            p = Penalty(player, team_color, duration)
+            p = Penalty(player, new_team, duration)
             self.mgr.addPenalty(p)
-            if team_color == TeamColor.white:
-                self.redraw_penalties_white()
-            else:
-                self.redraw_penalties_white()
-            self.penalties[team_color].redraw()
+            self.redraw_penalties()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
                       lambda x: None, partial(submit_clicked, self))
 
