@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from refbox.ui import NormalView, RefboxConfigParser, is_rpi
 from uwh.gamemanager import GameManager, PoolLayout
