@@ -1156,6 +1156,9 @@ class NormalView(object):
         self.mgr.setGameState(new_state)
         self.timeout_mgr.set_ready(self.mgr)
 
+        # Automatically advance to the next part of the game
+        self.gong_clicked()
+
     def advance_game_state(self, old_state):
         half_play_duration = self.half_play_duration()
         half_time_duration = self.half_time_duration()
