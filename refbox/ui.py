@@ -1165,12 +1165,8 @@ class NormalView(object):
         self.mgr.setGameClock(new_duration)
         self.mgr.setGameState(new_state)
 
-        if False:
-            self.timeout_mgr.set_ready(self.mgr)
-        else:
-            # Automatically advance to the next part of the game
-            self.timeout_mgr.click(self.mgr, new_duration, TimeoutState.none)
-            self.gong_clicked("Auto advance")
+        # Automatically advance to the next part of the game
+        self.timeout_mgr.click(self.mgr, new_duration, TimeoutState.none)
 
     def advance_game_state(self, old_state, is_confirm):
         half_play_duration = self.half_play_duration()
@@ -1189,6 +1185,7 @@ class NormalView(object):
         elif old_state == GameState.half_time:
             self.timeout_mgr.reset_allowances()
             self.play_ready(half_play_duration, GameState.second_half)
+            gong_reason = "End of Half Time"
         elif old_state == GameState.second_half:
             if (self.mgr.blackScore() == self.mgr.whiteScore() and
                 self.has_overtime()):
@@ -1205,11 +1202,13 @@ class NormalView(object):
                 return True
         elif old_state == GameState.pre_ot:
             self.play_ready(self.overtime_duration(), GameState.ot_first)
+            gong_reason = "End of Pre Overtime Break"
         elif old_state == GameState.ot_first:
             self.game_break(self.overtime_break_duration(), GameState.ot_half)
             gong_reason = "End of Overtime First Half"
         elif old_state == GameState.ot_half:
             self.play_ready(self.overtime_duration(), GameState.ot_second)
+            gong_reason = "End of Overtime Half Time"
         elif old_state == GameState.ot_second:
             if (self.mgr.blackScore() == self.mgr.whiteScore() and
                 self.has_sudden_death()):
@@ -1222,6 +1221,7 @@ class NormalView(object):
                 return True
         elif old_state == GameState.pre_sudden_death:
             self.play_ready(self.sudden_death_duration(), GameState.sudden_death)
+            gong_reason = "End of Pre Sudden Death"
         elif old_state == GameState.sudden_death:
             gong_reason = "End of Timed Sudden Death"
             if not is_confirm:
