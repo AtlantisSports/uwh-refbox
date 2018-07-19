@@ -1432,4 +1432,4 @@ class NormalView(object):
         self.game_info = game
         if self.not_yet_started:
             self.mgr.setGameState(GameState.pre_game)
-            self.mgr.setGameClock(self.half_play_duration())
+            self.mgr.setGameClock(15 * 60)

@@ -99,7 +99,7 @@ class TimeoutManager(object):
             self.reset(mgr, get_half_play_duration)
             return
 
-        if mgr.gameState() == GameState.pre_game:
+        if mgr.gameState() == GameState.pre_game and not self.ready_to_start():
             mgr.setGameState(GameState.first_half)
 
         if (state == TimeoutState.white or
