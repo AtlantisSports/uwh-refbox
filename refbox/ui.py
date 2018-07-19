@@ -611,6 +611,7 @@ class SettingsView(object):
 
             def on_yes():
                 self.select(now[0])
+                self.parent.gong_clicked()
                 self.parent.timeout_mgr.reset(self.mgr, lambda: self.parent.half_play_duration())
             def on_no():
                 self.select(temp[0])
@@ -1041,6 +1042,7 @@ class NormalView(object):
                       lambda x: None, partial(submit_clicked, self)).wait()
 
     def timeout_clicked(self):
+        self.gong_clicked()
         def ref_clicked():
             self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
                                    TimeoutState.ref)
@@ -1105,6 +1107,7 @@ class NormalView(object):
 
     def game_over(self):
         state = self.mgr.gameState()
+        self.gong_clicked()
         self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(0)
 
@@ -1154,10 +1157,13 @@ class NormalView(object):
         self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(new_duration)
         self.mgr.setGameState(new_state)
-        self.timeout_mgr.set_ready(self.mgr)
 
-        # Automatically advance to the next part of the game
-        self.gong_clicked()
+        if False:
+            self.timeout_mgr.set_ready(self.mgr)
+        else:
+            # Automatically advance to the next part of the game
+            self.timeout_mgr.click(self.mgr, new_duration, TimeoutState.none)
+            self.gong_clicked()
 
     def advance_game_state(self, old_state):
         half_play_duration = self.half_play_duration()
@@ -1165,8 +1171,10 @@ class NormalView(object):
 
         if self.mgr.timeoutState() == TimeoutState.white:
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.gong_clicked()
         elif self.mgr.timeoutState() == TimeoutState.black:
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.gong_clicked()
         elif old_state == GameState.first_half:
             self.game_break(half_time_duration, GameState.half_time)
             self.gong_clicked()
