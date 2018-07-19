@@ -619,11 +619,11 @@ class SettingsView(object):
             self.cur_selection = now
 
             def on_yes():
-                self.select(now[0])
+                self.select(now[0]-1)
                 self.parent.gong_clicked("Change of Game")
                 self.parent.timeout_mgr.reset(self.mgr, lambda: self.parent.half_play_duration())
             def on_no():
-                self.select(temp[0])
+                self.select(temp[0]-1)
 
             ConfirmDialog(self.root, self.tb_offset,
                           "Switch to {}?\n\n\nWARNING: this will reset the game!"
