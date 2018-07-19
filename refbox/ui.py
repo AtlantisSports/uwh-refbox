@@ -1036,7 +1036,7 @@ class NormalView(object):
             p = Penalty(player, new_team, duration)
 
             ConfirmDialog(self.root, self.tb_offset, "",
-                          lambda:self.gong_pressed(),
+                          lambda:self.gong_clicked("Resume After Add Penalty"),
                           lambda:self.add_penalty(team_color),
                           self.cfg,
                           "Resume Play", "More Penalties").wait()
@@ -1065,7 +1065,9 @@ class NormalView(object):
             self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
                                    TimeoutState.black)
             self.redraw_penalties()
-        if self.timeout_mgr.ready_to_start() or self.timeout_mgr.ready_to_resume():
+        if (self.timeout_mgr.ready_to_start() or
+            self.timeout_mgr.ready_to_reset() or
+            self.timeout_mgr.ready_to_resume()):
             self.gong_clicked("Start of First Game (or Resume?)")
             self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
                                    TimeoutState.none)
@@ -1226,8 +1228,14 @@ class NormalView(object):
             self.gong_clicked("End of Timed Sudden Death")
             self.game_over()
         elif old_state == GameState.game_over:
+            self.timeout_mgr.reset(self.mgr, lambda:self.mgr.gameClock())
             self.mgr.setGameClock(3 * 60)
             self.mgr.setGameClockRunning(True)
+        elif old_state == GameState.pre_game:
+            self.gong_clicked("End of Pre Game")
+            self.mgr.setGameClock(half_play_duration)
+            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.mgr.setGameClock(half_play_duration)
 
         if gong_reason is not None:
             self.gong_clicked(gong_reason)
