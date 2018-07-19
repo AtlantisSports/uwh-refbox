@@ -1,4 +1,4 @@
-from uwh.gamemanager import TimeoutState, GameState
+from uwh.gamemanager import TimeoutState, GameState, TeamColor
 
 class TimeoutManager(object):
     def __init__(self, var, team_timeout_duration):
@@ -7,6 +7,17 @@ class TimeoutManager(object):
         self._team_timeout_duration = team_timeout_duration
         self._clock_at_timeout = None
         self._reset_handlers = []
+        self.reset_allowances()
+
+    def reset_allowances(self):
+        self._timeout_allowed = { TeamColor.black : True,
+                                  TeamColor.white : True }
+
+    def timeout_allowed(self, team):
+        return self._timeout_allowed[team]
+
+    def timeout_used(self, team):
+        self._timeout_allowed[team] = False
 
     def ready_to_start(self):
         return self._text.get() == "START" or self._text.get() == "RESET"
@@ -26,6 +37,7 @@ class TimeoutManager(object):
         self._reset_handlers += [callback]
 
     def reset(self, mgr, get_half_play_duration):
+        self.reset_allowances()
         mgr.setBlackScore(0)
         mgr.setWhiteScore(0)
         mgr.setGameState(GameState.pre_game)
@@ -48,6 +60,10 @@ class TimeoutManager(object):
 
         if mgr.gameState() == GameState.pre_game:
             mgr.setGameState(GameState.first_half)
+
+        if (state == TimeoutState.white or
+            state == TimeoutState.black):
+            self._timeout_allowed[state] = False
 
         if mgr.timeoutState() == TimeoutState.none and state != TimeoutState.none:
             self._clock_at_timeout = mgr.gameClock()

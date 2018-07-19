@@ -38,7 +38,7 @@ def RefboxConfigParser():
         'sudden_death_allowed': 'False',
         'max_sudden_death_duration': '1800',
         'overtime_timeouts_allowed': 'False',
-        'team_timeouts_per_half': 'False',
+        'team_timeouts_per_half': 'True',
         'pool' : '1',
         'tid' : '16',
         'uwhscores_url' : 'http://uwhscores.com/api/v1/',
@@ -832,6 +832,8 @@ class TimeoutEditor(object):
         self.root.overrideredirect(1)
         self.root.transient(root)
 
+        timeout_mgr = normal_view.timeout_mgr
+
         self.on_ref = on_ref
         self.on_white = on_white
         self.on_black = on_black
@@ -866,17 +868,19 @@ class TimeoutEditor(object):
               (mgr.gameState() == GameState.sudden_death or
                mgr.gameState() == GameState.ot_first or
                mgr.gameState() == GameState.ot_second)))):
-            white = SizedButton(submit_frame, self.white_clicked,
-                                "White Timeout", "White.TButton",
-                                frame_height / 5, frame_width / 2)
-            white.grid(row=row, column=0)
-            row += 1
+            if timeout_mgr.timeout_allowed(TeamColor.white):
+                white = SizedButton(submit_frame, self.white_clicked,
+                                    "White Timeout", "White.TButton",
+                                    frame_height / 5, frame_width / 2)
+                white.grid(row=row, column=0)
+                row += 1
 
-            black = SizedButton(submit_frame, self.black_clicked,
-                                "Black Timeout", "Blue.TButton",
-                                frame_height / 5, frame_width / 2)
-            black.grid(row=row, column=0)
-            row += 1
+            if timeout_mgr.timeout_allowed(TeamColor.black):
+                black = SizedButton(submit_frame, self.black_clicked,
+                                    "Black Timeout", "Blue.TButton",
+                                    frame_height / 5, frame_width / 2)
+                black.grid(row=row, column=0)
+                row += 1
 
         shot = SizedButton(submit_frame, self.shot_clicked, "Penalty Shot",
                              "Cyan.TButton", frame_height / 5, frame_width / 2)
@@ -1052,10 +1056,12 @@ class NormalView(object):
                                    TimeoutState.penalty_shot)
             self.redraw_penalties()
         def white_clicked():
+            self.timeout_mgr.timeout_used(TeamColor.white)
             self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
                                    TimeoutState.white)
             self.redraw_penalties()
         def black_clicked():
+            self.timeout_mgr.timeout_used(TeamColor.black)
             self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
                                    TimeoutState.black)
             self.redraw_penalties()
@@ -1179,6 +1185,7 @@ class NormalView(object):
             self.game_break(half_time_duration, GameState.half_time)
             self.gong_clicked()
         elif old_state == GameState.half_time:
+            self.timeout_mgr.reset_allowances()
             self.play_ready(half_play_duration, GameState.second_half)
         elif old_state == GameState.second_half:
             if (self.mgr.blackScore() == self.mgr.whiteScore() and
