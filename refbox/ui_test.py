@@ -26,7 +26,7 @@ def test_normal_view():
     assert nv.mgr.gameClockRunning() is False
     assert nv.mgr.gameClock() > 0
 
-    nv.gong_clicked()
+    nv.gong_clicked("test_normal_view()")
     assert nv.mgr.gameClockRunning() is True
 
 
