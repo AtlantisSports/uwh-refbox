@@ -6,7 +6,7 @@ class TimeoutManager(object):
         var.set("START")
         self._text = var
         self._team_timeout_duration = team_timeout_duration
-        self._clock_at_timeout = None
+        self._timeout_running = False
         self._reset_handlers = []
         self._total_delay = 0
         self.reset_allowances()
@@ -88,7 +88,7 @@ class TimeoutManager(object):
         self._text.set("START")
 
     def set_ready(self, mgr):
-        self._clock_at_timeout = None
+        self._timeout_running = False
         self._text.set("RESUME")
 
     def click(self, mgr, get_half_play_duration, state):
@@ -107,7 +107,8 @@ class TimeoutManager(object):
             self._timeout_allowed[state] = False
 
         if mgr.timeoutState() == TimeoutState.none and state != TimeoutState.none:
-            self._clock_at_timeout = mgr.gameClock()
+            self._timeout_running = True
+            mgr.setGameClockAtPause(mgr.gameClock())
             mgr.pauseOutstandingPenalties()
             mgr.setGameClockRunning(False)
             mgr.setTimeoutState(state)
@@ -119,9 +120,9 @@ class TimeoutManager(object):
             return
 
         mgr.setGameClockRunning(True)
-        if self._clock_at_timeout is not None:
-            mgr.setGameClock(self._clock_at_timeout)
-            self._clock_at_timeout = None
+        if self._timeout_running:
+            mgr.setGameClock(mgr.gameClockAtPause())
+            self._timeout_running = False
         mgr.restartOutstandingPenalties()
         mgr.setTimeoutState(TimeoutState.none)
         self._text.set('TIMEOUT')
