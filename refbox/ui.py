@@ -1030,7 +1030,7 @@ class NormalView(object):
             p = Penalty(player, new_team, duration)
 
             ConfirmDialog(self.root, self.tb_offset, "",
-                          lambda:None,
+                          lambda:self.gong_pressed(),
                           lambda:self.add_penalty(team_color),
                           self.cfg,
                           "Resume Play", "More Penalties").wait()
