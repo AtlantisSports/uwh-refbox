@@ -567,6 +567,12 @@ class SettingsView(object):
         self.game = self.games[idx]
         self.parent.set_game_info(self.game)
         if not self.parent.not_yet_started:
+            self.mgr.setBlackScore(0)
+            self.mgr.setWhiteScore(0)
+            self.mgr.setTimeoutState(TimeoutState.none)
+            self.mgr.deleteAllPenalties()
+            self.mgr.delAllGoals()
+            self.parent.redraw_penalties()
             self.mgr.setGameState(GameState.first_half)
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(idx)
