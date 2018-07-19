@@ -5,6 +5,7 @@ import os
 from .timeoutmanager import TimeoutManager
 from uwh.gamemanager import GameManager, GameState, TeamColor, Penalty, TimeoutState
 from functools import partial
+import time
 
 _font_name = 'Consolas'
 
@@ -1261,7 +1262,7 @@ class NormalView(object):
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
     def gong_clicked(self):
-        print("gong clicked")
+        print("gong clicked " + str(time.time()))
         self.mgr.setGameClockRunning(True)
         self.not_yet_started = False
         self.iomgr.setSound(1)
