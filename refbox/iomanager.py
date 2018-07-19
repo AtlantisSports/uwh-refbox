@@ -26,7 +26,8 @@ class IOManager(object):
     self.io.write(4, 1)
 
   def readClicker(self):
-    return not self.io.read(4)
+#    return not self.io.read(4)
+    return False
 
   def setSound(self, setting):
     self.io.write(26, setting)
