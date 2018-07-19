@@ -1115,7 +1115,6 @@ class NormalView(object):
 
     def game_over(self):
         state = self.mgr.gameState()
-        self.gong_clicked("game_over()")
         self.mgr.setGameClockRunning(False)
         self.mgr.setGameClock(0)
 
@@ -1133,7 +1132,7 @@ class NormalView(object):
                          % (self.mgr.whiteScore(), self.mgr.blackScore()),
                       lambda:None, edit_scores, self.cfg).wait()
 
-        if self.advance_game_state(state):
+        if self.advance_game_state(state, is_confirm=True):
             self.post_score(True)
             self.mgr.setGameState(GameState.game_over)
             self.mgr.deleteAllPenalties()
@@ -1173,56 +1172,66 @@ class NormalView(object):
             self.timeout_mgr.click(self.mgr, new_duration, TimeoutState.none)
             self.gong_clicked("Auto advance")
 
-    def advance_game_state(self, old_state):
+    def advance_game_state(self, old_state, is_confirm):
         half_play_duration = self.half_play_duration()
         half_time_duration = self.half_time_duration()
+        gong_reason = None
 
         if self.mgr.timeoutState() == TimeoutState.white:
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
-            self.gong_clicked("End of White Timeout")
+            gong_reason = "End of White Timeout"
         elif self.mgr.timeoutState() == TimeoutState.black:
             self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
-            self.gong_clicked("End of Black Timeout")
+            gong_reason = "End of Black Timeout"
         elif old_state == GameState.first_half:
             self.game_break(half_time_duration, GameState.half_time)
-            self.gong_clicked("End of First Half")
+            gong_reason = "End of First Half"
         elif old_state == GameState.half_time:
             self.timeout_mgr.reset_allowances()
             self.play_ready(half_play_duration, GameState.second_half)
         elif old_state == GameState.second_half:
             if (self.mgr.blackScore() == self.mgr.whiteScore() and
                 self.has_overtime()):
-                self.gong_clicked("Start Overtime Break")
+                gong_reason = "Start Overtime Break"
                 self.game_break(self.pre_overtime_break(), GameState.pre_ot)
             elif (self.mgr.blackScore() == self.mgr.whiteScore() and
                   self.has_sudden_death()):
-                self.gong_clicked("Start Sudden Death Break")
+                gong_reason = "Start Sudden Death Break"
                 self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
             else:
-                self.gong_clicked("End of Second Half")
+                gong_reason = "End of Second Half"
+                if not is_confirm:
+                    self.gong_clicked(gong_reason)
                 return True
         elif old_state == GameState.pre_ot:
             self.play_ready(self.overtime_duration(), GameState.ot_first)
         elif old_state == GameState.ot_first:
             self.game_break(self.overtime_break_duration(), GameState.ot_half)
-            self.gong_clicked("End of Overtime First Half")
+            gong_reason = "End of Overtime First Half"
         elif old_state == GameState.ot_half:
             self.play_ready(self.overtime_duration(), GameState.ot_second)
         elif old_state == GameState.ot_second:
             if (self.mgr.blackScore() == self.mgr.whiteScore() and
                 self.has_sudden_death()):
                 self.game_break(self.pre_sudden_death_duration(), GameState.pre_sudden_death)
-                self.gong_clicked("Begin Sudden Death Break")
+                gong_reason = "Begin Sudden Death Break"
             else:
-                self.gong_clicked("End of Overtime (No Sudden Death)")
+                gong_reason = "End of Overtime (No Sudden Death)"
+                if not is_confirm:
+                    self.gong_clicked(gong_reason)
                 return True
         elif old_state == GameState.pre_sudden_death:
             self.play_ready(self.sudden_death_duration(), GameState.sudden_death)
         elif old_state == GameState.sudden_death:
-            self.gong_clicked("End of Timed Sudden Death")
+            gong_reason = "End of Timed Sudden Death"
+            if not is_confirm:
+                self.gong_clicked(gong_reason)
             return True
         elif old_state == GameState.game_over:
             return True
+
+        if gong_reason is not None and not is_confirm:
+            self.gong_clicked(gong_reason)
         return False
 
     def refresh_time(self):
@@ -1232,7 +1241,7 @@ class NormalView(object):
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
         if game_clock <= 0 and self.mgr.gameClockRunning():
-            if self.advance_game_state(self.mgr.gameState()):
+            if self.advance_game_state(self.mgr.gameState(), is_confirm=False):
                 self.game_over()
 
         if self.mgr.timeoutState() != TimeoutState.none:
