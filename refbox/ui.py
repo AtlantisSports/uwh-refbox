@@ -566,6 +566,8 @@ class SettingsView(object):
     def select(self, idx):
         self.game = self.games[idx]
         self.parent.set_game_info(self.game)
+        if not self.parent.not_yet_started:
+            self.mgr.setGameState(GameState.first_half)
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(idx)
         self.cur_selection = (idx,)
