@@ -298,12 +298,12 @@ class ScoreEditor(object):
 
 class ConfirmDialog(object):
     def __init__(self, master, tb_offset, prompt, on_yes, on_no, cfg,
-                 yes_txt='YES', no_txt='NO'):
+                 yes_txt='YES', no_txt='NO', y_offset=0):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
-                                                cfg.getint('hardware', 'screen_y'),
-                                                0, tb_offset))
+                                                cfg.getint('hardware', 'screen_y') - y_offset,
+                                                0, tb_offset + y_offset))
 
         maybe_hide_cursor(self.root)
 
@@ -692,14 +692,14 @@ class PlayerSelectNumpad(tk.Frame):
 
 class PenaltyEditor(object):
     def __init__(self, master, tb_offset, mgr, cfg, team_color, on_delete, on_submit,
-                 penalty=None):
+                 penalty=None, y_offset=0):
         self._team = team_color
 
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
-                                                cfg.getint('hardware', 'screen_y'),
-                                                0, tb_offset))
+                                                cfg.getint('hardware', 'screen_y')-y_offset,
+                                                0, tb_offset + y_offset))
 
         maybe_hide_cursor(self.root)
 
@@ -1044,15 +1044,17 @@ class NormalView(object):
             p = Penalty(player, new_team, duration)
 
             ConfirmDialog(self.root, self.tb_offset, "",
-                          lambda:self.gong_clicked("Resume After Add Penalty"),
+                          lambda:None,
                           lambda:self.add_penalty(team_color),
                           self.cfg,
-                          "Resume Play", "More Penalties").wait()
+                          "Done", "More Penalties",
+                          y_offset=150).wait()
 
             self.mgr.addPenalty(p)
             self.redraw_penalties()
         PenaltyEditor(self.root, self.tb_offset, self.mgr, self.cfg, team_color,
-                      lambda x: None, partial(submit_clicked, self)).wait()
+                      lambda x: None, partial(submit_clicked, self),
+                      y_offset=150).wait()
 
     def timeout_clicked(self):
         def ref_clicked():
