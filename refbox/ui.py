@@ -950,7 +950,7 @@ class NormalView(object):
         self.game_info = None
         self.not_yet_started = True
         self.mgr.setGameState(GameState.pre_game)
-        self.mgr.setGameClock(self.half_play_duration())
+        self.mgr.setGameClock(15 * 60)
 
         self.root = tk.Tk()
         self.root.configure(background='black')
