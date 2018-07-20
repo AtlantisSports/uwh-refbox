@@ -575,7 +575,8 @@ class SettingsView(object):
             self.mgr.deleteAllPenalties()
             self.mgr.delAllGoals()
             self.parent.redraw_penalties()
-            self.mgr.setGameState(GameState.first_half)
+            self.mgr.setGameState(GameState.pre_game)
+            self.mgr.setGameClock(3 * 60)
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(idx)
         self.cur_selection = (idx,)
@@ -623,7 +624,7 @@ class SettingsView(object):
             def on_yes():
                 self.select(now[0]-1)
                 self.parent.gong_clicked("Change of Game", 3000)
-                self.parent.timeout_mgr.reset(self.mgr, lambda: self.parent.half_play_duration())
+                self.parent.timeout_mgr.reset(self.mgr)
             def on_no():
                 self.select(temp[0]-1)
 
@@ -1060,29 +1061,24 @@ class NormalView(object):
 
     def timeout_clicked(self):
         def ref_clicked():
-            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
-                                   TimeoutState.ref)
+            self.timeout_mgr.click(self.mgr, TimeoutState.ref)
             self.redraw_penalties()
         def shot_clicked():
-            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
-                                   TimeoutState.penalty_shot)
+            self.timeout_mgr.click(self.mgr, TimeoutState.penalty_shot)
             self.redraw_penalties()
         def white_clicked():
             self.timeout_mgr.timeout_used(TeamColor.white)
-            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
-                                   TimeoutState.white)
+            self.timeout_mgr.click(self.mgr, TimeoutState.white)
             self.redraw_penalties()
         def black_clicked():
             self.timeout_mgr.timeout_used(TeamColor.black)
-            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
-                                   TimeoutState.black)
+            self.timeout_mgr.click(self.mgr, TimeoutState.black)
             self.redraw_penalties()
         if (self.timeout_mgr.ready_to_start() or
             self.timeout_mgr.ready_to_reset() or
             self.timeout_mgr.ready_to_resume()):
             self.gong_clicked("Start of First Game (or Resume?)", 1000)
-            self.timeout_mgr.click(self.mgr, lambda: self.half_play_duration(),
-                                   TimeoutState.none)
+            self.timeout_mgr.click(self.mgr, TimeoutState.none)
             self.redraw_penalties()
         else:
             TimeoutEditor(self.root, self, self.tb_offset, self.mgr, self.cfg,
@@ -1183,11 +1179,11 @@ class NormalView(object):
         gong_duration = 1000
 
         if self.mgr.timeoutState() == TimeoutState.white:
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.timeout_mgr.click(self.mgr, TimeoutState.none)
             gong_reason = "End of White Timeout"
             gong_duration = 1000
         elif self.mgr.timeoutState() == TimeoutState.black:
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.timeout_mgr.click(self.mgr, TimeoutState.none)
             gong_reason = "End of Black Timeout"
             gong_duration = 1000
         elif old_state == GameState.first_half:
@@ -1248,13 +1244,12 @@ class NormalView(object):
             self.gong_clicked("End of Timed Sudden Death", 2500)
             self.game_over()
         elif old_state == GameState.game_over:
-            self.timeout_mgr.reset(self.mgr, lambda:self.mgr.gameClock())
-            self.mgr.setGameClock(3 * 60)
+            self.timeout_mgr.reset(self.mgr)
             self.mgr.setGameClockRunning(True)
         elif old_state == GameState.pre_game:
             self.gong_clicked("End of Pre Game", 1000)
             self.mgr.setGameClock(half_play_duration)
-            self.timeout_mgr.click(self.mgr, half_play_duration, TimeoutState.none)
+            self.timeout_mgr.click(self.mgr, TimeoutState.none)
             self.mgr.setGameClock(half_play_duration)
 
         if gong_reason is not None:
