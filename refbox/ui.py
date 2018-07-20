@@ -1249,8 +1249,7 @@ class NormalView(object):
         elif old_state == GameState.pre_game:
             self.gong_clicked("End of Pre Game", 1000)
             self.mgr.setGameClock(half_play_duration)
-            self.timeout_mgr.click(self.mgr, TimeoutState.none)
-            self.mgr.setGameClock(half_play_duration)
+            self.mgr.setGameState(GameState.first_half)
 
         if gong_reason is not None:
             self.gong_clicked(gong_reason, gong_duration)
