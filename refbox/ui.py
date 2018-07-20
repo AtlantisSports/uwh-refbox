@@ -1259,6 +1259,8 @@ class NormalView(object):
         game_clock = self.mgr.gameClock()
         game_mins = game_clock // 60
         game_secs = game_clock % 60
+        if self.mgr.gameState() == GameState.game_over:
+            game_mins += 3
         self.game_clock_var.set("%02d:%02d" % (game_mins, game_secs))
 
         if game_clock <= 0 and self.mgr.gameClockRunning():
@@ -1273,11 +1275,11 @@ class NormalView(object):
             }[self.mgr.timeoutState()]
         else:
             text, color = {
-                GameState.pre_game         : ("PRE GAME",         "#ffff00"),
+                GameState.pre_game         : ("NEXT GAME",        "#ffff00"),
                 GameState.first_half       : ("FIRST HALF",       "#00ff00"),
                 GameState.half_time        : ("HALF TIME",        "#ff8000"),
                 GameState.second_half      : ("SECOND HALF",      "#00ff00"),
-                GameState.game_over        : ("GAME OVER",        "#ff0000"),
+                GameState.game_over        : ("NEXT GAME",        "#ff0000"),
                 GameState.pre_ot           : ("PRE-OVERTIME",     "#ffff00"),
                 GameState.ot_first         : ("OVERTIME FIRST",   "#00ff00"),
                 GameState.ot_half          : ("OVERTIME HALF",    "#ff8000"),
