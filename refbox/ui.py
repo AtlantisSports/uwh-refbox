@@ -9,6 +9,8 @@ import time
 
 _font_name = 'Consolas'
 
+FIRST_PREGAME_LEN = 10 * 60
+
 def RefboxConfigParser():
     defaults = {
         # hardware
@@ -958,7 +960,7 @@ class NormalView(object):
         self.game_info = None
         self.not_yet_started = True
         self.mgr.setGameState(GameState.pre_game)
-        self.mgr.setGameClock(15 * 60)
+        self.mgr.setGameClock(FIRST_PREGAME_LEN)
 
         self.root = tk.Tk()
         self.root.configure(background='black')
@@ -1450,4 +1452,4 @@ class NormalView(object):
         self.game_info = game
         if self.not_yet_started:
             self.mgr.setGameState(GameState.pre_game)
-            self.mgr.setGameClock(15 * 60)
+            self.mgr.setGameClock(FIRST_PREGAME_LEN)
