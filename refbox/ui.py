@@ -28,7 +28,7 @@ def RefboxConfigParser():
         'id': '000D',
 
         # game
-        'half_play_duration': '600',
+        'half_play_duration': '900',
         'half_time_duration': '180',
         'team_timeout_duration': '60',
         'team_timeouts_allowed': '1',
