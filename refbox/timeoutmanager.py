@@ -91,6 +91,10 @@ class TimeoutManager(object):
         self._timeout_running = False
         self._text.set("RESUME")
 
+    def record_game_start(self):
+        self._game_start_time = time.time()
+        print("game start was: " + str(self._game_start_time))
+
     def click(self, mgr, state):
         if self.ready_to_start():
             self._game_start_time = time.time()
