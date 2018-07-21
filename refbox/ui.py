@@ -562,8 +562,14 @@ class SettingsView(object):
         self.listbox.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.listbox.yview)
 
+        def today(g):
+            from datetime import datetime, date
+            return (datetime.strptime(g['start_time'],
+                                      "%Y-%m-%dT%H:%M:%S").date() ==
+                    date.today())
+
         def response(games):
-            self.games = [g for g in games if g['pool'] == pool]
+            self.games = [g for g in games if g['pool'] == pool and today(g)]
 
             for game in self.games:
                 self.listbox.insert(tk.END, self.desc(game))
