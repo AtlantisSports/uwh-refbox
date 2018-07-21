@@ -1143,8 +1143,8 @@ class NormalView(object):
                 self.uwhscores.post_score(
                     self.game_info['tid'],
                     self.game_info['gid'],
-                    self.mgr.whiteScore(),
                     self.mgr.blackScore(),
+                    self.mgr.whiteScore(),
                     self.game_info['black_id'],
                     self.game_info['white_id'])
 
