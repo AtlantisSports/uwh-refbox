@@ -92,12 +92,14 @@ def maybe_hide_cursor(root):
         root.configure(cursor='none')
 
 class TimeEditor(object):
-    def __init__(self, master, tb_offset, clock_at_pause, on_submit, on_cancel, cfg):
+    def __init__(self, master, tb_offset, clock_at_pause, on_submit, on_cancel, cfg, mgr):
         self.root = tk.Toplevel(master, background='black')
         self.root.resizable(width=tk.FALSE, height=tk.FALSE)
         self.root.geometry('{}x{}+{}+{}'.format(cfg.getint('hardware', 'screen_x'),
                                            cfg.getint('hardware', 'screen_y'),
                                            0, 0))
+
+        self.mgr = mgr
 
         maybe_hide_cursor(self.root)
 
@@ -109,6 +111,9 @@ class TimeEditor(object):
 
         space = tk.Frame(self.root, height=50, width=100, bg="black")
         space.grid(row=0, column=0)
+
+        if mgr.gameState() == GameState.game_over:
+            clock_at_pause += 3 * 60
 
         self.clock_at_pause_var = tk.IntVar(value=clock_at_pause)
 
@@ -164,8 +169,12 @@ class TimeEditor(object):
 
     def game_clock_s_dn(self):
         x = self.clock_at_pause_var.get()
-        if x > 0:
-            self.clock_at_pause_var.set(x - 1)
+        if self.mgr.gameState() == GameState.game_over:
+            if x > 3 * 60:
+                self.clock_at_pause_var.set(x - 1)
+        else:
+            if x > 0:
+                self.clock_at_pause_var.set(x - 1)
 
     def game_clock_m_up(self):
         x = self.clock_at_pause_var.get()
@@ -173,17 +182,23 @@ class TimeEditor(object):
 
     def game_clock_m_dn(self):
         x = self.clock_at_pause_var.get()
-        if x - 60 >= 0:
-            self.clock_at_pause_var.set(x - 60)
+        if self.mgr.gameState() == GameState.game_over:
+            self.clock_at_pause_var.set(max(x - 60, 3 * 60))
         else:
-            self.clock_at_pause_var.set(0)
+            if x - 60 >= 0:
+                self.clock_at_pause_var.set(x - 60)
+            else:
+                self.clock_at_pause_var.set(0)
 
     def cancel_clicked(self):
         self.on_cancel()
         self.root.destroy()
 
     def submit_clicked(self):
-        self.on_submit(self.clock_at_pause_var.get())
+        if self.mgr.gameState() == GameState.game_over:
+            self.on_submit(self.clock_at_pause_var.get() - 3 * 60)
+        else:
+            self.on_submit(self.clock_at_pause_var.get())
         self.root.destroy()
 
     def wait(self):
@@ -1342,7 +1357,7 @@ class NormalView(object):
         def cancel_clicked():
             self.mgr.setGameClockRunning(was_running)
 
-        TimeEditor(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked, self.cfg)
+        TimeEditor(self.root, self.tb_offset, clock_at_pause, submit_clicked, cancel_clicked, self.cfg, self.mgr)
 
     def half_play_duration(self):
         if self.game_info:
