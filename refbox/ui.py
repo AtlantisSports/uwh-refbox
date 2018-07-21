@@ -1092,7 +1092,8 @@ class NormalView(object):
         if (self.timeout_mgr.ready_to_start() or
             self.timeout_mgr.ready_to_reset() or
             self.timeout_mgr.ready_to_resume()):
-            self.gong_clicked("Start of First Game (or Resume?)", 1000)
+            if self.mgr.timeoutState() != TimeoutState.ref:
+                self.gong_clicked("Start of First Game (or Resume?)", 1000)
             self.timeout_mgr.click(self.mgr, TimeoutState.none)
             self.redraw_penalties()
         else:
