@@ -638,7 +638,7 @@ class SettingsView(object):
 
     def poll(self):
         now = self.listbox.curselection()
-        if now != self.cur_selection:
+        if now != self.cur_selection and now != ():
             temp = self.cur_selection
             self.cur_selection = now
 
@@ -647,7 +647,8 @@ class SettingsView(object):
                 self.parent.gong_clicked("Change of Game", 3000)
                 self.parent.timeout_mgr.reset(self.mgr)
             def on_no():
-                self.select(temp[0]-1)
+                self.cur_selection = None
+                self.listbox.selection_clear(0, tk.END)
 
             ConfirmDialog(self.root, self.tb_offset,
                           "Switch to {}?\n\n\nWARNING: this will reset the game!"
