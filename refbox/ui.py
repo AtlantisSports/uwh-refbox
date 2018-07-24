@@ -541,7 +541,7 @@ class SettingsView(object):
         self.info = sized_frame(self.outer, height / 2, width)
         self.info.grid(row=0, column=0)
 
-        label_font = ("Courier New", 10)
+        label_font = ("Courier New", 12)
         self.game_info_var = tk.StringVar()
         game_info = SizedLabel(self.info, self.game_info_var, "black", "white",
                                label_font, height=height / 2, width=width)
@@ -576,6 +576,7 @@ class SettingsView(object):
 
             if len(self.games) > 0:
                 self.select(0)
+                self.setup_game()
 
             self.outer.after(250, self.poll)
 
@@ -586,9 +587,7 @@ class SettingsView(object):
         return "{}{} - {} vs {}".format(game['game_type'], game['gid'],
                                         game['white'], game['black'])
 
-    def select(self, idx):
-        self.game = self.games[idx]
-        self.parent.set_game_info(self.game)
+    def setup_game(self):
         if not self.parent.not_yet_started:
             self.mgr.setBlackScore(0)
             self.mgr.setWhiteScore(0)
@@ -598,6 +597,11 @@ class SettingsView(object):
             self.parent.redraw_penalties()
             self.mgr.setGameState(GameState.pre_game)
             self.mgr.setGameClock(3 * 60)
+
+
+    def select(self, idx):
+        self.game = self.games[idx]
+        self.parent.set_game_info(self.game)
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(idx)
         self.cur_selection = (idx,)
@@ -644,14 +648,14 @@ class SettingsView(object):
 
             def on_yes():
                 self.select(now[0]-1)
+                self.setup_game()
                 self.parent.gong_clicked("Change of Game", 3000)
                 self.parent.timeout_mgr.reset(self.mgr)
             def on_no():
-                self.cur_selection = None
-                self.listbox.selection_clear(0, tk.END)
+                self.select(now[0])
 
             ConfirmDialog(self.root, self.tb_offset,
-                          "Switch to {}?\n\n\nWARNING: this will reset the game!"
+                          "Switching to {}.\n\n\nWARNING: Also reset the game?"
                               .format(self.desc(self.games[now[0]])),
                           on_yes, on_no, self.cfg)
 
