@@ -31,7 +31,7 @@ class TimeoutManager(object):
         return self._text.get() == "RESUME"
 
     def set_game_over(self, mgr):
-        actual_duration = time.time() - self._game_start_time
+        actual_duration = int(time.time() - self._game_start_time)
         print("actual duration:     " + str(actual_duration))
 
         expected_duration = (15 + 3 + 15) * 60
@@ -58,7 +58,7 @@ class TimeoutManager(object):
         else:
             # Amount of time to be recovered is small enough to entirely
             # recover within this break.
-            break_duration = nominal_break - self._total_delay
+            break_duration = int(nominal_break - self._total_delay)
             self._total_delay = 0
         print("total delay will be: " + str(self._total_delay))
 
@@ -93,7 +93,7 @@ class TimeoutManager(object):
 
     def record_game_start(self):
         self._game_start_time = time.time()
-        print("game start was: " + str(self._game_start_time))
+        print("game start was: " + str(int(self._game_start_time)))
         self._text.set('TIMEOUT')
 
     def click(self, mgr, state):
