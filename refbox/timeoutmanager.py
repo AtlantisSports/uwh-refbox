@@ -47,7 +47,7 @@ class TimeoutManager(object):
         self._total_delay += amount_over
 
         pre_game_duration = 3 * 60
-        nominal_break = 15 * 60 - pre_game_duration
+        nominal_break = 17 * 60 - pre_game_duration
         minimum_break = 4 * 60 - pre_game_duration
 
         if nominal_break - self._total_delay < minimum_break:
