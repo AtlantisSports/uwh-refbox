@@ -2,8 +2,9 @@ from uwh.gamemanager import TimeoutState, GameState, TeamColor
 import time
 
 class TimeoutManager(object):
-    def __init__(self, var, team_timeout_duration):
+    def __init__(self, parent, var, team_timeout_duration):
         var.set("START")
+        self._parent = parent
         self._text = var
         self._team_timeout_duration = team_timeout_duration
         self._timeout_running = False
@@ -46,9 +47,9 @@ class TimeoutManager(object):
         print("total delay was:     " + str(self._total_delay))
         self._total_delay += amount_over
 
-        pre_game_duration = 3 * 60
-        nominal_break = 32 * 60 - pre_game_duration
-        minimum_break = 4 * 60 - pre_game_duration
+        pre_game_duration = self._parent.pre_game_duration()
+        nominal_break = self._parent.nominal_break() - pre_game_duration
+        minimum_break = self._parent.minimum_break() - pre_game_duration
 
         if nominal_break - self._total_delay < minimum_break:
             # Amount of time to be recovered is big, so all we can recover is

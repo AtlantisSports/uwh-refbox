@@ -42,6 +42,9 @@ def RefboxConfigParser():
         'max_sudden_death_duration': '1800',
         'overtime_timeouts_allowed': 'False',
         'team_timeouts_per_half': 'True',
+        'pre_game_duration': '180',
+        'nominal_break': '900',
+        'minimum_break': '240',
         'pool' : '1',
         'tid' : '16',
         'uwhscores_url' : 'http://uwhscores.com/api/v1/',
@@ -1138,7 +1141,7 @@ class NormalView(object):
         self.game_clock_label.after(refresh_ms, lambda: self.refresh_time())
 
         time_button_var = tk.StringVar()
-        self.timeout_mgr = TimeoutManager(time_button_var, lambda: self.team_timeout_duration())
+        self.timeout_mgr = TimeoutManager(self, time_button_var, lambda: self.team_timeout_duration())
         time_button = SizedButton(self.root,
                                   lambda: self.timeout_clicked(),
                                   time_button_var, "Yellow.TButton",
@@ -1471,6 +1474,15 @@ class NormalView(object):
                 except Exception:
                     pass
         return self.cfg.getboolean('game', 'overtime_timeouts_allowed')
+
+    def pre_game_duration(self):
+        return self.cfg.getint('game', 'pre_game_duration')
+
+    def nominal_break(self):
+        return self.cfg.getint('game', 'nominal_break')
+
+    def minimum_break(self):
+        return self.cfg.getint('game', 'minimum_break')
 
     def set_game_info(self, game):
         self.game_info = game
