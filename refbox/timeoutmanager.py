@@ -1,5 +1,6 @@
 from uwh.gamemanager import TimeoutState, GameState, TeamColor
 import time
+from . import wallclock
 
 class TimeoutManager(object):
     def __init__(self, parent, var, team_timeout_duration):
@@ -51,16 +52,32 @@ class TimeoutManager(object):
         nominal_break = self._parent.nominal_break() - pre_game_duration
         minimum_break = self._parent.minimum_break() - pre_game_duration
 
-        if nominal_break - self._total_delay < minimum_break:
-            # Amount of time to be recovered is big, so all we can recover is
-            # limited by the minimum break duration.
-            break_duration = minimum_break
-            self._total_delay -= nominal_break - break_duration
+        next_start = self._parent.next_game_start()
+        now = wallclock.now(self._parent.timezone())
+
+        if self._parent.use_wallclock() and next_start is not None and now is not None:
+            print("using wallclock")
+            print("next_start", next_start)
+            print("now", now)
+            start_delay = (next_start - now).total_seconds()
+
+            if start_delay < minimum_break:
+                break_duration = minimum_break
+                self._total_delay -= nominal_break - break_duration
+            else:
+                break_duration = start_delay
+                self._total_delay = 0
         else:
-            # Amount of time to be recovered is small enough to entirely
-            # recover within this break.
-            break_duration = int(nominal_break - self._total_delay)
-            self._total_delay = 0
+            if nominal_break - self._total_delay < minimum_break:
+                # Amount of time to be recovered is big, so all we can recover is
+                # limited by the minimum break duration.
+                break_duration = minimum_break
+                self._total_delay -= nominal_break - break_duration
+            else:
+                # Amount of time to be recovered is small enough to entirely
+                # recover within this break.
+                break_duration = int(nominal_break - self._total_delay)
+                self._total_delay = 0
         print("total delay will be: " + str(self._total_delay))
 
         self._text.set("RESET")

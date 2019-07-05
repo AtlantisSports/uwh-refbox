@@ -6,6 +6,7 @@ from .timeoutmanager import TimeoutManager
 from uwh.gamemanager import GameManager, GameState, TeamColor, Penalty, TimeoutState
 from functools import partial
 import time
+from datetime import datetime
 
 _font_name = 'Consolas'
 
@@ -45,6 +46,8 @@ def RefboxConfigParser():
         'pre_game_duration': '180',
         'nominal_break': '900',
         'minimum_break': '240',
+        'timezone': 'mst',
+        'use_wallclock': 'True',
         'pool' : '1',
         'tid' : '16',
         'uwhscores_url' : 'http://uwhscores.com/api/v1/',
@@ -1483,6 +1486,24 @@ class NormalView(object):
 
     def minimum_break(self):
         return self.cfg.getint('game', 'minimum_break')
+
+    def timezone(self):
+        return self.cfg.get('game', 'timezone')
+
+    def use_wallclock(self):
+        return self.cfg.getboolean('game', 'use_wallclock')
+
+    def next_game_start(self):
+        if not self.game_info:
+            return None
+
+        next_game = next([g for g in self.games if g['gid'] > self.game_info['gid']], None)
+        if not next_game:
+            return None
+
+        # '2018-01-27T09:02:00',
+        start_time = next_game['start_time']
+        return datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
 
     def set_game_info(self, game):
         self.game_info = game
