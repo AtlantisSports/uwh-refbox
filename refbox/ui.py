@@ -1407,7 +1407,6 @@ class NormalView(object):
         return self.cfg.getint('game', 'team_timeout_duration')
 
     def has_overtime(self):
-        return True
         if self.game_info:
             rules = self.game_info['timing_rules']
             if rules is not None:
@@ -1415,11 +1414,9 @@ class NormalView(object):
         return self.cfg.getboolean('game', 'has_overtime')
 
     def overtime_duration(self):
-        return 5 * 60
         return self.cfg.getint('game', 'ot_half_play_duration')
 
     def has_sudden_death(self):
-        return True
         if self.game_info:
             rules = self.game_info['timing_rules']
             if rules is not None:
@@ -1427,7 +1424,6 @@ class NormalView(object):
         return self.cfg.getboolean('game', 'sudden_death_allowed')
 
     def sudden_death_duration(self):
-        return 99 * 60
         if self.game_info:
             rules = self.game_info['timing_rules']
             if rules is not None:
@@ -1437,7 +1433,6 @@ class NormalView(object):
         return self.cfg.getint('game', 'max_sudden_death_duration')
 
     def pre_overtime_break(self):
-        return 3 * 60
         if self.game_info:
             rules = self.game_info['timing_rules']
             if rules is not None:
@@ -1448,7 +1443,6 @@ class NormalView(object):
         return self.cfg.getint('game', 'pre_overtime_break')
 
     def overtime_break_duration(self):
-        return 1 * 60
         if self.game_info:
             rules = self.game_info['timing_rules']
             if rules is not None:
@@ -1459,7 +1453,6 @@ class NormalView(object):
         return self.cfg.getint('game', 'overtime_break_duration')
 
     def pre_sudden_death_duration(self):
-        return 1 * 60
         if self.game_info:
             rules = self.game_info['timing_rules']
             if rules is not None:
