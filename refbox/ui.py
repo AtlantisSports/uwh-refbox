@@ -1497,12 +1497,12 @@ class NormalView(object):
         if not self.game_info:
             return None
 
-        next_game = next([g for g in self.games if g['gid'] > self.game_info['gid']], None)
-        if not next_game:
+        future_games = [g for g in self.settings_view.games if g['gid'] > self.game_info['gid']]
+        if len(future_games) < 1:
             return None
 
         # '2018-01-27T09:02:00',
-        start_time = next_game['start_time']
+        start_time = future_games[0]['start_time']
         return datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
 
     def set_game_info(self, game):

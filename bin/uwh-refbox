@@ -2,7 +2,7 @@
 
 from refbox.ui import NormalView, RefboxConfigParser, is_rpi
 from uwh.gamemanager import GameManager, PoolLayout
-from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients, xbee_id, xbee_ch
+#from uwh.xbee_comms import XBeeServer, XBeeClient, xbee_port, xbee_baud, xbee_clients, xbee_id, xbee_ch
 import uwh.rs485_comms as rs485_ser
 from uwh.uwhscores_comms import UWHScores
 
@@ -33,14 +33,14 @@ username = cfg.get('game', 'uwhscores_admin')
 password = cfg.get('game', 'uwhscores_password')
 uwhscores.login(username, password)
 
-if cfg.getboolean('hardware', 'has_xbee'):
-    xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
-    xbee.setup(xbee_id(cfg), xbee_ch(cfg), socket.gethostname())
-    def found_client(remote):
-       print("{} - {}".format(remote.get_64bit_addr(), remote.get_node_id()))
-    print("Available XBee Displays:")
-    xbee.client_discovery(found_client)
-    xbee.broadcast_thread(xbee_clients(cfg))
+#if cfg.getboolean('hardware', 'has_xbee'):
+#    xbee = XBeeServer(mgr, xbee_port(cfg), xbee_baud(cfg))
+#    xbee.setup(xbee_id(cfg), xbee_ch(cfg), socket.gethostname())
+#    def found_client(remote):
+#       print("{} - {}".format(remote.get_64bit_addr(), remote.get_node_id()))
+#    print("Available XBee Displays:")
+#    xbee.client_discovery(found_client)
+#    xbee.broadcast_thread(xbee_clients(cfg))
 
 if cfg.getboolean('hardware', 'has_rs485'):
     rs485 = rs485_ser.RS485Server(mgr, rs485_ser.port(cfg), rs485_ser.baud(cfg))
